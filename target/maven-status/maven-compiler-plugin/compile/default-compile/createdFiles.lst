@@ -1,0 +1,5 @@
+chatapp/models/User.class
+chatapp/App.class
+module-info.class
+chatapp/models/Message.class
+chatapp/MessageList.class
