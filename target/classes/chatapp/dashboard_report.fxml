@@ -27,7 +27,7 @@
                   <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="218.0" text="Chat Groups" />
                   <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="238.0" text="Reports" />
                   <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="295.0" text="Registrations" />
-                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="188.0" text="User's Friend" />
+                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="178.0" text="User's Friend" />
                   <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="180.0" text="Active Users" />
                </children>
             </VBox>
@@ -79,19 +79,18 @@
                         <Button mnemonicParsing="false" text="Log out" />
                      </children>
                   </HBox>
-                  <Label text="Users">
+                  <Label text="Reports">
                      <font>
                         <Font size="18.0" />
                      </font>
                   </Label>
-                  <TableView prefHeight="720.0">
+                  <TableView prefHeight="720.0" prefWidth="1020.0">
                     <columns>
-                      <TableColumn prefWidth="138.40000915527344" text="User account" />
-                      <TableColumn prefWidth="184.79998779296875" text="User name" />
-                        <TableColumn prefWidth="223.19998168945312" text="Address" />
-                        <TableColumn prefWidth="100.79998779296875" text="Birthday" />
-                        <TableColumn prefWidth="91.2000732421875" text="Gender" />
-                        <TableColumn prefWidth="284.0" text="Email" />
+                      <TableColumn prefWidth="176.0" text="Time" />
+                      <TableColumn prefWidth="206.39996337890625" text="User account" />
+                        <TableColumn prefWidth="212.800048828125" text="Content" />
+                        <TableColumn prefWidth="223.20001220703125" text="Reporter" />
+                        <TableColumn prefWidth="75.0" />
                     </columns>
                   </TableView>
                </children>
