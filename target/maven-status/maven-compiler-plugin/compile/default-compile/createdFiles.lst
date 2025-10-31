@@ -1,0 +1,10 @@
+chatapp\controller\DashboardFriend.class
+chatapp\controller\DashboardRegistration.class
+chatapp\controller\DashboardUserController.class
+chatapp\controller\DashboardChatGroup.class
+chatapp\controller\DashboardActivity.class
+chatapp\App.class
+module-info.class
+chatapp\model\User.class
+chatapp\controller\DashboardLoginHistory.class
+chatapp\controller\DashboardReport.class

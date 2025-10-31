@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.StackedBarChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
@@ -12,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chatapp.controller.DashboardActivity">
    <children>
       <BorderPane layoutX="178.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <left>
@@ -27,7 +30,7 @@
                   <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="218.0" text="Chat Groups" />
                   <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="238.0" text="Reports" />
                   <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="295.0" text="Registrations" />
-                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="188.0" text="User's Friend" />
+                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="178.0" text="User's Friend" />
                   <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="180.0" text="Active Users" />
                </children>
             </VBox>
@@ -74,26 +77,59 @@
                         </VBox>
                         <Label text="Field" />
                         <ComboBox prefWidth="150.0" />
+                        <Label text="Label" />
+                        <ComboBox prefWidth="150.0" />
                         <Button mnemonicParsing="false" text="Filter" />
-                        <Button mnemonicParsing="false" text="Add user" />
                         <Button mnemonicParsing="false" text="Log out" />
                      </children>
                   </HBox>
-                  <Label text="Users">
+                  <Label text="Ativity">
                      <font>
                         <Font size="18.0" />
                      </font>
                   </Label>
-                  <TableView prefHeight="720.0">
-                    <columns>
-                      <TableColumn prefWidth="138.40000915527344" text="User account" />
-                      <TableColumn prefWidth="184.79998779296875" text="User name" />
-                        <TableColumn prefWidth="223.19998168945312" text="Address" />
-                        <TableColumn prefWidth="100.79998779296875" text="Birthday" />
-                        <TableColumn prefWidth="91.2000732421875" text="Gender" />
-                        <TableColumn prefWidth="284.0" text="Email" />
-                    </columns>
-                  </TableView>
+                  <HBox prefHeight="702.0" prefWidth="1020.0">
+                     <children>
+                        <VBox prefHeight="671.0" prefWidth="510.0">
+                           <children>
+                              <HBox prefHeight="40.0" prefWidth="510.0">
+                                 <children>
+                                    <Label text="Label" />
+                                    <ComboBox prefWidth="150.0" />
+                                    <Button mnemonicParsing="false" text="Button" />
+                                 </children>
+                              </HBox>
+                              <TableView prefHeight="666.0" prefWidth="510.0">
+                                <columns>
+                                  <TableColumn fx:id="userAccountCol" prefWidth="95.99996948242188" text="User account" />
+                                  <TableColumn fx:id="UserNameCol" prefWidth="107.20004272460938" text="User Name" />
+                                    <TableColumn fx:id="TimeCol" prefWidth="112.00003051757812" text="Time" />
+                                    <TableColumn fx:id="ActivityCol" prefWidth="192.80001831054688" text="Activity" />
+                                </columns>
+                              </TableView>
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="655.0" prefWidth="510.0">
+                           <children>
+                              <StackedBarChart>
+                                <xAxis>
+                                  <CategoryAxis side="BOTTOM" />
+                                </xAxis>
+                                <yAxis>
+                                  <NumberAxis side="LEFT" />
+                                </yAxis>
+                              </StackedBarChart>
+                              <HBox prefHeight="100.0" prefWidth="200.0">
+                                 <children>
+                                    <Label text="Label" />
+                                    <ComboBox prefWidth="150.0" />
+                                    <Button mnemonicParsing="false" text="Button" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
                </children>
             </VBox>
          </center>

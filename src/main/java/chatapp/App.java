@@ -14,7 +14,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("dashboard_user.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/chatapp/views/dashboardActivity.fxml"));
         stage.setTitle("TEST");
         scene = new Scene(root);
         stage.setScene(scene);
