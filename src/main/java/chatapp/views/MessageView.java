@@ -26,7 +26,9 @@ public class MessageView extends BorderPane {
         input = new TextField();
         HBox.setHgrow(input, Priority.ALWAYS);
         sendBtn = new Button();
+        sendBtn.setText("Send");
         HBox inpLayout = new HBox(input, sendBtn);
+        inpLayout.setStyle("-fx-padding: 10");
         inpLayout.setAlignment(Pos.CENTER);
         inpLayout.setSpacing(6);
         setBottom(inpLayout);

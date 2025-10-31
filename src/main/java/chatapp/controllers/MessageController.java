@@ -3,29 +3,25 @@ package chatapp.controllers;
 import chatapp.views.ContactListView;
 import chatapp.views.MessageView;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.BorderPane;
 
 public class MessageController {
     private ContactListView contact;
     private MessageView msg;
-    private SplitPane split = new SplitPane();
+    private BorderPane split = new BorderPane();
 
     public MessageController() {
-        contact = new ContactListView(FXCollections.observableArrayList("alice", "bob"));
+        contact = new ContactListView(FXCollections.observableArrayList());
+        contact.setPrefWidth(240);
         msg = null;
-
-        split.getItems().addAll(contact, new Pane());
-        split.setDividerPositions(0.2);
+        split.setCenter(msg);
+        split.setLeft(contact);
 
         contact.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 msg = new MessageView();
-                split.getItems().add(msg);
-                split.getItems().remove(1);
+                split.setCenter(msg);
                 msg.getTextField().setOnAction(event -> sendMessage());
                 msg.getButton().setOnAction(event -> sendMessage());
             }
@@ -36,7 +32,6 @@ public class MessageController {
         String text = msg.getTextField().getText().trim();
         if (!text.isEmpty()) {
             msg.sendMessage(text);
-
             msg.getTextField().clear();
         }
     }
