@@ -11,8 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chatapp.controller.DashboardLoginHistory">
    <children>
       <BorderPane layoutX="178.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <left>
@@ -75,16 +74,17 @@
                         <Button mnemonicParsing="false" text="Log out" />
                      </children>
                   </HBox>
-                  <TableView prefHeight="720.0" prefWidth="1020.0">
-                    <columns>
-                      <TableColumn prefWidth="138.40000915527344" text="User account" />
-                      <TableColumn prefWidth="184.79998779296875" text="User name" />
-                        <TableColumn prefWidth="223.19998168945312" text="Address" />
-                        <TableColumn prefWidth="100.79998779296875" text="Birthday" />
-                        <TableColumn prefWidth="91.2000732421875" text="Gender" />
-                        <TableColumn prefWidth="284.0" text="Email" />
-                    </columns>
-                  </TableView>
+                  <HBox alignment="CENTER" prefHeight="726.0" prefWidth="1020.0">
+                     <children>
+                        <TableView fx:id="tableView" prefHeight="724.0" prefWidth="837.0">
+                          <columns>
+                            <TableColumn fx:id="timeCol" prefWidth="75.0" text="Time" />
+                            <TableColumn fx:id="userAccountCol" prefWidth="358.40000915527344" text="User account" />
+                              <TableColumn fx:id="userNameCol" prefWidth="402.400048828125" text="User name" />
+                          </columns>
+                        </TableView>
+                     </children>
+                  </HBox>
                </children>
             </VBox>
          </center>

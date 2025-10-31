@@ -11,8 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chatapp.controller.DashboardChatGroup">
    <children>
       <BorderPane layoutX="178.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <left>
@@ -45,9 +44,9 @@
                               <Insets />
                            </HBox.margin>
                         </Label>
-                        <VBox prefHeight="80.0" prefWidth="158.0">
+                        <VBox>
                            <children>
-                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0">
                                  <children>
                                     <Label text="Number of users:">
                                        <HBox.margin>
@@ -60,7 +59,7 @@
                                     <Insets right="4.0" />
                                  </padding>
                               </HBox>
-                              <HBox prefHeight="100.0" prefWidth="166.0">
+                              <HBox prefHeight="100.0">
                                  <children>
                                     <Label text="User online:">
                                        <HBox.margin>
@@ -75,16 +74,51 @@
                         <Button mnemonicParsing="false" text="Log out" />
                      </children>
                   </HBox>
-                  <TableView prefHeight="720.0" prefWidth="1020.0">
-                    <columns>
-                      <TableColumn prefWidth="138.40000915527344" text="User account" />
-                      <TableColumn prefWidth="184.79998779296875" text="User name" />
-                        <TableColumn prefWidth="223.19998168945312" text="Address" />
-                        <TableColumn prefWidth="100.79998779296875" text="Birthday" />
-                        <TableColumn prefWidth="91.2000732421875" text="Gender" />
-                        <TableColumn prefWidth="284.0" text="Email" />
-                    </columns>
-                  </TableView>
+                  <Label text="Chat groups">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+                  <HBox prefHeight="700.0" prefWidth="1020.0">
+                     <children>
+                        <TableView prefHeight="697.0" prefWidth="560.0">
+                          <columns>
+                            <TableColumn fx:id="groupCreatedAtCol" prefWidth="118.40000915527344" text="Created at" />
+                            <TableColumn fx:id="groupNameCol" prefWidth="148.0" text="Group name" />
+                              <TableColumn fx:id="groupMemberCol" prefWidth="165.60003662109375" text="Number of members" />
+                          </columns>
+                        </TableView>
+                        <VBox prefHeight="697.0" prefWidth="460.0">
+                           <children>
+                              <Label text="Members" />
+                              <TableView prefHeight="200.0" prefWidth="200.0">
+                                <columns>
+                                  <TableColumn fx:id="memberNamecol" prefWidth="176.0" text="User name" />
+                                    <TableColumn fx:id="memberGenderCol" prefWidth="60.0" text="Gender" />
+                                    <TableColumn fx:id="memberEmailCol" prefWidth="220.00006103515625" text="Email" />
+                                </columns>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </TableView>
+                              <Button mnemonicParsing="false" text="Get member">
+                                 <VBox.margin>
+                                    <Insets bottom="16.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Label text="admins" />
+                              <TableView prefHeight="200.0" prefWidth="200.0">
+                                <columns>
+                                  <TableColumn fx:id="adminNameCol" prefWidth="179.20001220703125" text="User name" />
+                                  <TableColumn fx:id="adminGenderCol" prefWidth="56.79998779296875" text="Gender" />
+                                    <TableColumn fx:id="adminEmailCol" prefWidth="222.4000244140625" text="Email" />
+                                </columns>
+                              </TableView>
+                              <Button mnemonicParsing="false" text="Get admin" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
                </children>
             </VBox>
          </center>
