@@ -1,5 +1,8 @@
 chatapp/models/User.class
-chatapp/App.class
 module-info.class
 chatapp/models/Message.class
-chatapp/MessageList.class
+chatapp/views/MessageView.class
+chatapp/views/ContactListView.class
+chatapp/App.class
+chatapp/models/ChatCache.class
+chatapp/controllers/MessageController.class
