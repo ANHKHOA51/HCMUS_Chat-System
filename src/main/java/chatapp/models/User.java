@@ -1,4 +1,4 @@
-package chatapp.model;
+package chatapp.models;
 
 import java.time.LocalDateTime;
 
@@ -12,13 +12,14 @@ public class User {
     private String email;
     private String createAt;
     private String updateAt;
+    private String status;
 
     public User() {
 
     }
 
     public User(int id, String userAccount, String userName, String address, String birthday, boolean gender,
-            String email) {
+            String email, String status) {
         this.id = id;
         this.userAccount = userAccount;
         this.userName = userName;
@@ -26,6 +27,7 @@ public class User {
         this.birthday = birthday;
         this.gender = gender;
         this.email = email;
+        this.status = status;
 
         this.createAt = "" + LocalDateTime.now();
         this.updateAt = "" + LocalDateTime.now();
@@ -65,5 +67,9 @@ public class User {
 
     public String getUpdateAt() {
         return updateAt;
+    }
+
+    public String getStatus() {
+        return status;
     }
 }

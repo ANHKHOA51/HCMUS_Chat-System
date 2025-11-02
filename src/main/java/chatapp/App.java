@@ -8,13 +8,15 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+import chatapp.utils.FXMLPaths;
+
 public class App extends Application {
 
     private static Scene scene;
 
     @Override
     public void start(Stage stage) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/chatapp/views/dashboardActivity.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource(FXMLPaths.Dashboard.USER));
         stage.setTitle("TEST");
         scene = new Scene(root);
         stage.setScene(scene);

@@ -11,23 +11,23 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chatapp.controller.DashboardLoginHistory">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chatapp.controllers.dashboard.ReportController">
    <children>
       <BorderPane layoutX="178.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <left>
             <VBox alignment="TOP_CENTER" prefHeight="800.0" prefWidth="180.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="195.0" text="Users ">
+                  <Button mnemonicParsing="false" onAction="#navigateUser" prefHeight="26.0" prefWidth="195.0" text="Users ">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
                   </Button>
-                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="182.0" text="Login History" />
-                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="218.0" text="Chat Groups" />
-                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="238.0" text="Reports" />
-                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="295.0" text="Registrations" />
-                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="178.0" text="User's Friend" />
-                  <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="180.0" text="Active Users" />
+                  <Button mnemonicParsing="false" onAction="#navigateLogInHistory" prefHeight="26.0" prefWidth="182.0" text="Login History" />
+                  <Button mnemonicParsing="false" onAction="#navigateChatGroup" prefHeight="26.0" prefWidth="218.0" text="Chat Groups" />
+                  <Button mnemonicParsing="false" onAction="#navigateReport" prefHeight="26.0" prefWidth="238.0" text="Reports" />
+                  <Button mnemonicParsing="false" onAction="#navigateRegistration" prefHeight="26.0" prefWidth="295.0" text="Registrations" />
+                  <Button mnemonicParsing="false" onAction="#navigateUserFriend" prefHeight="26.0" prefWidth="178.0" text="User's Friend" />
+                  <Button mnemonicParsing="false" onAction="#navigateActiveUser" prefHeight="26.0" prefWidth="180.0" text="Active Users" />
                </children>
             </VBox>
          </left>
@@ -44,9 +44,9 @@
                               <Insets />
                            </HBox.margin>
                         </Label>
-                        <VBox prefHeight="80.0" prefWidth="158.0">
+                        <VBox>
                            <children>
-                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0">
                                  <children>
                                     <Label text="Number of users:">
                                        <HBox.margin>
@@ -59,7 +59,7 @@
                                     <Insets right="4.0" />
                                  </padding>
                               </HBox>
-                              <HBox prefHeight="100.0" prefWidth="166.0">
+                              <HBox prefHeight="100.0">
                                  <children>
                                     <Label text="User online:">
                                        <HBox.margin>
@@ -74,13 +74,24 @@
                         <Button mnemonicParsing="false" text="Log out" />
                      </children>
                   </HBox>
-                  <HBox alignment="CENTER" prefHeight="726.0" prefWidth="1020.0">
+                  <HBox prefHeight="30.0" prefWidth="1020.0">
                      <children>
-                        <TableView fx:id="tableView" prefHeight="724.0" prefWidth="837.0">
+                        <Label text="Reports">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <Button mnemonicParsing="false" text="Lock User" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="TOP_CENTER" prefHeight="696.0" prefWidth="1020.0">
+                     <children>
+                        <TableView prefHeight="694.0" prefWidth="933.0">
                           <columns>
-                            <TableColumn fx:id="timeCol" prefWidth="75.0" text="Time" />
-                            <TableColumn fx:id="userAccountCol" prefWidth="358.40000915527344" text="User account" />
-                              <TableColumn fx:id="userNameCol" prefWidth="402.400048828125" text="User name" />
+                            <TableColumn fx:id="timeCol" prefWidth="173.59997862577438" text="Time" />
+                            <TableColumn fx:id="reporterCol" prefWidth="168.79994201660156" text="Reporter" />
+                              <TableColumn fx:id="contentCol" prefWidth="396.800048828125" text="Content" />
+                              <TableColumn fx:id="userAccountCol" prefWidth="191.20001220703125" text="User Acoount" />
                           </columns>
                         </TableView>
                      </children>
