@@ -125,16 +125,12 @@ public class UserController extends DashboardController {
 
     @FXML
     void addUser(ActionEvent event) throws IOException {
-        User selectedUser = tableView.getSelectionModel().getSelectedItem();
-        if (selectedUser == null)
-            return;
         Parent root = FXMLLoader.load(getClass().getResource(FXMLPaths.Auth.REGISTER));
         Stage stage = new Stage();
         stage.setTitle("TEST");
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.showAndWait();
-        System.out.println(selectedUser.getUserAccount());
     }
 
     @FXML

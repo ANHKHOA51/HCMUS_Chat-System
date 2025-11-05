@@ -83,7 +83,7 @@
                   </Label>
                   <HBox prefHeight="700.0" prefWidth="1020.0">
                      <children>
-                        <TableView fx:id="tableView" prefHeight="697.0" prefWidth="680.0">
+                        <TableView fx:id="tableView" prefHeight="682.0" prefWidth="680.0">
                           <columns>
                             <TableColumn fx:id="userAccountCol" prefWidth="73.59994506835938" text="User account" />
                             <TableColumn fx:id="userNameCol" prefWidth="72.00001525878906" text="User name" />

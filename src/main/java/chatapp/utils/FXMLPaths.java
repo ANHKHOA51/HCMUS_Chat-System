@@ -15,7 +15,7 @@ public class FXMLPaths {
     }
 
     public static class Auth {
-        private static final String AUTH_BASE = "/chatapp/views/auth";
+        private static final String AUTH_BASE = "/chatapp/views/auth/";
 
         public static final String LOG_IN = AUTH_BASE + "loginForm.fxml";
         public static final String REGISTER = AUTH_BASE + "registerForm.fxml";

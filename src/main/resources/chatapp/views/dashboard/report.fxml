@@ -2,9 +2,11 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -81,19 +83,73 @@
                               <Font size="18.0" />
                            </font>
                         </Label>
-                        <Button mnemonicParsing="false" text="Lock User" />
                      </children>
                   </HBox>
-                  <HBox alignment="TOP_CENTER" prefHeight="696.0" prefWidth="1020.0">
+                  <HBox prefHeight="696.0" prefWidth="1020.0">
                      <children>
-                        <TableView prefHeight="694.0" prefWidth="933.0">
+                        <TableView fx:id="reportTable" prefHeight="694.0" prefWidth="680.0">
                           <columns>
-                            <TableColumn fx:id="timeCol" prefWidth="173.59997862577438" text="Time" />
-                            <TableColumn fx:id="reporterCol" prefWidth="168.79994201660156" text="Reporter" />
-                              <TableColumn fx:id="contentCol" prefWidth="396.800048828125" text="Content" />
-                              <TableColumn fx:id="userAccountCol" prefWidth="191.20001220703125" text="User Acoount" />
+                            <TableColumn fx:id="timeCol" prefWidth="117.60000914335251" text="Time" />
+                            <TableColumn fx:id="reporterCol" prefWidth="112.0" text="Reporter" />
+                              <TableColumn fx:id="contentCol" prefWidth="183.9999542236328" text="Content" />
+                              <TableColumn fx:id="reportedUserCol" prefWidth="264.00006103515625" text="Reported user " />
                           </columns>
                         </TableView>
+                        <VBox prefHeight="694.0" prefWidth="340.0">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#lockUser" text="Lock user">
+                                 <VBox.margin>
+                                    <Insets left="16.0" top="16.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Label text="Time filter">
+                                 <VBox.margin>
+                                    <Insets left="16.0" top="16.0" />
+                                 </VBox.margin>
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                              <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="340.0">
+                                 <children>
+                                    <Label text="From">
+                                       <HBox.margin>
+                                          <Insets left="16.0" right="8.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <DatePicker fx:id="fromDate" />
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="340.0">
+                                 <children>
+                                    <Label text="To">
+                                       <HBox.margin>
+                                          <Insets left="16.0" right="8.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <DatePicker fx:id="toDate" />
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="340.0">
+                                 <children>
+                                    <Label text="User account">
+                                       <HBox.margin>
+                                          <Insets left="16.0" right="8.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <TextField fx:id="filterField" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </HBox>
+                              <Button mnemonicParsing="false" onAction="#filterReport" text="Filter">
+                                 <VBox.margin>
+                                    <Insets left="16.0" />
+                                 </VBox.margin>
+                              </Button>
+                           </children>
+                        </VBox>
                      </children>
                   </HBox>
                </children>

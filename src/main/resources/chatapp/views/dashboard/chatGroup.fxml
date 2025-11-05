@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -81,19 +82,37 @@
                   </Label>
                   <HBox prefHeight="700.0" prefWidth="1020.0">
                      <children>
-                        <TableView prefHeight="645.0" prefWidth="560.0">
+                        <TableView fx:id="groupTable" prefHeight="645.0" prefWidth="560.0">
                           <columns>
-                            <TableColumn fx:id="groupCreatedAtCol" prefWidth="118.40000915527344" text="Created at" />
-                            <TableColumn fx:id="groupNameCol" prefWidth="148.0" text="Group name" />
-                              <TableColumn fx:id="groupMemberCol" prefWidth="165.60003662109375" text="Number of members" />
+                            <TableColumn fx:id="groupCreatedAtCol" prefWidth="221.6000213623047" text="Created at" />
+                            <TableColumn fx:id="groupNameCol" prefWidth="205.5999755859375" text="Group name" />
+                              <TableColumn fx:id="groupMemberCol" prefWidth="128.0" text="Number of members" />
                           </columns>
                         </TableView>
                         <VBox prefHeight="697.0" prefWidth="460.0">
                            <children>
-                              <Label text="Members" />
-                              <TableView prefHeight="200.0" prefWidth="200.0">
+                              <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="460.0">
+                                 <children>
+                                    <Label text="Group name">
+                                       <HBox.margin>
+                                          <Insets left="16.0" right="8.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <TextField fx:id="groupNameField">
+                                       <HBox.margin>
+                                          <Insets right="8.0" />
+                                       </HBox.margin>
+                                    </TextField>
+                                    <Button mnemonicParsing="false" onAction="#filterGroupName" text="Filter" />
+                                 </children>
+                              </HBox>
+                              <Label text="Members">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font></Label>
+                              <TableView fx:id="memberTable" prefHeight="200.0" prefWidth="200.0">
                                 <columns>
-                                  <TableColumn fx:id="memberNamecol" prefWidth="176.0" text="User name" />
+                                  <TableColumn fx:id="memberNameCol" prefWidth="176.0" text="User name" />
                                     <TableColumn fx:id="memberGenderCol" prefWidth="60.0" text="Gender" />
                                     <TableColumn fx:id="memberEmailCol" prefWidth="220.00006103515625" text="Email" />
                                 </columns>
@@ -101,20 +120,23 @@
                                     <Insets />
                                  </VBox.margin>
                               </TableView>
-                              <Button mnemonicParsing="false" text="Get member">
+                              <Button mnemonicParsing="false" onAction="#getMember" text="Get member">
                                  <VBox.margin>
                                     <Insets bottom="16.0" />
                                  </VBox.margin>
                               </Button>
-                              <Label text="admins" />
-                              <TableView prefHeight="200.0" prefWidth="200.0">
+                              <Label text="admins">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font></Label>
+                              <TableView fx:id="adminTable" prefHeight="200.0" prefWidth="200.0">
                                 <columns>
                                   <TableColumn fx:id="adminNameCol" prefWidth="179.20001220703125" text="User name" />
                                   <TableColumn fx:id="adminGenderCol" prefWidth="56.79998779296875" text="Gender" />
                                     <TableColumn fx:id="adminEmailCol" prefWidth="222.4000244140625" text="Email" />
                                 </columns>
                               </TableView>
-                              <Button mnemonicParsing="false" text="Get admin" />
+                              <Button mnemonicParsing="false" onAction="#getAdmin" text="Get admin" />
                            </children>
                         </VBox>
                      </children>

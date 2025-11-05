@@ -74,13 +74,18 @@
                         <Button mnemonicParsing="false" text="Log out" />
                      </children>
                   </HBox>
+                  <Label text="Login History">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
                   <HBox alignment="CENTER" prefHeight="726.0" prefWidth="1020.0">
                      <children>
                         <TableView fx:id="tableView" prefHeight="667.0" prefWidth="838.0">
                           <columns>
-                            <TableColumn fx:id="timeCol" prefWidth="75.0" text="Time" />
-                            <TableColumn fx:id="userAccountCol" prefWidth="358.40000915527344" text="User account" />
-                              <TableColumn fx:id="userNameCol" prefWidth="402.400048828125" text="User name" />
+                            <TableColumn fx:id="timeCol" prefWidth="245.59997862577438" text="Time" />
+                            <TableColumn fx:id="userAccountCol" prefWidth="307.19993591308594" text="User account" />
+                              <TableColumn fx:id="userNameCol" prefWidth="287.20001220703125" text="User name" />
                           </columns>
                         </TableView>
                      </children>
