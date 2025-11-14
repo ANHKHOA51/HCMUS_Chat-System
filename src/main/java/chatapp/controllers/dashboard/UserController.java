@@ -181,11 +181,6 @@ public class UserController extends DashboardController {
     }
 
     @FXML
-    void logOut(ActionEvent event) {
-
-    }
-
-    @FXML
     void filterUser(ActionEvent event) {
         ObservableList<User> userListFilter = FXCollections.observableArrayList();
         String value = filterValueField.getText();

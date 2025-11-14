@@ -3,6 +3,7 @@ package chatapp.controllers.dashboard;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 
@@ -27,4 +28,5 @@ public class FriendController extends DashboardController {
     public void initialize(URL arg0, ResourceBundle arg1) {
 
     }
+
 }

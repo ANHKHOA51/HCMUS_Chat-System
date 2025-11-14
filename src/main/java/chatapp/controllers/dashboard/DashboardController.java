@@ -84,4 +84,9 @@ public abstract class DashboardController implements Initializable {
         stage.show();
 
     }
+
+    @FXML
+    void logOut(ActionEvent event) {
+
+    }
 }
