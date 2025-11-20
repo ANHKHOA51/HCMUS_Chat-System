@@ -17,6 +17,7 @@ public class Message {
     public void setReciever(String reciever) {
         this.reciever = reciever;
     }
+    
 
     public String getMsg_content() {
         return msg_content;

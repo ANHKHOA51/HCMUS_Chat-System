@@ -21,6 +21,16 @@
             <artifactId>javafx-fxml</artifactId>
             <version>21</version>
         </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.8</version> <!-- kiểm tra version mới nhất nếu cần -->
+        </dependency>
+        <dependency>
+    <groupId>io.github.cdimascio</groupId>
+    <artifactId>dotenv-java</artifactId>
+    <version>3.2.0</version>
+</dependency>
     </dependencies>
     <build>
         <plugins>

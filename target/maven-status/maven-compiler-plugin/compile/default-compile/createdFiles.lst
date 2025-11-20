@@ -1,8 +1,13 @@
-chatapp/models/User.class
-module-info.class
+chatapp/controllers/ProfileController.class
 chatapp/models/Message.class
+chatapp/views/ContactListView$1.class
 chatapp/views/MessageView.class
+chatapp/views/ContactListView$2.class
+chatapp/controllers/MessageController.class
+chatapp/models/User.class
+chatapp/db/DBConnection.class
+module-info.class
 chatapp/views/ContactListView.class
 chatapp/App.class
 chatapp/models/ChatCache.class
-chatapp/controllers/MessageController.class
+chatapp/views/ProfileView.class
