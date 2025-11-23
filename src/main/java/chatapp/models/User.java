@@ -4,9 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import chatapp.db.DBConnection;
 
@@ -24,15 +21,6 @@ public class User {
     private boolean gender;
     private String createAt;
     private String updateAt;
-    private String status;
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
     public String getId() {
         return id;
@@ -66,7 +54,7 @@ public class User {
         this.email = email;
     }
 
-    public boolean isAdmin() {
+    public boolean getIsAdmin() {
         return isAdmin;
     }
 
@@ -74,7 +62,7 @@ public class User {
         this.isAdmin = isAdmin;
     }
 
-    public boolean isOnline() {
+    public boolean getIsOnline() {
         return isOnline;
     }
 
@@ -126,16 +114,17 @@ public class User {
 
     }
 
-    public User(String id, String userAccount, String userName, String address, String birthday, boolean gender,
-            String email, String status) {
+    public User(String id, String user_name, String name, String address, String birthday, boolean gender,
+            String email, boolean isOnline, boolean isAdmin) {
         this.id = id;
-        this.name = userName;
-        this.user_name = userAccount;
+        this.name = name;
+        this.user_name = user_name;
         this.address = address;
         this.birthday = birthday;
         this.gender = gender;
         this.email = email;
-        this.status = status;
+        this.isOnline = isOnline;
+        this.isAdmin = isAdmin;
 
         this.createAt = "" + LocalDateTime.now();
         this.updateAt = "" + LocalDateTime.now();

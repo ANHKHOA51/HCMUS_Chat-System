@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chatapp.controllers.dashboard.ActivityController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chatapp.controllers.dashboard.ActivityController">
    <children>
       <BorderPane layoutX="178.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <left>
@@ -135,10 +135,10 @@
                               </HBox>
                               <TableView prefHeight="500.0" prefWidth="510.0">
                                 <columns>
-                                  <TableColumn fx:id="userAccountCol" prefWidth="95.99996948242188" text="User account" />
-                                  <TableColumn fx:id="UserNameCol" prefWidth="107.20004272460938" text="User Name" />
-                                    <TableColumn fx:id="TimeCol" prefWidth="112.00003051757812" text="Time" />
-                                    <TableColumn fx:id="ActivityCol" prefWidth="192.80001831054688" text="Activity" />
+                                  <TableColumn fx:id="userNameCol" prefWidth="95.99996948242188" text="User name" />
+                                  <TableColumn fx:id="name" prefWidth="107.20004272460938" text="Name" />
+                                    <TableColumn fx:id="timeCol" prefWidth="112.00003051757812" text="Time" />
+                                    <TableColumn fx:id="activityCol" prefWidth="160.0" text="Activity" />
                                 </columns>
                               </TableView>
                            </children>

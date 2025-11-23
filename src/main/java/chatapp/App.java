@@ -1,9 +1,7 @@
 package chatapp;
 
 import javafx.application.Application;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.collections.FXCollections;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
@@ -18,9 +16,7 @@ import chatapp.controllers.MessageController;
 import chatapp.controllers.ProfileController;
 // import chatapp.db.DBConnection;
 import chatapp.models.User;
-import java.sql.Connection;
 
-import chatapp.db.DBConnection;
 import chatapp.utils.FXMLPaths;
 
 public class App extends Application {

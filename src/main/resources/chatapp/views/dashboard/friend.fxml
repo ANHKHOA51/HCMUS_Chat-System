@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chatapp.controllers.dashboard.FriendController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chatapp.controllers.dashboard.FriendController">
    <children>
       <BorderPane layoutX="178.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <left>
@@ -128,8 +128,8 @@
                      <children>
                         <TableView prefHeight="600.0" prefWidth="905.0">
                           <columns>
-                            <TableColumn fx:id="userAccountCol" prefWidth="160.0" text="User account" />
                             <TableColumn fx:id="userNameCol" prefWidth="160.0" text="User name" />
+                            <TableColumn fx:id="nameCol" prefWidth="160.0" text="Name" />
                               <TableColumn fx:id="emailCol" prefWidth="240.0" text="Email" />
                               <TableColumn fx:id="friendCol" prefWidth="160.0" text="Friends" />
                               <TableColumn fx:id="friendOfFriendCol" prefWidth="160.0" text="Friend of friend" />

@@ -86,31 +86,9 @@ public class ChatGroupController extends DashboardController {
 
     @FXML
     void getMember(ActionEvent event) {
-        if (groupTable.getSelectionModel().getSelectedCells() == null) {
-            return;
-        }
-        memberList = FXCollections.observableArrayList(
-                new User("1", "helloworld", "Hello World", "HCM", "1/1/2000", false, "helloworld@gmail.com", "online"),
-                new User("2", "test", "Test", "VietNam", "2/2/2002", true, "test@gmail.com", "online"));
-
-        memberNameCol.setCellValueFactory(new PropertyValueFactory<User, String>("user_name"));
-        memberGenderCol.setCellValueFactory(new PropertyValueFactory<User, Boolean>("gender"));
-        memberEmailCol.setCellValueFactory(new PropertyValueFactory<User, String>("email"));
-        memberTable.setItems(memberList);
     }
 
     @FXML
     void getAdmin(ActionEvent event) {
-        if (groupTable.getSelectionModel().getSelectedCells() == null) {
-            return;
-        }
-        adminList = FXCollections.observableArrayList(
-                new User("1", "helloworld", "Hello World", "HCM", "1/1/2000", false, "helloworld@gmail.com", "online"),
-                new User("2", "test", "Test", "VietNam", "2/2/2002", true, "test@gmail.com", "online"));
-
-        adminNameCol.setCellValueFactory(new PropertyValueFactory<User, String>("user_name"));
-        adminGenderCol.setCellValueFactory(new PropertyValueFactory<User, Boolean>("gender"));
-        adminEmailCol.setCellValueFactory(new PropertyValueFactory<User, String>("email"));
-        adminTable.setItems(adminList);
     }
 }

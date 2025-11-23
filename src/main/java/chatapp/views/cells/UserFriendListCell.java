@@ -54,7 +54,7 @@ public class UserFriendListCell extends ListCell<User> {
         delBtn.setStyle(defaultDelBtn + buttonStyle);
         delBtn.setOnMouseEntered(e -> delBtn.setStyle(hoverDelBtn + buttonStyle));
         delBtn.setOnMouseExited(e -> delBtn.setStyle(defaultDelBtn + buttonStyle));
-        
+
         sendReqBtn.setFocusTraversable(false);
         String hoverSendReqBtn = "-fx-cursor: hand; -fx-opacity: 1; -fx-background-color: lightblue;";
         String defaultSendReqBtn = "-fx-background-color: lightblue; -fx-opacity: 0.6;";
@@ -65,11 +65,11 @@ public class UserFriendListCell extends ListCell<User> {
         blockBtn.setFocusTraversable(false);
         String hoverBlockBtn = "-fx-cursor: hand; -fx-opacity: 1; -fx-background-color: orange;";
         String defaultBlockBtn = "-fx-background-color: orange; -fx-opacity: 0.6;";
-        
+
         blockBtn.setStyle(defaultBlockBtn + buttonStyle);
         blockBtn.setOnMouseEntered(e -> blockBtn.setStyle(hoverBlockBtn + buttonStyle));
         blockBtn.setOnMouseExited(e -> blockBtn.setStyle(defaultBlockBtn + buttonStyle));
-        
+
         buttonsBox.getChildren().addAll(sendReqBtn, blockBtn, delBtn);
 
         delBtn.setOnAction(e -> {
@@ -109,10 +109,10 @@ public class UserFriendListCell extends ListCell<User> {
             // if your User has getUsername(), use: user.getUsername()
             nameLabel.setText(display);
 
-            String statusText = user.isOnline() ? " -fx-text-fill: green;" : " -fx-text-fill: gray;";
+            String statusText = user.getIsOnline() ? " -fx-text-fill: green;" : " -fx-text-fill: gray;";
             statusLabel.setStyle("-fx-font-size: 11px; -fx-opacity: 0.6;" + statusText);
 
-            statusLabel.setText(user.isOnline() ? "Online" : "Offline");
+            statusLabel.setText(user.getIsOnline() ? "Online" : "Offline");
 
             // bind cell width to listview width once so cell uses full container width
             if (!boundWidth && getListView() != null) {

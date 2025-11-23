@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chatapp.controllers.dashboard.UserController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chatapp.controllers.dashboard.UserController">
    <children>
       <BorderPane layoutX="178.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <left>
@@ -88,7 +88,7 @@
                <children>
                   <HBox prefHeight="700.0" prefWidth="1020.0">
                      <children>
-                        <VBox prefHeight="200.0" prefWidth="680.0">
+                        <VBox prefHeight="700.0" prefWidth="980.0">
                            <children>
                               <HBox alignment="CENTER" prefHeight="40.0" prefWidth="340.0">
                                  <children>
@@ -147,75 +147,100 @@
                                     <Insets bottom="16.0" top="16.0" />
                                  </padding>
                               </HBox>
-                              <TableView fx:id="tableView" prefHeight="580.0" prefWidth="680.0">
-                                <columns>
-                                  <TableColumn fx:id="userAccountCol" prefWidth="84.80003356933594" text="User account" />
-                                  <TableColumn fx:id="userNameCol" prefWidth="75.199951171875" text="User name" />
-                                    <TableColumn fx:id="addressCol" prefWidth="65.5999755859375" text="Address" />
-                                    <TableColumn fx:id="birthdayCol" prefWidth="58.4000244140625" text="Birthday" />
-                                    <TableColumn fx:id="genderCol" prefWidth="62.4000244140625" text="Gender" />
-                                    <TableColumn fx:id="emailCol" prefWidth="146.39996337890625" text="Email" />
-                                    <TableColumn fx:id="statusCol" prefWidth="60.00006103515625" text="Status" />
-                                    <TableColumn fx:id="timeCol" prefWidth="121.5999755859375" text="Time" />
-                                </columns>
-                              </TableView>
+                              <VBox prefHeight="697.0" prefWidth="340.0">
+                                 <padding>
+                                    <Insets bottom="16.0" top="16.0" />
+                                 </padding>
+                                 <children>
+                                    <TableView fx:id="tableView" prefHeight="320.0" prefWidth="200.0">
+                                      <columns>
+                                        <TableColumn fx:id="userIdCol" prefWidth="50.0" text="User id" />
+                                        <TableColumn fx:id="userNameCol" prefWidth="100.0" text="User name" />
+                                          <TableColumn fx:id="nameCol" prefWidth="100.0" text="Name" />
+                                          <TableColumn fx:id="emailCol" prefWidth="120.0" text="Email" />
+                                          <TableColumn fx:id="isAdminCol" prefWidth="75.0" text="admin" />
+                                          <TableColumn fx:id="isOnlineCol" prefWidth="75.0" text="online" />
+                                          <TableColumn fx:id="addressCol" prefWidth="120.0" text="Address" />
+                                          <TableColumn fx:id="birthdayCol" prefWidth="120.0" text="Birthday" />
+                                          <TableColumn fx:id="genderCol" prefWidth="75.0" text="Gender" />
+                                          <TableColumn fx:id="createdAtCol" prefWidth="120.0" text="Created at" />
+                                      </columns>
+                                    </TableView>
+                                    <HBox alignment="CENTER" prefHeight="240.0" prefWidth="200.0">
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                       <padding>
+                                          <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                       </padding>
+                                       <children>
+                                          <VBox prefHeight="200.0" prefWidth="472.0">
+                                             <padding>
+                                                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                             </padding>
+                                             <children>
+                                                <HBox alignment="CENTER" prefHeight="30.0" prefWidth="200.0">
+                                                   <children>
+                                                      <Label text="List friend">
+                                                         <font>
+                                                            <Font size="18.0" />
+                                                         </font>
+                                                         <HBox.margin>
+                                                            <Insets right="220.0" />
+                                                         </HBox.margin>
+                                                      </Label>
+                                                      <Button mnemonicParsing="false" text="Get list friend" />
+                                                   </children>
+                                                   <padding>
+                                                      <Insets left="16.0" right="16.0" />
+                                                   </padding>
+                                                </HBox>
+                                                <TableView fx:id="friendTableView" prefHeight="180.0" prefWidth="200.0">
+                                                  <columns>
+                                                    <TableColumn fx:id="friendUserIdCol" prefWidth="50.0" text="User id" />
+                                                    <TableColumn fx:id="friendUserNameCol" prefWidth="120.0" text="User name" />
+                                                      <TableColumn fx:id="friendEmailCol" prefWidth="192.0" text="Email" />
+                                                      <TableColumn fx:id="friendStatusCol" prefWidth="90.0" text="Status" />
+                                                  </columns>
+                                                </TableView>
+                                             </children>
+                                          </VBox>
+                                          <VBox prefHeight="200.0" prefWidth="472.0">
+                                             <children>
+                                                <HBox alignment="CENTER" prefHeight="30.0" prefWidth="200.0">
+                                                   <children>
+                                                      <Label text="Activity history">
+                                                         <font>
+                                                            <Font size="18.0" />
+                                                         </font>
+                                                         <HBox.margin>
+                                                            <Insets right="180.0" />
+                                                         </HBox.margin>
+                                                      </Label>
+                                                      <Button mnemonicParsing="false" text="Get activity history" />
+                                                   </children>
+                                                   <padding>
+                                                      <Insets left="16.0" right="16.0" />
+                                                   </padding>
+                                                </HBox>
+                                                <TableView fx:id="activityTableView" prefHeight="180.0" prefWidth="200.0">
+                                                   <columns>
+                                                      <TableColumn fx:id="activityUserIdCol" prefWidth="50.0" text="User id" />
+                                                      <TableColumn fx:id="activityUserNamId" prefWidth="100.0" text="User name" />
+                                                      <TableColumn fx:id="activityTimeCol" prefWidth="192.0" text="Time" />
+                                                      <TableColumn fx:id="activityCol" prefWidth="108.0" text="Activity" />
+                                                   </columns>
+                                                </TableView>
+                                             </children>
+                                             <padding>
+                                                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                             </padding>
+                                          </VBox>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
                            </children>
-                        </VBox>
-                        <VBox prefHeight="697.0" prefWidth="340.0">
-                           <children>
-                              <Label text="List friend">
-                                 <font>
-                                    <Font size="16.0" />
-                                 </font>
-                                 <VBox.margin>
-                                    <Insets left="16.0" />
-                                 </VBox.margin></Label>
-                              <Label text="name">
-                                 <VBox.margin>
-                                    <Insets bottom="4.0" left="16.0" />
-                                 </VBox.margin></Label>
-                              <TableView fx:id="friendTableView" prefHeight="200.0">
-                                <columns>
-                                    <TableColumn fx:id="friendUserAccountCol" text="User account" />
-                                  <TableColumn fx:id="friendUserNameCol" text="User name" />
-                                  <TableColumn fx:id="friendEmailCol" prefWidth="90.0" text="Email" />
-                                    <TableColumn fx:id="friendStatusCol" prefWidth="50.0" text="Status" />
-                                </columns>
-                              </TableView>
-                              <Button mnemonicParsing="false" onAction="#getListFriend" text="Get list friend">
-                                 <VBox.margin>
-                                    <Insets bottom="8.0" left="16.0" top="4.0" />
-                                 </VBox.margin>
-                              </Button>
-                              <Label text="activity history">
-                                 <font>
-                                    <Font size="16.0" />
-                                 </font>
-                                 <VBox.margin>
-                                    <Insets left="16.0" top="20.0" />
-                                 </VBox.margin></Label>
-                              <Label text="name">
-                                 <VBox.margin>
-                                    <Insets bottom="4.0" left="16.0" />
-                                 </VBox.margin></Label>
-                              <TableView fx:id="activityTableView" prefHeight="200.0">
-                                <columns>
-                                  <TableColumn text="User account" />
-                                  <TableColumn prefWidth="130.0" text="Time" />
-                                    <TableColumn text="Activity" />
-                                </columns>
-                              </TableView>
-                              <Button mnemonicParsing="false" onAction="#getActivityHistory" text="Get activity history">
-                                 <VBox.margin>
-                                    <Insets left="16.0" top="4.0" />
-                                 </VBox.margin></Button>
-                           </children>
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                           <padding>
-                              <Insets bottom="16.0" left="8.0" right="8.0" top="16.0" />
-                           </padding>
                         </VBox>
                      </children>
                   </HBox>
