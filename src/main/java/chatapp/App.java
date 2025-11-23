@@ -18,7 +18,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        // Connection db = DBConnection.getConnection();
+        Connection db = DBConnection.getConnection();
         Parent root = FXMLLoader.load(getClass().getResource(FXMLPaths.Dashboard.USER));
         stage.setTitle("TEST");
         scene = new Scene(root);

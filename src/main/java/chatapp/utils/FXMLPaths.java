@@ -19,6 +19,7 @@ public class FXMLPaths {
 
         public static final String LOG_IN = AUTH_BASE + "loginForm.fxml";
         public static final String REGISTER = AUTH_BASE + "registerForm.fxml";
+        public static final String UPDATE_ACCOUNT = AUTH_BASE + "updateAccount.fxml";
     }
 
     public static class User {

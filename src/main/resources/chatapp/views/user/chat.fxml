@@ -11,18 +11,21 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chatapp.controllers.user.ChatController">
    <children>
       <BorderPane layoutX="456.0" layoutY="271.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <left>
             <VBox prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button mnemonicParsing="false" prefWidth="200.0" text="Home">
+                  <Button mnemonicParsing="false" onAction="#navigateChat" prefWidth="200.0" text="Chat">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
                      <padding>
                         <Insets bottom="16.0" top="16.0" />
                      </padding>
                   </Button>
-                  <Button mnemonicParsing="false" prefWidth="200.0" text="Chat">
+                  <Button mnemonicParsing="false" onAction="#navigateFriends" prefWidth="200.0" text="Friends list">
                      <VBox.margin>
                         <Insets top="16.0" />
                      </VBox.margin>
@@ -30,7 +33,7 @@
                         <Insets bottom="16.0" top="16.0" />
                      </padding>
                   </Button>
-                  <Button mnemonicParsing="false" prefWidth="200.0" text="Friends list">
+                  <Button mnemonicParsing="false" onAction="#navigateGroups" prefWidth="200.0" text="Groups list">
                      <VBox.margin>
                         <Insets top="16.0" />
                      </VBox.margin>
@@ -38,7 +41,7 @@
                         <Insets bottom="16.0" top="16.0" />
                      </padding>
                   </Button>
-                  <Button mnemonicParsing="false" prefWidth="200.0" text="Groups list">
+                  <Button mnemonicParsing="false" onAction="#navigateSetting" prefWidth="200.0" text="Setting">
                      <VBox.margin>
                         <Insets top="16.0" />
                      </VBox.margin>
@@ -46,15 +49,7 @@
                         <Insets bottom="16.0" top="16.0" />
                      </padding>
                   </Button>
-                  <Button mnemonicParsing="false" prefWidth="200.0" text="Setting">
-                     <VBox.margin>
-                        <Insets top="16.0" />
-                     </VBox.margin>
-                     <padding>
-                        <Insets bottom="16.0" top="16.0" />
-                     </padding>
-                  </Button>
-                  <Button mnemonicParsing="false" prefWidth="200.0" text="Log out">
+                  <Button mnemonicParsing="false" onAction="#logOut" prefWidth="200.0" text="Log out">
                      <VBox.margin>
                         <Insets top="16.0" />
                      </VBox.margin>
