@@ -2,6 +2,7 @@ package chatapp;
 
 import javafx.application.Application;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
 import javafx.collections.FXCollections;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -17,6 +18,10 @@ import chatapp.controllers.MessageController;
 import chatapp.controllers.ProfileController;
 // import chatapp.db.DBConnection;
 import chatapp.models.User;
+import java.sql.Connection;
+
+import chatapp.db.DBConnection;
+import chatapp.utils.FXMLPaths;
 
 public class App extends Application {
     private User cur_user;
@@ -65,6 +70,18 @@ public class App extends Application {
                 // System.out.println("Login fail");
                 // }
 
+            } else if ("admin".equals(username)) {
+                // Connection db = DBConnection.getConnection();
+                Parent root = new Pane();
+                try {
+                    root = FXMLLoader.load(getClass().getResource(FXMLPaths.Dashboard.USER));
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                stage.setTitle("TEST");
+                scene = new Scene(root);
+                stage.setScene(scene);
             } else {
                 System.out.println("Login failed for user=" + username);
             }

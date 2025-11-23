@@ -10,6 +10,8 @@ import java.util.UUID;
 
 import chatapp.db.DBConnection;
 
+import java.time.LocalDateTime;
+
 public class User {
     private String id;
     private String name;
@@ -17,13 +19,19 @@ public class User {
     private String email;
     private boolean isAdmin;
     private boolean isOnline;
+    private String address;
+    private String birthday;
+    private boolean gender;
+    private String createAt;
+    private String updateAt;
+    private String status;
 
-    public boolean isOnline() {
-        return isOnline;
+    public String getStatus() {
+        return status;
     }
 
-    public void setOnline(boolean isOnline) {
-        this.isOnline = isOnline;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getId() {
@@ -64,6 +72,73 @@ public class User {
 
     public void setAdmin(boolean isAdmin) {
         this.isAdmin = isAdmin;
+    }
+
+    public boolean isOnline() {
+        return isOnline;
+    }
+
+    public void setOnline(boolean isOnline) {
+        this.isOnline = isOnline;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
+    }
+
+    public boolean isGender() {
+        return gender;
+    }
+
+    public void setGender(boolean gender) {
+        this.gender = gender;
+    }
+
+    public String getCreateAt() {
+        return createAt;
+    }
+
+    public void setCreateAt(String createAt) {
+        this.createAt = createAt;
+    }
+
+    public String getUpdateAt() {
+        return updateAt;
+    }
+
+    public void setUpdateAt(String updateAt) {
+        this.updateAt = updateAt;
+    }
+
+    public User() {
+
+    }
+
+    public User(String id, String userAccount, String userName, String address, String birthday, boolean gender,
+            String email, String status) {
+        this.id = id;
+        this.name = userName;
+        this.user_name = userAccount;
+        this.address = address;
+        this.birthday = birthday;
+        this.gender = gender;
+        this.email = email;
+        this.status = status;
+
+        this.createAt = "" + LocalDateTime.now();
+        this.updateAt = "" + LocalDateTime.now();
     }
 
     public static User login(String user_name) {

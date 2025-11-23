@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chatapp.controllers.dashboard.UserController">
+   <children>
+      <BorderPane layoutX="178.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <left>
+            <VBox alignment="TOP_CENTER" prefHeight="800.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#navigateUser" prefHeight="26.0" prefWidth="200.0" text="Users ">
+                     <VBox.margin>
+                        <Insets bottom="8.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="16.0" top="16.0" />
+                     </padding>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#navigateLogInHistory" prefHeight="26.0" prefWidth="200.0" text="Login History">
+                     <VBox.margin>
+                        <Insets bottom="8.0" top="8.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="16.0" top="16.0" />
+                     </padding></Button>
+                  <Button mnemonicParsing="false" onAction="#navigateChatGroup" prefHeight="26.0" prefWidth="200.0" text="Chat Groups">
+                     <VBox.margin>
+                        <Insets bottom="8.0" top="8.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="16.0" top="16.0" />
+                     </padding></Button>
+                  <Button mnemonicParsing="false" onAction="#navigateReport" prefHeight="26.0" prefWidth="200.0" text="Reports">
+                     <VBox.margin>
+                        <Insets bottom="8.0" top="8.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="16.0" top="16.0" />
+                     </padding></Button>
+                  <Button mnemonicParsing="false" onAction="#navigateRegistration" prefHeight="26.0" prefWidth="200.0" text="Registrations">
+                     <VBox.margin>
+                        <Insets bottom="8.0" top="8.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="16.0" top="16.0" />
+                     </padding></Button>
+                  <Button mnemonicParsing="false" onAction="#navigateUserFriend" prefHeight="26.0" prefWidth="200.0" text="User's Friend">
+                     <VBox.margin>
+                        <Insets bottom="8.0" top="8.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="16.0" top="16.0" />
+                     </padding></Button>
+                  <Button mnemonicParsing="false" onAction="#navigateActiveUser" prefHeight="26.0" prefWidth="200.0" text="Active Users">
+                     <VBox.margin>
+                        <Insets bottom="8.0" top="8.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="16.0" top="16.0" />
+                     </padding></Button>
+                  <Button mnemonicParsing="false" onAction="#logOut" prefWidth="200.0" text="Log out">
+                     <VBox.margin>
+                        <Insets top="8.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="16.0" top="16.0" />
+                     </padding>
+                  </Button>
+               </children>
+               <padding>
+                  <Insets bottom="16.0" left="8.0" right="8.0" top="16.0" />
+               </padding>
+            </VBox>
+         </left>
+         <center>
+            <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+               <children>
+                  <HBox prefHeight="700.0" prefWidth="1020.0">
+                     <children>
+                        <VBox prefHeight="200.0" prefWidth="680.0">
+                           <children>
+                              <HBox alignment="CENTER" prefHeight="40.0" prefWidth="340.0">
+                                 <children>
+                                    <Button mnemonicParsing="false" onAction="#addUser" text="Add user">
+                                       <HBox.margin>
+                                          <Insets right="8.0" />
+                                       </HBox.margin></Button>
+                                    <Button mnemonicParsing="false" onAction="#updateUser" text="Update User">
+                                       <HBox.margin>
+                                          <Insets right="8.0" />
+                                       </HBox.margin></Button>
+                                    <Button mnemonicParsing="false" onAction="#deleteUser" text="Delete User">
+                                       <HBox.margin>
+                                          <Insets right="40.0" />
+                                       </HBox.margin></Button>
+                                    <VBox prefHeight="200.0" prefWidth="300.0">
+                                       <children>
+                                          <HBox prefHeight="29.0" prefWidth="340.0">
+                                             <children>
+                                                <Label prefWidth="32.0" text="Field">
+                                                   <HBox.margin>
+                                                      <Insets left="8.0" right="16.0" />
+                                                   </HBox.margin>
+                                                </Label>
+                                                <ComboBox fx:id="fieldCombox" onAction="#fieldComboxChanged" prefWidth="150.0" promptText="Select field" />
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="340.0">
+                                             <children>
+                                                <Label prefWidth="32.0" text="Value">
+                                                   <HBox.margin>
+                                                      <Insets left="8.0" right="16.0" />
+                                                   </HBox.margin>
+                                                </Label>
+                                                <VBox prefHeight="60.0" prefWidth="150.0">
+                                                   <children>
+                                                      <TextField fx:id="filterValueField">
+                                                         <VBox.margin>
+                                                            <Insets bottom="4.0" />
+                                                         </VBox.margin>
+                                                      </TextField>
+                                                      <ComboBox fx:id="statusCombox" onAction="#statusComboxChanged" prefWidth="150.0" promptText="Select status" />
+                                                   </children>
+                                                </VBox>
+                                                <Button fx:id="filterBtn" disable="true" mnemonicParsing="false" onAction="#filterUser" text="Filter">
+                                                   <HBox.margin>
+                                                      <Insets left="8.0" />
+                                                   </HBox.margin>
+                                                </Button>
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="16.0" top="16.0" />
+                                 </padding>
+                              </HBox>
+                              <TableView fx:id="tableView" prefHeight="580.0" prefWidth="680.0">
+                                <columns>
+                                  <TableColumn fx:id="userAccountCol" prefWidth="84.80003356933594" text="User account" />
+                                  <TableColumn fx:id="userNameCol" prefWidth="75.199951171875" text="User name" />
+                                    <TableColumn fx:id="addressCol" prefWidth="65.5999755859375" text="Address" />
+                                    <TableColumn fx:id="birthdayCol" prefWidth="58.4000244140625" text="Birthday" />
+                                    <TableColumn fx:id="genderCol" prefWidth="62.4000244140625" text="Gender" />
+                                    <TableColumn fx:id="emailCol" prefWidth="146.39996337890625" text="Email" />
+                                    <TableColumn fx:id="statusCol" prefWidth="60.00006103515625" text="Status" />
+                                    <TableColumn fx:id="timeCol" prefWidth="121.5999755859375" text="Time" />
+                                </columns>
+                              </TableView>
+                           </children>
+                        </VBox>
+                        <VBox prefHeight="697.0" prefWidth="340.0">
+                           <children>
+                              <Label text="List friend">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="16.0" />
+                                 </VBox.margin></Label>
+                              <Label text="name">
+                                 <VBox.margin>
+                                    <Insets bottom="4.0" left="16.0" />
+                                 </VBox.margin></Label>
+                              <TableView fx:id="friendTableView" prefHeight="200.0">
+                                <columns>
+                                    <TableColumn fx:id="friendUserAccountCol" text="User account" />
+                                  <TableColumn fx:id="friendUserNameCol" text="User name" />
+                                  <TableColumn fx:id="friendEmailCol" prefWidth="90.0" text="Email" />
+                                    <TableColumn fx:id="friendStatusCol" prefWidth="50.0" text="Status" />
+                                </columns>
+                              </TableView>
+                              <Button mnemonicParsing="false" onAction="#getListFriend" text="Get list friend">
+                                 <VBox.margin>
+                                    <Insets bottom="8.0" left="16.0" top="4.0" />
+                                 </VBox.margin>
+                              </Button>
+                              <Label text="activity history">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="16.0" top="20.0" />
+                                 </VBox.margin></Label>
+                              <Label text="name">
+                                 <VBox.margin>
+                                    <Insets bottom="4.0" left="16.0" />
+                                 </VBox.margin></Label>
+                              <TableView fx:id="activityTableView" prefHeight="200.0">
+                                <columns>
+                                  <TableColumn text="User account" />
+                                  <TableColumn prefWidth="130.0" text="Time" />
+                                    <TableColumn text="Activity" />
+                                </columns>
+                              </TableView>
+                              <Button mnemonicParsing="false" onAction="#getActivityHistory" text="Get activity history">
+                                 <VBox.margin>
+                                    <Insets left="16.0" top="4.0" />
+                                 </VBox.margin></Button>
+                           </children>
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                           <padding>
+                              <Insets bottom="16.0" left="8.0" right="8.0" top="16.0" />
+                           </padding>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+               <padding>
+                  <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+               </padding>
+            </VBox>
+         </center>
+         <top>
+            <HBox alignment="CENTER_LEFT" prefHeight="80.0" prefWidth="500.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label text="Dashboard" textAlignment="CENTER">
+                     <font>
+                        <Font name="SansSerif Regular" size="24.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </Label>
+                  <Label text="Users">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets left="360.0" right="360.0" />
+                     </HBox.margin>
+                  </Label>
+                  <VBox prefHeight="76.0">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" prefHeight="100.0">
+                           <children>
+                              <Label text="Number of users:">
+                                 <HBox.margin>
+                                    <Insets right="4.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <Label text="1" />
+                           </children>
+                           <padding>
+                              <Insets right="4.0" />
+                           </padding>
+                        </HBox>
+                        <HBox prefHeight="100.0">
+                           <children>
+                              <Label text="User online:">
+                                 <HBox.margin>
+                                    <Insets right="4.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <Label text="1" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+               <padding>
+                  <Insets left="32.0" right="32.0" />
+               </padding>
+            </HBox>
+         </top>
+      </BorderPane>
+   </children>
+</AnchorPane>
