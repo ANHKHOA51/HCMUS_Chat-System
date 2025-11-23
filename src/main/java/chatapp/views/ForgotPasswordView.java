@@ -4,6 +4,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -17,7 +18,9 @@ public class ForgotPasswordView {
     public ForgotPasswordView() {
         emailField.setPromptText("Email or username");
         Text title = new Text("Forgot password");
-        VBox box = new VBox(8, title, emailField, sendButton, backButton);
+        HBox buttonBox = new HBox(10, sendButton, backButton);
+        buttonBox.setAlignment(Pos.CENTER);
+        VBox box = new VBox(8, title, emailField, buttonBox);
         box.setAlignment(Pos.CENTER);
         box.setMaxWidth(420);
 

@@ -12,7 +12,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.collections.ObservableList;
 
-public class UserList extends BorderPane {
+public class UserListView extends BorderPane {
     TextField filterField;
     ListView<User> userListView;
     
@@ -32,8 +32,9 @@ public class UserList extends BorderPane {
         this.userListView = userListView;
     }
 
-    public UserList() {
+    public UserListView() {
         filterField = new TextField();
+        filterField.setPromptText("Search users...");
         filterField.setMaxWidth(600);
 
         HBox topBox = new HBox(filterField);
@@ -44,9 +45,10 @@ public class UserList extends BorderPane {
         this.setCenter(userListView);
     }
 
-    public UserList(ObservableList<User> users) {
+    public UserListView(ObservableList<User> users) {
         userListView = new ListView<>(users);
         filterField = new TextField();
+        filterField.setPromptText("Search users...");
         filterField.setMaxWidth(200);
 
         HBox topBox = new HBox(filterField);
@@ -56,17 +58,6 @@ public class UserList extends BorderPane {
         this.setCenter(userListView);
     }
 
-    public void setFriendCellList() {
-        
-    }
-
-    public void setOnlineCellList() {
-
-    }
-
-    public void setReqFriendList() {
-
-    }
 
     public void setFriendListCellFactory() {
         userListView.setCellFactory(param -> new UserFriendListCell());

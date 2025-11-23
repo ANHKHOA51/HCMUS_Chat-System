@@ -5,6 +5,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -27,7 +28,10 @@ public class SignupView {
         confirmField.setPromptText("Confirm password");
 
         Text title = new Text("Sign up");
-        VBox box = new VBox(8, title, nameField, usernameField, emailField, passwordField, confirmField, signupButton, backButton);
+
+        HBox buttonBox = new HBox(10, signupButton, backButton);
+        buttonBox.setAlignment(Pos.CENTER);
+        VBox box = new VBox(8, title, nameField, usernameField, emailField, passwordField, confirmField, buttonBox);
         box.setAlignment(Pos.CENTER);
         box.setMaxWidth(420);
 

@@ -11,6 +11,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
 import javafx.application.Platform;
@@ -85,9 +87,17 @@ public class MessageView extends BorderPane {
         ));
 
         chat.setWrapText(true);
-        HBox bubble = new HBox(6, delMessage, chat);
+        HBox bubble;
+        if (isMine) {
+            Text text = new Text("You");
+            text.setFont(Font.font(10));
+            bubble = new HBox(6, delMessage, chat, text);
+        } else {
+            Text text = new Text("Friend");
+            text.setFont(Font.font(10));
+            bubble = new HBox(6, text, chat, delMessage);
+        }
         chat.setMaxWidth(400);
-
         String bg = isMine ? "#9292ff" : "#E5E5EA";
         chat.setStyle(
                 "-fx-background-color: " + bg + ";" +
@@ -115,6 +125,12 @@ public class MessageView extends BorderPane {
         HBox bb = createBubble(message, true);
 
         msgList.getChildren().add(bb);
+
+
+        //TODO: Remove this example response later
+        HBox res = createBubble("This is an example response message", false);
+
+        msgList.getChildren().add(res);
     }
 
     public TextField getTextField() {

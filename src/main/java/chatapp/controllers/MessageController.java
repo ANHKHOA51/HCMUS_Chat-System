@@ -19,7 +19,10 @@ public class MessageController {
     private final Map<String, MessageView> views = new HashMap<>();
 
     public MessageController() {
-        this(null);
+        this.user = null;
+        contact.setPrefWidth(300);
+        split.setLeft(contact);
+        split.setCenter(null);
     }
 
     public MessageController(User u) {

@@ -33,6 +33,12 @@ public class App extends Application {
 
         authCtl.setOnLogin((username, password) -> {
             if ("user".equals(username)) {
+                cur_user = new User();
+                cur_user.setId("1");
+                cur_user.setName("Demo User");
+                cur_user.setUser_name("user");
+                cur_user.setEmail("user@example.com");
+                cur_user.setOnline(true);
                 // DBConnection.getConnection();
                 // try {
                 // cur_user = User.login("user");
@@ -41,8 +47,8 @@ public class App extends Application {
                 // if (!cur_user.isAdmin()) {
                 // System.out.println(cur_user.getId());
                 TabPane pane = new TabPane();
-                MessageController msgCtl = new MessageController();
-                ProfileController pfCtl = new ProfileController();
+                MessageController msgCtl = new MessageController(cur_user);
+                ProfileController pfCtl = new ProfileController(cur_user);
                 FriendController frCtl = new FriendController();
 
                 pane.getTabs().add(msgCtl.getTab());

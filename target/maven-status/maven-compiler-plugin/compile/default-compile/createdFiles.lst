@@ -7,10 +7,10 @@ chatapp/views/LoginView.class
 chatapp/views/ContactListView.class
 chatapp/models/Conversation.class
 chatapp/views/cells/UserFriendListCell.class
+chatapp/views/UserListView.class
 chatapp/models/ChatCache.class
 chatapp/controllers/FriendController.class
 chatapp/views/ProfileView.class
-chatapp/views/UserList.class
 chatapp/controllers/AuthController.class
 chatapp/controllers/ProfileController.class
 chatapp/models/Message.class
