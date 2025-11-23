@@ -1,21 +1,28 @@
 package chatapp.views;
 
+import chatapp.models.User;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 
-public class ContactListView extends ListView<String> {
+public class ContactListView extends ListView<User> {
     public ContactListView() {
         super();
         setFixedCellSize(50);
         // center text and enlarge font
         setCellFactory(lv -> {
-            ListCell<String> cell = new ListCell<>() {
+            ListCell<User> cell = new ListCell<>() {
                 @Override
-                protected void updateItem(String item, boolean empty) {
-                    super.updateItem(item, empty);
-                    setText(empty || item == null ? null : item);
+                protected void updateItem(User u, boolean empty) {
+                    if (empty || u == null) {
+                        setText(null);
+                        setGraphic(null);
+                        return;
+                    }
+                    super.updateItem(u, empty);
+                    String display = (u.toString() == null ? "" : u.toString());
+                    setText(display);
                 }
             };
             cell.setAlignment(Pos.CENTER);
@@ -24,16 +31,22 @@ public class ContactListView extends ListView<String> {
         });
     }
 
-    public ContactListView(ObservableList<String> contact) {
+    public ContactListView(ObservableList<User> contact) {
         super();
         setItems(contact);
         setFixedCellSize(50);
         setCellFactory(lv -> {
-            ListCell<String> cell = new ListCell<>() {
+            ListCell<User> cell = new ListCell<>() {
                 @Override
-                protected void updateItem(String item, boolean empty) {
-                    super.updateItem(item, empty);
-                    setText(empty || item == null ? null : item);
+                protected void updateItem(User u, boolean empty) {
+                    if (empty || u == null) {
+                        setText(null);
+                        setGraphic(null);
+                        return;
+                    }
+                    super.updateItem(u, empty);
+                    String display = (u.toString() == null ? "" : u.toString());
+                    setText(display);
                 }
             };
             cell.setAlignment(Pos.CENTER);
@@ -42,7 +55,7 @@ public class ContactListView extends ListView<String> {
         });
     }
 
-    public ListView<String> getContactList() {
+    public ListView<User> getContactList() {
         return this;
     }
 }

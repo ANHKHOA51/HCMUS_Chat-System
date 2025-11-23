@@ -4,6 +4,7 @@ import chatapp.models.User;
 import chatapp.test.MockData;
 import chatapp.views.FriendOptionView;
 import chatapp.views.UserList;
+import chatapp.views.cells.UserFriendListCell;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
 
@@ -16,6 +17,7 @@ public class FriendController {
     public FriendController() {
         fov = new FriendOptionView();
         userList = new UserList(MockData.mockUsers());
+        userList.setToChatListCellFactory();
         split.setLeft(fov);
         split.setCenter(userList);
     }

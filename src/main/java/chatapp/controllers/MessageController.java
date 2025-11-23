@@ -1,57 +1,65 @@
 package chatapp.controllers;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import chatapp.models.User;
+import chatapp.test.MockData;
 import chatapp.views.ContactListView;
 import chatapp.views.MessageView;
 import javafx.collections.FXCollections;
+import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
 
 public class MessageController {
     User user;
     private ContactListView contact;
-    private MessageView msg;
     private BorderPane split = new BorderPane();
+    private final Map<String, MessageView> views = new HashMap<>();
 
     public MessageController() {
-        contact = new ContactListView(FXCollections.observableArrayList("alice"));
-        contact.setPrefWidth(300);
-        msg = null;
-        split.setCenter(msg);
-        split.setLeft(contact);
-
-        contact.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                msg = new MessageView();
-                split.setCenter(msg);
-                msg.getTextField().setOnAction(event -> sendMessage());
-                msg.getButton().setOnAction(event -> sendMessage());
-            }
-        });
+        this(null);
     }
+
     public MessageController(User u) {
         this.user = u;
-        contact = new ContactListView(FXCollections.observableArrayList("alice"));
+        contact = new ContactListView(MockData.mockUsers());
         contact.setPrefWidth(300);
-        msg = null;
-        split.setCenter(msg);
-        split.setLeft(contact);
 
-        contact.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                msg = new MessageView();
-                split.setCenter(msg);
-                msg.getTextField().setOnAction(event -> sendMessage());
-                msg.getButton().setOnAction(event -> sendMessage());
-            }
-        });
+        split.setLeft(contact);
+        split.setCenter(null);
+
+        MultipleSelectionModel<User> sel = (MultipleSelectionModel<User>) contact.getSelectionModel();
+        if (sel != null) {
+            sel.selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null) {
+                    // reuse per-contact view so state (history, draft) is preserved
+                    MessageView view = views.computeIfAbsent(newVal.getId(), k -> {
+                        MessageView mv = new MessageView();
+                        // handlers capture mv and the contact id (user id string)
+                        mv.getTextField().setOnAction(e -> sendMessageFor(mv, newVal.getId()));
+                        mv.getButton().setOnAction(e -> sendMessageFor(mv, newVal.getId()));
+                        return mv;
+                    });
+                    split.setCenter(view);
+                } else {
+                    split.setCenter(null);
+                }
+            });
+        }
     }
 
-    private void sendMessage() {
-        String text = msg.getTextField().getText().trim();
+    // send message for a specific MessageView / contactId
+    private void sendMessageFor(MessageView mv, String contactId) {
+        if (mv == null) return;
+        String text = mv.getTextField().getText();
+        if (text == null) return;
+        text = text.trim();
         if (!text.isEmpty()) {
-            msg.sendMessage(text);
-            msg.getTextField().clear();
+            mv.sendMessage(text);
+            mv.getTextField().clear();
+            // TODO: persist message to conversation store for contactId if needed
         }
     }
 

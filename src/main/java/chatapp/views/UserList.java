@@ -1,6 +1,9 @@
 package chatapp.views;
 
 import chatapp.models.User;
+import chatapp.views.cells.FriendReqCell;
+import chatapp.views.cells.UserCanChatCell;
+import chatapp.views.cells.UserFriendListCell;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ListView;
@@ -13,16 +16,32 @@ public class UserList extends BorderPane {
     TextField filterField;
     ListView<User> userListView;
     
+    public TextField getFilterField() {
+        return filterField;
+    }
+
+    public void setFilterField(TextField filterField) {
+        this.filterField = filterField;
+    }
+
+    public ListView<User> getUserListView() {
+        return userListView;
+    }
+
+    public void setUserListView(ListView<User> userListView) {
+        this.userListView = userListView;
+    }
+
     public UserList() {
         filterField = new TextField();
-        filterField.setMaxWidth(200);
+        filterField.setMaxWidth(600);
 
         HBox topBox = new HBox(filterField);
         topBox.setAlignment(Pos.CENTER_RIGHT);
-        topBox.setPadding(new Insets(10)); // optional spacing
+        topBox.setPrefWidth(400);
+        topBox.setPadding(new Insets(10));
         this.setTop(topBox);
         this.setCenter(userListView);
-        setDefaultCellFactory();
     }
 
     public UserList(ObservableList<User> users) {
@@ -35,10 +54,29 @@ public class UserList extends BorderPane {
         topBox.setPadding(new Insets(10)); // optional spacing
         this.setTop(topBox);
         this.setCenter(userListView);
-        setDefaultCellFactory();
     }
 
-    private void setDefaultCellFactory() {
-        userListView.setCellFactory(list -> new UserListCell());
+    public void setFriendCellList() {
+        
+    }
+
+    public void setOnlineCellList() {
+
+    }
+
+    public void setReqFriendList() {
+
+    }
+
+    public void setFriendListCellFactory() {
+        userListView.setCellFactory(param -> new UserFriendListCell());
+    }
+
+    public void setRequestListCellFactory() {
+        userListView.setCellFactory(param -> new FriendReqCell());
+    }
+
+    public void setToChatListCellFactory() {
+        userListView.setCellFactory(param -> new UserCanChatCell());
     }
 }

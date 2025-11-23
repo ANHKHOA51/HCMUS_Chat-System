@@ -11,6 +11,38 @@ public class FriendOptionView extends VBox {
     Button onlineBtn;
     Button searchBtn;
 
+    public Button getFriendBtn() {
+        return friendBtn;
+    }
+
+    public void setFriendBtn(Button friendBtn) {
+        this.friendBtn = friendBtn;
+    }
+
+    public Button getFriendReqBtn() {
+        return friendReqBtn;
+    }
+
+    public void setFriendReqBtn(Button friendReqBtn) {
+        this.friendReqBtn = friendReqBtn;
+    }
+
+    public Button getOnlineBtn() {
+        return onlineBtn;
+    }
+
+    public void setOnlineBtn(Button onlineBtn) {
+        this.onlineBtn = onlineBtn;
+    }
+
+    public Button getSearchBtn() {
+        return searchBtn;
+    }
+
+    public void setSearchBtn(Button searchBtn) {
+        this.searchBtn = searchBtn;
+    }
+
     public FriendOptionView() {
         super(30);
         setPadding(new Insets(20));
