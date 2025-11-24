@@ -2,7 +2,6 @@ package chatapp.views;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.scene.control.Tab;
 import javafx.scene.layout.VBox;
 
 public class FriendOptionView extends VBox {

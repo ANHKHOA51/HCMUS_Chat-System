@@ -50,6 +50,11 @@ public class App extends Application {
                 TabPane pane = new TabPane();
                 MessageController msgCtl = new MessageController(cur_user);
                 ProfileController pfCtl = new ProfileController(cur_user);
+                pfCtl.setOnSignOut(() -> {
+                    cur_user = null;
+                    authCtl.showLogin();
+                    stage.setScene(authCtl.getScene());
+                });
                 FriendController frCtl = new FriendController();
 
                 pane.getTabs().add(msgCtl.getTab());
@@ -78,6 +83,10 @@ public class App extends Application {
                 stage.setTitle("TEST");
                 scene = new Scene(root);
                 stage.setScene(scene);
+                chatapp.controllers.dashboard.DashboardController.onLogout = () -> {
+                    authCtl.showLogin();
+                    stage.setScene(authCtl.getScene());
+                };
             } else {
                 System.out.println("Login failed for user=" + username);
             }

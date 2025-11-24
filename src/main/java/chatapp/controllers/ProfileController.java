@@ -19,4 +19,8 @@ public class ProfileController {
         this.profile.setClosable(false);
         return this.profile;
     }
+
+    public void setOnSignOut(Runnable handler) {
+        profile.getSignOutButton().setOnAction(e -> handler.run());
+    }
 }

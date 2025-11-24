@@ -85,8 +85,12 @@ public abstract class DashboardController implements Initializable {
 
     }
 
+    public static Runnable onLogout;
+
     @FXML
     void logOut(ActionEvent event) {
-
+        if (onLogout != null) {
+            onLogout.run();
+        }
     }
 }

@@ -16,6 +16,7 @@ import javafx.scene.layout.Priority;
 public class UserCanChatCell extends ListCell<User> {
     private final HBox root = new HBox(8);
     private final Label nameLabel = new Label();
+    private final Label statusLabel = new Label();
 
     private final Button chatBtn = new Button("Chat");
     private final Button groupBtn = new Button("Create group");
@@ -30,6 +31,11 @@ public class UserCanChatCell extends ListCell<User> {
         setPrefWidth(100);
         nameLabel.setMaxWidth(Double.MAX_VALUE);
         nameLabel.setStyle("-fx-font-size: 16px;");
+
+        statusLabel.setStyle("-fx-font-size: 8px; -fx-opacity: 0.3;");
+        HBox leftBox = new HBox(8);
+        leftBox.setAlignment(Pos.CENTER_LEFT);
+        leftBox.getChildren().addAll(nameLabel, statusLabel);
 
         HBox buttonsBox = new HBox(6);
         buttonsBox.setAlignment(Pos.CENTER_RIGHT);
@@ -64,9 +70,9 @@ public class UserCanChatCell extends ListCell<User> {
 
         root.setAlignment(Pos.CENTER_LEFT);
         root.setPadding(new Insets(6, 5, 6, 8));
-        root.getChildren().addAll(nameLabel, buttonsBox);
+        root.getChildren().addAll(leftBox, buttonsBox);
 
-        HBox.setHgrow(nameLabel, Priority.ALWAYS);
+        HBox.setHgrow(leftBox, Priority.ALWAYS);
     }
 
     @Override
@@ -82,6 +88,11 @@ public class UserCanChatCell extends ListCell<User> {
             String display = (user.toString() == null ? "" : user.toString());
             // if your User has getUsername(), use: user.getUsername()
             nameLabel.setText(display);
+
+            String statusText = user.getIsOnline() ? " -fx-text-fill: green;" : " -fx-text-fill: gray;";
+            statusLabel.setStyle("-fx-font-size: 11px; -fx-opacity: 0.6;" + statusText);
+
+            statusLabel.setText(user.getIsOnline() ? "Online" : "Offline");
 
             // bind cell width to listview width once so cell uses full container width
             if (!boundWidth && getListView() != null) {

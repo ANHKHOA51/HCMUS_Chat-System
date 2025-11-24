@@ -56,13 +56,12 @@ public class FriendController {
         });
 
         fov.getSearchBtn().setOnAction(e -> {
-            // demo: show filtered subset (ví dụ users có index %3 == 0)
             ObservableList<User> filtered = FXCollections.observableArrayList();
             for (int i = 0; i < all.size(); i++) {
                 if (i % 3 == 0) filtered.add(all.get(i));
             }
             userList.getUserListView().setItems(filtered);
-            userList.setFriendListCellFactory();
+            userList.setToChatListCellFactory();
         });
     }
 

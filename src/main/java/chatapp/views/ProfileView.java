@@ -18,6 +18,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 public class ProfileView extends Tab {
+    private Button signOutButton;
+
     public ProfileView() {
         VBox vbox = new VBox();
         GridPane gp = new GridPane();
@@ -31,6 +33,10 @@ public class ProfileView extends Tab {
         Label lb_user_name = new Label("User name");
         TextField tf_user_name = new TextField();
         tf_user_name.setMaxWidth(300);
+
+        Label lb_password = new Label("New password");
+        TextField tf_password = new TextField();
+        tf_password.setMaxWidth(300);
 
         Label lb_full_name = new Label("Full name");
         TextField tf_full_name = new TextField();
@@ -47,18 +53,20 @@ public class ProfileView extends Tab {
         col0.setPrefWidth(150);
 
         ColumnConstraints col1 = new ColumnConstraints();
-        col1.setPrefWidth(200); 
+        col1.setPrefWidth(200);
         col1.setHalignment(HPos.CENTER);
 
         gp.getColumnConstraints().addAll(col0, col1);
 
         gp.add(lb_full_name, 0, 12);
         gp.add(tf_full_name, 1, 12);
-        gp.add(lb_user_name, 0, 13);
-        gp.add(tf_user_name, 1, 13);
+        gp.add(lb_password, 0, 13);
+        gp.add(tf_password, 1, 13);
+        gp.add(lb_user_name, 0, 14);
+        gp.add(tf_user_name, 1, 14);
 
-        gp.add(tf_email, 1, 14);
-        gp.add(lb_email, 0, 14);
+        gp.add(tf_email, 1, 15);
+        gp.add(lb_email, 0, 15);
 
         Separator sep = new Separator();
 
@@ -67,11 +75,12 @@ public class ProfileView extends Tab {
 
         Button saveButton = new Button("Save");
         Button cancelButton = new Button("Cancel");
+        signOutButton = new Button("Sign Out");
 
         ButtonBar.setButtonData(saveButton, ButtonBar.ButtonData.OK_DONE);
         ButtonBar.setButtonData(cancelButton, ButtonBar.ButtonData.CANCEL_CLOSE);
 
-        buttonBar.getButtons().addAll(saveButton, cancelButton);
+        buttonBar.getButtons().addAll(saveButton, cancelButton, signOutButton);
 
         vbox.getChildren().addAll(gp, sep, buttonBar);
 
@@ -94,6 +103,10 @@ public class ProfileView extends Tab {
         tf_user_name.setText(u.getUser_name());
         tf_user_name.setMaxWidth(300);
 
+        Label lb_password = new Label("New password");
+        TextField tf_password = new TextField();
+        tf_password.setMaxWidth(300);
+
         Label lb_full_name = new Label("Full name");
         TextField tf_full_name = new TextField();
         tf_full_name.setMaxWidth(300);
@@ -111,18 +124,20 @@ public class ProfileView extends Tab {
         col0.setPrefWidth(150);
 
         ColumnConstraints col1 = new ColumnConstraints();
-        col1.setPrefWidth(200); 
+        col1.setPrefWidth(200);
         col1.setHalignment(HPos.CENTER);
 
         gp.getColumnConstraints().addAll(col0, col1);
 
         gp.add(lb_full_name, 0, 12);
         gp.add(tf_full_name, 1, 12);
-        gp.add(lb_user_name, 0, 13);
-        gp.add(tf_user_name, 1, 13);
+        gp.add(lb_password, 0, 13);
+        gp.add(tf_password, 1, 13);
+        gp.add(lb_user_name, 0, 14);
+        gp.add(tf_user_name, 1, 14);
 
-        gp.add(tf_email, 1, 14);
-        gp.add(lb_email, 0, 14);
+        gp.add(tf_email, 1, 15);
+        gp.add(lb_email, 0, 15);
 
         Separator sep = new Separator();
 
@@ -131,15 +146,20 @@ public class ProfileView extends Tab {
 
         Button saveButton = new Button("Save");
         Button cancelButton = new Button("Cancel");
+        signOutButton = new Button("Sign Out");
 
         ButtonBar.setButtonData(saveButton, ButtonBar.ButtonData.OK_DONE);
         ButtonBar.setButtonData(cancelButton, ButtonBar.ButtonData.CANCEL_CLOSE);
 
-        buttonBar.getButtons().addAll(saveButton, cancelButton);
+        buttonBar.getButtons().addAll(saveButton, cancelButton, signOutButton);
 
         vbox.getChildren().addAll(gp, sep, buttonBar);
 
         setText("Profile");
         setContent(vbox);
+    }
+
+    public Button getSignOutButton() {
+        return signOutButton;
     }
 }

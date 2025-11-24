@@ -33,6 +33,7 @@ public class UserListView extends BorderPane {
     }
 
     public UserListView() {
+        userListView = new ListView<>();
         filterField = new TextField();
         filterField.setPromptText("Search users...");
         filterField.setMaxWidth(600);
