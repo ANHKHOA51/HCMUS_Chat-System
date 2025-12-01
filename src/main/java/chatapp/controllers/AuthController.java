@@ -17,8 +17,12 @@ public class AuthController {
     private final SignupView signupView = new SignupView();
     private final ForgotPasswordView forgotView = new ForgotPasswordView();
 
+    public interface SignupHandler {
+        void handle(String username, String password, String name, String email);
+    }
+
     private BiConsumer<String, String> onLogin;
-    private BiConsumer<String, String> onSignup;
+    private SignupHandler onSignup;
     private Consumer<String> onRequestReset;
 
     public AuthController() {
@@ -30,11 +34,21 @@ public class AuthController {
     }
 
     // scene getter used by App
-    public Scene getScene() { return scene; }
+    public Scene getScene() {
+        return scene;
+    }
 
-    public void setOnLogin(BiConsumer<String, String> handler) { this.onLogin = handler; }
-    public void setOnSignup(BiConsumer<String, String> handler) { this.onSignup = handler; }
-    public void setOnRequestReset(Consumer<String> handler) { this.onRequestReset = handler; }
+    public void setOnLogin(BiConsumer<String, String> handler) {
+        this.onLogin = handler;
+    }
+
+    public void setOnSignup(SignupHandler handler) {
+        this.onSignup = handler;
+    }
+
+    public void setOnRequestReset(Consumer<String> handler) {
+        this.onRequestReset = handler;
+    }
 
     private void wireLogin() {
         // Enter or button triggers submit
@@ -62,29 +76,63 @@ public class AuthController {
     }
 
     // navigation helpers
-    public void showLogin() { root.getChildren().setAll(loginView.getRoot()); }
-    public void showSignup() { root.getChildren().setAll(signupView.getRoot()); }
-    public void showForgot() { root.getChildren().setAll(forgotView.getRoot()); }
+    public void showLogin() {
+        loginView.clearError();
+        root.getChildren().setAll(loginView.getRoot());
+    }
+
+    public void showSignup() {
+        signupView.clearError();
+        root.getChildren().setAll(signupView.getRoot());
+    }
+
+    public void showForgot() {
+        root.getChildren().setAll(forgotView.getRoot());
+    }
+
+    public void showLoginError(String message) {
+        loginView.showError(message);
+    }
+
+    public void showSignupError(String message) {
+        signupView.showError(message);
+    }
 
     // submit handlers call caller-provided callbacks
     private void submitLogin() {
+        loginView.clearError();
         String u = loginView.getUsernameField().getText() == null ? "" : loginView.getUsernameField().getText().trim();
         String p = loginView.getPasswordField().getText() == null ? "" : loginView.getPasswordField().getText();
-        if (onLogin != null) onLogin.accept(u, p);
+        if (onLogin != null)
+            onLogin.accept(u, p);
     }
 
     private void submitSignup() {
-        String u = signupView.getUsernameField().getText() == null ? "" : signupView.getUsernameField().getText().trim();
+        signupView.clearError();
+        String u = signupView.getUsernameField().getText() == null ? ""
+                : signupView.getUsernameField().getText().trim();
         String p = signupView.getPasswordField().getText() == null ? "" : signupView.getPasswordField().getText();
         String conf = signupView.getConfirmField().getText() == null ? "" : signupView.getConfirmField().getText();
-        if (u.isEmpty() || p.isEmpty()) return;
-        if (!p.equals(conf)) return;
-        if (onSignup != null) onSignup.accept(u, p);
+        String name = signupView.getNameField().getText() == null ? "" : signupView.getNameField().getText().trim();
+        String email = signupView.getEmailField().getText() == null ? "" : signupView.getEmailField().getText().trim();
+
+        if (u.isEmpty() || p.isEmpty()) {
+            signupView.showError("Username and password are required");
+            return;
+        }
+        if (!p.equals(conf)) {
+            signupView.showError("Passwords do not match");
+            return;
+        }
+        if (onSignup != null)
+            onSignup.handle(u, p, name, email);
     }
 
     private void submitForgot() {
         String v = forgotView.getEmailField().getText() == null ? "" : forgotView.getEmailField().getText().trim();
-        if (v.isEmpty()) return;
-        if (onRequestReset != null) onRequestReset.accept(v);
+        if (v.isEmpty())
+            return;
+        if (onRequestReset != null)
+            onRequestReset.accept(v);
     }
 }

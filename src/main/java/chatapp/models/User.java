@@ -20,7 +20,7 @@ public class User {
     private String birthday;
     private boolean gender;
     private String createAt;
-    private String updateAt;
+    // private String updateAt;
 
     public String getId() {
         return id;
@@ -102,14 +102,6 @@ public class User {
         this.createAt = createAt;
     }
 
-    public String getUpdateAt() {
-        return updateAt;
-    }
-
-    public void setUpdateAt(String updateAt) {
-        this.updateAt = updateAt;
-    }
-
     public User() {
 
     }
@@ -127,15 +119,15 @@ public class User {
         this.isAdmin = isAdmin;
 
         this.createAt = "" + LocalDateTime.now();
-        this.updateAt = "" + LocalDateTime.now();
     }
 
-    public static User login(String user_name) {
+    public static User login(String user_name, String password) {
         try {
             Connection conn = DBConnection.getConnection();
-            String sql = "SELECT * FROM users WHERE username = ?";
+            String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, user_name);
+                ps.setString(2, password);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         User u = new User();
@@ -144,6 +136,11 @@ public class User {
                         u.setUser_name(rs.getString("username"));
                         u.setEmail(rs.getString("email"));
                         u.setAdmin(rs.getBoolean("admin"));
+                        u.setAddress(rs.getString("address"));
+                        u.setBirthday(rs.getString("birthday"));
+                        u.setGender(rs.getBoolean("gender"));
+                        u.setCreateAt(rs.getString("created_at"));
+                        // u.setUpdateAt(rs.getString("updated_at"));
                         return u;
                     } else {
                         return null;
@@ -153,6 +150,45 @@ public class User {
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public static boolean register(String username, String password, String name, String email) {
+        try {
+            Connection conn = DBConnection.getConnection();
+            // Check if username already exists
+            String checkSql = "SELECT id FROM users WHERE username = ?";
+            try (PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
+                checkPs.setString(1, username);
+                try (ResultSet rs = checkPs.executeQuery()) {
+                    if (rs.next()) {
+                        return false; // Username already exists
+                    }
+                }
+            }
+
+            String sql = "INSERT INTO users (id, username, password, display_name, email, admin, is_online, address, birthday, gender, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                String now = LocalDateTime.now().toString();
+                ps.setString(1, java.util.UUID.randomUUID().toString());
+                ps.setString(2, username);
+                ps.setString(3, password);
+                ps.setString(4, name);
+                ps.setString(5, email);
+                ps.setBoolean(6, false); // Default not admin
+                ps.setBoolean(7, false); // Default offline
+                ps.setString(8, ""); // Default address
+                ps.setString(9, ""); // Default birthday
+                ps.setBoolean(10, true); // Default gender (true for male, just a default)
+                ps.setString(11, now);
+
+
+                int rowsAffected = ps.executeUpdate();
+                return rowsAffected > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 

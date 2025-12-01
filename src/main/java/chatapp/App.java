@@ -5,7 +5,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -14,6 +13,7 @@ import chatapp.controllers.AuthController;
 import chatapp.controllers.FriendController;
 import chatapp.controllers.MessageController;
 import chatapp.controllers.ProfileController;
+import chatapp.db.DBConnection;
 // import chatapp.db.DBConnection;
 import chatapp.models.User;
 
@@ -21,10 +21,10 @@ import chatapp.utils.FXMLPaths;
 
 public class App extends Application {
     private User cur_user;
-    private static Scene scene;
 
     @Override
     public void start(Stage stage) throws IOException {
+        DBConnection.getConnection();
         AuthController authCtl = new AuthController();
 
         stage.setScene(authCtl.getScene());
@@ -33,69 +33,68 @@ public class App extends Application {
         stage.show();
 
         authCtl.setOnLogin((username, password) -> {
-            if ("user".equals(username)) {
-                cur_user = new User();
-                cur_user.setId("1");
-                cur_user.setName("Demo User");
-                cur_user.setUser_name("user");
-                cur_user.setEmail("user@example.com");
+            User user = User.login(username, password);
+            if (user != null) {
+                cur_user = user;
                 cur_user.setOnline(true);
-                // DBConnection.getConnection();
-                // try {
-                // cur_user = User.login("user");
 
-                // if (cur_user != null) {
-                // if (!cur_user.isAdmin()) {
-                // System.out.println(cur_user.getId());
-                TabPane pane = new TabPane();
-                MessageController msgCtl = new MessageController(cur_user);
-                ProfileController pfCtl = new ProfileController(cur_user);
-                pfCtl.setOnSignOut(() -> {
-                    cur_user = null;
-                    authCtl.showLogin();
-                    stage.setScene(authCtl.getScene());
-                });
-                FriendController frCtl = new FriendController();
+                if (cur_user.getIsAdmin()) {
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource(FXMLPaths.Dashboard.USER));
+                        Parent root = loader.load();
 
-                pane.getTabs().add(msgCtl.getTab());
-                pane.getTabs().add(frCtl.getTab());
-                pane.getTabs().add(pfCtl.getProfileView());
-                Scene main = new Scene(pane, 1200, 800);
+                        // Setup logout handler for Dashboard
+                        chatapp.controllers.dashboard.DashboardController.onLogout = () -> {
+                            authCtl.showLogin();
+                            stage.setScene(authCtl.getScene());
+                            stage.centerOnScreen();
+                        };
 
-                // đổi scene trên FX thread (callback chạy trên FX thread)
-                stage.setScene(main);
-                stage.centerOnScreen();
-                // }
-                // }
-                // } catch (NullPointerException e) {
-                // System.out.println("Login fail");
-                // }
+                        Scene adminScene = new Scene(root);
+                        stage.setScene(adminScene);
+                        stage.centerOnScreen();
+                        stage.setTitle("Admin Dashboard");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        System.out.println("Failed to load Admin Dashboard");
+                    }
+                } else {
+                    TabPane pane = new TabPane();
+                    MessageController msgCtl = new MessageController(cur_user);
+                    ProfileController pfCtl = new ProfileController(cur_user);
+                    pfCtl.setOnSignOut(() -> {
+                        cur_user = null;
+                        authCtl.showLogin();
+                        stage.setScene(authCtl.getScene());
+                        stage.centerOnScreen();
+                    });
+                    FriendController frCtl = new FriendController();
 
-            } else if ("admin".equals(username)) {
-                // Connection db = DBConnection.getConnection();
-                Parent root = new Pane();
-                try {
-                    root = FXMLLoader.load(getClass().getResource(FXMLPaths.Dashboard.USER));
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    pane.getTabs().add(msgCtl.getTab());
+                    pane.getTabs().add(frCtl.getTab());
+                    pane.getTabs().add(pfCtl.getProfileView());
+                    Scene main = new Scene(pane, 1200, 800);
+
+                    stage.setScene(main);
+                    stage.centerOnScreen();
+                    stage.setTitle("HCMUS Chat App");
                 }
-                stage.setTitle("TEST");
-                scene = new Scene(root);
-                stage.setScene(scene);
-                chatapp.controllers.dashboard.DashboardController.onLogout = () -> {
-                    authCtl.showLogin();
-                    stage.setScene(authCtl.getScene());
-                };
             } else {
                 System.out.println("Login failed for user=" + username);
+                authCtl.showLoginError("Invalid username or password");
             }
         });
 
-        authCtl.setOnSignup((username, password) -> {
+        authCtl.setOnSignup((username, password, name, email) -> {
             System.out.println("Signup requested: " + username);
-            // TODO: gọi backend tạo user; quay về login sau thành công
-            authCtl.showLogin();
+            boolean success = User.register(username, password, name, email);
+            if (success) {
+                System.out.println("Signup successful");
+                authCtl.showLogin();
+            } else {
+                System.out.println("Signup failed");
+                authCtl.showSignupError("Signup failed. User might already exist.");
+            }
         });
 
         authCtl.setOnRequestReset(email -> {
