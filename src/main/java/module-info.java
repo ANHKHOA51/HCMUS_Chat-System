@@ -5,10 +5,8 @@ module chatapp {
     requires java.sql;
     requires io.github.cdimascio.dotenv.java;
 
-
     opens chatapp to javafx.fxml;
     opens chatapp.controllers.dashboard to javafx.fxml;
-    opens chatapp.controllers.user to javafx.fxml;
     opens chatapp.models to javafx.base;
 
     exports chatapp;
