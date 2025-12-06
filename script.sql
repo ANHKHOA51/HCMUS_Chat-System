@@ -6,17 +6,24 @@ drop table if exists conversations;
 
 drop table if exists friendships;
 
+drop table if exists login_history;
+
 drop table if exists users;
 
 -- USERS
-create table users (
-  id UUID primary key,
-  username TEXT unique not null,
-  display_name TEXT,
-  email TEXT,
-  admin BOOLEAN,
-  password TEXT,
-  created_at TIMESTAMPTZ default now()
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    display_name VARCHAR(255),
+    username VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE,
+    password VARCHAR(255),
+    admin BOOLEAN DEFAULT FALSE,
+    is_online BOOLEAN DEFAULT FALSE,
+    address TEXT,
+    birthday DATE,
+    gender BOOLEAN,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 create table friendships (
@@ -70,6 +77,15 @@ create table messages (
     or conversation_seq >= 0
   )
 );
+
+create table public.login_history (
+  id uuid not null default gen_random_uuid (),
+  created_at timestamp with time zone not null default now(),
+  user_id uuid null,
+  time timestamp with time zone null default now(),
+  constraint login_history_pkey primary key (id),
+  constraint login_history_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;
 
 -- SAMPLE DATA FOR CHAT SCHEMA
 -- NOTE: replace the password placeholders with real password hashes in production.
@@ -1037,4 +1053,3 @@ BEGIN
   ORDER BY COALESCE(last_msg.created_at, c.created_at) DESC;
 END;
 $$;
-
