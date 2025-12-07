@@ -1,8 +1,18 @@
 package chatapp.models;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+
+import chatapp.db.DBConnection;
+import chatapp.dto.ChatGroupDTO;
 
 public class Conversation {
     private UUID id;
@@ -75,5 +85,70 @@ public class Conversation {
                 ", title='" + title + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
+    }
+
+    // Query
+    public static List<ChatGroupDTO> getListChatGroup() {
+        List<ChatGroupDTO> list = new ArrayList<>();
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                SELECT c.id AS id, c.title AS group_name, c.created_at AS created_at, u.username AS creator, COUNT(cm.user_id) AS num_members
+                FROM conversations AS c
+                JOIN conversation_members AS cm ON cm.conversation_id = c.id
+                JOIN users AS u ON u.id = c.created_by
+                WHERE c.isgroup = TRUE
+                GROUP BY c.id, c.title, c.created_at, u.username
+                    """;
+        try {
+            Statement st = conn.createStatement();
+
+            ResultSet rs = st.executeQuery(sql);
+            while (rs.next()) {
+                ChatGroupDTO item = new ChatGroupDTO();
+                item.setId(UUID.fromString(rs.getString("id")));
+                item.setGroupName(rs.getString("group_name"));
+                item.setCreatedAt(
+                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+                item.setCreator(rs.getString("creator"));
+                item.setNumMember(rs.getInt("num_members"));
+
+                list.add(item);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public static List<User> getListMembers(UUID conversation_id, String role) {
+        List<User> list = new ArrayList<>();
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                SELECT u.username AS username, u.gender AS gender, u.email AS email
+                FROM conversation_members AS cm
+                JOIN users AS u ON u.id = cm.user_id
+                WHERE cm.conversation_id = ? AND cm.role = ?
+                    """;
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setObject(1, conversation_id);
+            ps.setString(2, role);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                User user = new User();
+                user.setUsername(rs.getString("username"));
+                user.setGender(rs.getBoolean("gender"));
+                user.setEmail(rs.getString("email"));
+
+                list.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

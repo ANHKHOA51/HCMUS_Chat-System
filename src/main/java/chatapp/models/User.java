@@ -197,7 +197,7 @@ public class User {
         List<User> list = new ArrayList<User>();
         Connection conn = DBConnection.getConnection();
 
-        String sql = "SELECT * FROM users";
+        String sql = "SELECT * FROM users ORDER BY id ASC";
         try (Statement st = conn.createStatement()) {
             ResultSet rs = st.executeQuery(sql);
 

@@ -10,6 +10,7 @@ D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\vi
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\views\FriendOptionView.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\controllers\dashboard\DashboardController.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\controllers\dashboard\UpdateUserController.java
+D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\dto\ChatGroupDTO.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\views\UserListView.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\dto\LoginHistoryDTO.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\views\cells\UserCanChatCell.java

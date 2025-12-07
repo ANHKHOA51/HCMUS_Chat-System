@@ -2,9 +2,12 @@ package chatapp.controllers.dashboard;
 
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import chatapp.dto.ChatGroupDTO;
 import chatapp.models.ChatGroup;
+import chatapp.models.Conversation;
 import chatapp.models.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -27,14 +30,16 @@ public class ChatGroupController extends DashboardController {
     private TableColumn<User, String> adminNameCol;
 
     @FXML
-    private TableView<ChatGroup> groupTable;
+    private TableView<ChatGroupDTO> groupTable;
 
     @FXML
-    private TableColumn<ChatGroup, String> groupCreatedAtCol;
+    private TableColumn<ChatGroupDTO, String> groupCreatedAtCol;
     @FXML
-    private TableColumn<ChatGroup, Integer> groupMemberCol;
+    private TableColumn<ChatGroupDTO, Integer> groupMemberCol;
     @FXML
-    private TableColumn<ChatGroup, String> groupNameCol;
+    private TableColumn<ChatGroupDTO, String> groupNameCol;
+    @FXML
+    private TableColumn<ChatGroupDTO, String> groupCreatorCol;
 
     @FXML
     private TableView<User> memberTable;
@@ -49,34 +54,27 @@ public class ChatGroupController extends DashboardController {
     @FXML
     private TextField groupNameField;
 
-    private ObservableList<ChatGroup> groupList;
+    private ObservableList<ChatGroupDTO> groupList;
     private ObservableList<User> memberList;
     private ObservableList<User> adminList;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        groupList = FXCollections.observableArrayList(
-                new ChatGroup(1, "Developers", 8, LocalDateTime.now().minusHours(1).toString()),
-                new ChatGroup(2, "Designers", 5, LocalDateTime.now().minusDays(1).toString()),
-                new ChatGroup(3, "Gamers", 12, LocalDateTime.now().minusDays(2).toString()),
-                new ChatGroup(4, "Music Lovers", 9, LocalDateTime.now().minusHours(4).toString()),
-                new ChatGroup(5, "Movie Fans", 7, LocalDateTime.now().minusDays(3).toString()),
-                new ChatGroup(6, "Tech Talk", 15, LocalDateTime.now().minusMinutes(45).toString()),
-                new ChatGroup(7, "Travelers", 10, LocalDateTime.now().minusDays(5).toString()),
-                new ChatGroup(8, "Foodies", 6, LocalDateTime.now().minusHours(10).toString()),
-                new ChatGroup(9, "Study Group", 11, LocalDateTime.now().minusDays(7).toString()),
-                new ChatGroup(10, "Random Chat", 4, LocalDateTime.now().toString()));
-        groupCreatedAtCol.setCellValueFactory(new PropertyValueFactory<ChatGroup, String>("createdAt"));
-        groupNameCol.setCellValueFactory(new PropertyValueFactory<ChatGroup, String>("groupName"));
-        groupMemberCol.setCellValueFactory(new PropertyValueFactory<ChatGroup, Integer>("numMember"));
+        List<ChatGroupDTO> list = Conversation.getListChatGroup();
+
+        groupList = FXCollections.observableArrayList(list);
+        groupCreatedAtCol.setCellValueFactory(new PropertyValueFactory<ChatGroupDTO, String>("createdAt"));
+        groupNameCol.setCellValueFactory(new PropertyValueFactory<ChatGroupDTO, String>("groupName"));
+        groupMemberCol.setCellValueFactory(new PropertyValueFactory<ChatGroupDTO, Integer>("numMember"));
+        groupCreatorCol.setCellValueFactory(new PropertyValueFactory<ChatGroupDTO, String>("creator"));
         groupTable.setItems(groupList);
     }
 
     @FXML
     void filterGroupName(ActionEvent event) {
-        ObservableList<ChatGroup> chatGroupFilter = FXCollections.observableArrayList();
+        ObservableList<ChatGroupDTO> chatGroupFilter = FXCollections.observableArrayList();
         String value = groupNameField.getText();
-        for (ChatGroup group : groupList) {
+        for (ChatGroupDTO group : groupList) {
             if (group.getGroupName().contains(value)) {
                 chatGroupFilter.add(group);
             }
@@ -86,9 +84,35 @@ public class ChatGroupController extends DashboardController {
 
     @FXML
     void getMember(ActionEvent event) {
+        ChatGroupDTO selectedGroup = groupTable.getSelectionModel().getSelectedItem();
+        if (selectedGroup == null)
+            return;
+
+        List<User> listMembers = Conversation.getListMembers(selectedGroup.getId(), "member");
+
+        memberList = FXCollections.observableArrayList(listMembers);
+
+        memberEmailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
+        memberGenderCol.setCellValueFactory(new PropertyValueFactory<>("gender"));
+        memberNameCol.setCellValueFactory(new PropertyValueFactory<>("username"));
+
+        memberTable.setItems(memberList);
     }
 
     @FXML
     void getAdmin(ActionEvent event) {
+        ChatGroupDTO selectedGroup = groupTable.getSelectionModel().getSelectedItem();
+        if (selectedGroup == null)
+            return;
+
+        List<User> listAdmins = Conversation.getListMembers(selectedGroup.getId(), "admin");
+
+        adminList = FXCollections.observableArrayList(listAdmins);
+
+        adminEmailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
+        adminGenderCol.setCellValueFactory(new PropertyValueFactory<>("gender"));
+        adminNameCol.setCellValueFactory(new PropertyValueFactory<>("username"));
+
+        adminTable.setItems(adminList);
     }
 }

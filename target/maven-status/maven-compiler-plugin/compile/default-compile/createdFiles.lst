@@ -26,6 +26,7 @@ chatapp\models\FriendShip.class
 module-info.class
 chatapp\controllers\dashboard\FriendController.class
 chatapp\controllers\dashboard\ReportController.class
+chatapp\dto\ChatGroupDTO.class
 chatapp\models\Conversation.class
 chatapp\controllers\dashboard\ActivityController.class
 chatapp\utils\FXMLPaths$User.class

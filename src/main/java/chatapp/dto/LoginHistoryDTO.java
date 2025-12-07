@@ -8,16 +8,19 @@ public class LoginHistoryDTO {
     private UUID id;
     private UUID userId;
     private String username;
+    private String displayName;
     private LocalDateTime time;
     private String activity;
 
     public LoginHistoryDTO() {
     }
 
-    public LoginHistoryDTO(UUID id, UUID userId, String username, LocalDateTime time, String activity) {
+    public LoginHistoryDTO(UUID id, UUID userId, String username, String displayName, LocalDateTime time,
+            String activity) {
         this.id = id;
         this.userId = userId;
         this.username = username;
+        this.displayName = displayName;
         this.time = time;
         this.activity = activity;
     }
@@ -44,6 +47,14 @@ public class LoginHistoryDTO {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getTime() {
