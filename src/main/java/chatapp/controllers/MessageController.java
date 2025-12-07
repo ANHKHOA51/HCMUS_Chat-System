@@ -33,31 +33,34 @@ public class MessageController {
         split.setLeft(contact);
         split.setCenter(null);
 
-        MultipleSelectionModel<User> sel = (MultipleSelectionModel<User>) contact.getSelectionModel();
-        if (sel != null) {
-            sel.selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal != null) {
-                    // reuse per-contact view so state (history, draft) is preserved
-                    MessageView view = views.computeIfAbsent(newVal.getId(), k -> {
-                        MessageView mv = new MessageView();
-                        // handlers capture mv and the contact id (user id string)
-                        mv.getTextField().setOnAction(e -> sendMessageFor(mv, newVal.getId()));
-                        mv.getButton().setOnAction(e -> sendMessageFor(mv, newVal.getId()));
-                        return mv;
-                    });
-                    split.setCenter(view);
-                } else {
-                    split.setCenter(null);
-                }
-            });
-        }
+        // MultipleSelectionModel<User> sel = (MultipleSelectionModel<User>)
+        // contact.getSelectionModel();
+        // if (sel != null) {
+        // sel.selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+        // if (newVal != null) {
+        // // reuse per-contact view so state (history, draft) is preserved
+        // MessageView view = views.computeIfAbsent(newVal.getId(), k -> {
+        // MessageView mv = new MessageView();
+        // // handlers capture mv and the contact id (user id string)
+        // mv.getTextField().setOnAction(e -> sendMessageFor(mv, newVal.getId()));
+        // mv.getButton().setOnAction(e -> sendMessageFor(mv, newVal.getId()));
+        // return mv;
+        // });
+        // split.setCenter(view);
+        // } else {
+        // split.setCenter(null);
+        // }
+        // });
+        // }
     }
 
     // send message for a specific MessageView / contactId
     private void sendMessageFor(MessageView mv, String contactId) {
-        if (mv == null) return;
+        if (mv == null)
+            return;
         String text = mv.getTextField().getText();
-        if (text == null) return;
+        if (text == null)
+            return;
         text = text.trim();
         if (!text.isEmpty()) {
             mv.sendMessage(text);

@@ -2,7 +2,7 @@ package chatapp.controllers.dashboard;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Optional;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import chatapp.models.User;
@@ -97,23 +97,20 @@ public class UserController extends DashboardController {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        userList = FXCollections.observableArrayList(
-                new User("1", "helloworld", "Hello World", "HCM", "1/1/2000", false, "helloworld@gmail.com", true,
-                        false),
-                new User("2", "test", "Test", "VietNam", "2/2/2002", true, "test@gmail.com", true, true),
-                new User("3", "alice", "Alice Nguyen", "Ha Noi", "3/3/2001", false, "alice@gmail.com", false, false),
-                new User("4", "bob", "Bob Tran", "Da Nang", "4/4/1999", true, "bob@gmail.com", true, false));
+        List<User> list = User.getAllUser();
+
+        userList = FXCollections.observableArrayList(list);
 
         userIdCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        userNameCol.setCellValueFactory(new PropertyValueFactory<>("user_name"));
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        userNameCol.setCellValueFactory(new PropertyValueFactory<>("username"));
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("displayName"));
         emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
         addressCol.setCellValueFactory(new PropertyValueFactory<>("address"));
         birthdayCol.setCellValueFactory(new PropertyValueFactory<>("birthday"));
         genderCol.setCellValueFactory(new PropertyValueFactory<>("gender"));
-        isOnlineCol.setCellValueFactory(new PropertyValueFactory<>("isOnline"));
-        isAdminCol.setCellValueFactory(new PropertyValueFactory<>("isAdmin"));
-        createdAtCol.setCellValueFactory(new PropertyValueFactory<>("createAt"));
+        isOnlineCol.setCellValueFactory(new PropertyValueFactory<>("online"));
+        isAdminCol.setCellValueFactory(new PropertyValueFactory<>("admin"));
+        createdAtCol.setCellValueFactory(new PropertyValueFactory<>("createdAt"));
 
         tableView.setItems(userList);
 
@@ -146,23 +143,23 @@ public class UserController extends DashboardController {
 
     @FXML
     void deleteUser(ActionEvent event) {
-        User selectedUser = tableView.getSelectionModel().getSelectedItem();
-        if (selectedUser == null)
-            return;
+        // User selectedUser = tableView.getSelectionModel().getSelectedItem();
+        // if (selectedUser == null)
+        // return;
 
-        Alert alert = new Alert(AlertType.CONFIRMATION);
-        alert.setTitle("Confirmation");
-        alert.setHeaderText("Delete account?");
-        alert.setContentText("Do you want to delete account " +
-                selectedUser.getUser_name() + "?");
+        // Alert alert = new Alert(AlertType.CONFIRMATION);
+        // alert.setTitle("Confirmation");
+        // alert.setHeaderText("Delete account?");
+        // alert.setContentText("Do you want to delete account " +
+        // selectedUser.getUser_name() + "?");
 
-        ButtonType buttonTypeYes = new ButtonType("Yes", ButtonData.YES);
-        ButtonType buttonTypeCancle = new ButtonType("Cancle",
-                ButtonData.CANCEL_CLOSE);
+        // ButtonType buttonTypeYes = new ButtonType("Yes", ButtonData.YES);
+        // ButtonType buttonTypeCancle = new ButtonType("Cancle",
+        // ButtonData.CANCEL_CLOSE);
 
-        alert.getButtonTypes().setAll(buttonTypeYes, buttonTypeCancle);
-        Optional<ButtonType> result = alert.showAndWait();
-        System.out.println(result);
+        // alert.getButtonTypes().setAll(buttonTypeYes, buttonTypeCancle);
+        // Optional<ButtonType> result = alert.showAndWait();
+        // System.out.println(result);
     }
 
     @FXML

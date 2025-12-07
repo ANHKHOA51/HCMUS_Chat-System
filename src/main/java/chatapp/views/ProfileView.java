@@ -100,7 +100,7 @@ public class ProfileView extends Tab {
 
         Label lb_user_name = new Label("User name");
         TextField tf_user_name = new TextField();
-        tf_user_name.setText(u.getUser_name());
+        tf_user_name.setText(u.getUsername());
         tf_user_name.setMaxWidth(300);
 
         Label lb_password = new Label("New password");
@@ -110,7 +110,7 @@ public class ProfileView extends Tab {
         Label lb_full_name = new Label("Full name");
         TextField tf_full_name = new TextField();
         tf_full_name.setMaxWidth(300);
-        tf_full_name.setText(u.getName());
+        tf_full_name.setText(u.getDisplayName());
         tf_full_name.setDisable(true);
 
         Label lb_email = new Label("Email");

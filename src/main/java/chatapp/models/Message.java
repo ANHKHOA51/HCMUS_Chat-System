@@ -1,54 +1,124 @@
 package chatapp.models;
 
-
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 public class Message {
-    private String sender;
-    private String reciever;
-    private String msg_content;
-    private LocalDateTime time; 
-    private boolean isRead;
+    private UUID id;
+    private UUID conversationId;
+    private UUID senderId;
+    private UUID replyToMessageId;
+    private int conversationSeq;
+    private String clientMessageId;
+    private String content;
+    private boolean deleted;
+    private LocalDateTime createdAt;
 
-    public String getReciever() {
-        return reciever;
+    public Message() {
     }
 
-    public void setReciever(String reciever) {
-        this.reciever = reciever;
-    }
-    
-
-    public String getMsg_content() {
-        return msg_content;
-    }
-
-    public void setMsg_content(String msg_content) {
-        this.msg_content = msg_content;
-    }
-
-    public LocalDateTime getTime() {
-        return time;
+    public Message(UUID id, UUID conversationId, UUID senderId, UUID replyToMessageId,
+            int conversationSeq, String clientMessageId, String content, boolean deleted, LocalDateTime createdAt) {
+        this.id = id;
+        this.conversationId = conversationId;
+        this.senderId = senderId;
+        this.replyToMessageId = replyToMessageId;
+        this.conversationSeq = conversationSeq;
+        this.clientMessageId = clientMessageId;
+        this.content = content;
+        this.deleted = deleted;
+        this.createdAt = createdAt;
     }
 
-    public void setTime(LocalDateTime time) {
-        this.time = time;
+    public UUID getId() {
+        return id;
     }
 
-    public boolean isRead() {
-        return isRead;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
-    public void setRead(boolean isRead) {
-        this.isRead = isRead;
+    public UUID getConversationId() {
+        return conversationId;
     }
 
-    public String getSender() {
-        return sender;
+    public void setConversationId(UUID conversationId) {
+        this.conversationId = conversationId;
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
+    public UUID getSenderId() {
+        return senderId;
     }
-    
+
+    public void setSenderId(UUID senderId) {
+        this.senderId = senderId;
+    }
+
+    public UUID getReplyToMessageId() {
+        return replyToMessageId;
+    }
+
+    public void setReplyToMessageId(UUID replyToMessageId) {
+        this.replyToMessageId = replyToMessageId;
+    }
+
+    public int getConversationSeq() {
+        return conversationSeq;
+    }
+
+    public void setConversationSeq(int conversationSeq) {
+        this.conversationSeq = conversationSeq;
+    }
+
+    public String getClientMessageId() {
+        return clientMessageId;
+    }
+
+    public void setClientMessageId(String clientMessageId) {
+        this.clientMessageId = clientMessageId;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public String getCreatedAt() {
+        if (createdAt == null)
+            return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
+        String formatted = createdAt.format(formatter);
+        return formatted;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "id=" + id +
+                ", conversationId=" + conversationId +
+                ", senderId=" + senderId +
+                ", replyToMessageId=" + replyToMessageId +
+                ", conversationSeq=" + conversationSeq +
+                ", clientMessageId='" + clientMessageId + '\'' +
+                ", content='" + content + '\'' +
+                ", deleted=" + deleted +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

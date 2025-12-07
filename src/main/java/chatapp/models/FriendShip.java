@@ -1,6 +1,7 @@
-package chatapp.models.dashboard;
+package chatapp.models;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 public class FriendShip {
@@ -69,24 +70,36 @@ public class FriendShip {
         this.status = status;
     }
 
-    public LocalDateTime getAcceptedAt() {
-        return acceptedAt;
+    public String getAcceptedAt() {
+        if (acceptedAt == null)
+            return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
+        String formatted = acceptedAt.format(formatter);
+        return formatted;
     }
 
     public void setAcceptedAt(LocalDateTime acceptedAt) {
         this.acceptedAt = acceptedAt;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public String getCreatedAt() {
+        if (createdAt == null)
+            return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
+        String formatted = createdAt.format(formatter);
+        return formatted;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    public String getUpdatedAt() {
+        if (updatedAt == null)
+            return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
+        String formatted = updatedAt.format(formatter);
+        return formatted;
     }
 
     public void setUpdatedAt(LocalDateTime updatedAt) {

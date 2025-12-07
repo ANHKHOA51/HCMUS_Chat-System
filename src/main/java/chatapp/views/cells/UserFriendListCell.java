@@ -109,10 +109,10 @@ public class UserFriendListCell extends ListCell<User> {
             // if your User has getUsername(), use: user.getUsername()
             nameLabel.setText(display);
 
-            String statusText = user.getIsOnline() ? " -fx-text-fill: green;" : " -fx-text-fill: gray;";
+            String statusText = user.isOnline() ? " -fx-text-fill: green;" : " -fx-text-fill: gray;";
             statusLabel.setStyle("-fx-font-size: 11px; -fx-opacity: 0.6;" + statusText);
 
-            statusLabel.setText(user.getIsOnline() ? "Online" : "Offline");
+            statusLabel.setText(user.isOnline() ? "Online" : "Offline");
 
             // bind cell width to listview width once so cell uses full container width
             if (!boundWidth && getListView() != null) {

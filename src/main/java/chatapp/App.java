@@ -38,7 +38,7 @@ public class App extends Application {
                 cur_user = user;
                 cur_user.setOnline(true);
 
-                if (cur_user.getIsAdmin()) {
+                if (cur_user.isAdmin()) {
                     try {
                         FXMLLoader loader = new FXMLLoader(getClass().getResource(FXMLPaths.Dashboard.USER));
                         Parent root = loader.load();

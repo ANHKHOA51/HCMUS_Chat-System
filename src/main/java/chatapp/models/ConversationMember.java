@@ -1,6 +1,7 @@
-package chatapp.models.dashboard;
+package chatapp.models;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 public class ConversationMember {
@@ -57,16 +58,24 @@ public class ConversationMember {
         this.role = role;
     }
 
-    public LocalDateTime getJoinedAt() {
-        return joinedAt;
+    public String getJoinedAt() {
+        if (joinedAt == null)
+            return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
+        String formatted = joinedAt.format(formatter);
+        return formatted;
     }
 
     public void setJoinedAt(LocalDateTime joinedAt) {
         this.joinedAt = joinedAt;
     }
 
-    public LocalDateTime getLastReadAt() {
-        return lastReadAt;
+    public String getLastReadAt() {
+        if (lastReadAt == null)
+            return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
+        String formatted = lastReadAt.format(formatter);
+        return formatted;
     }
 
     public void setLastReadAt(LocalDateTime lastReadAt) {

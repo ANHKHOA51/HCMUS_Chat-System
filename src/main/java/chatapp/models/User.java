@@ -4,46 +4,73 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import chatapp.db.DBConnection;
 
-import java.time.LocalDateTime;
-
 public class User {
-    private String id;
-    private String name;
-    private String user_name;
+    private UUID id;
+    private String username;
+    private String displayName;
     private String email;
-    private boolean isAdmin;
-    private boolean isOnline;
     private String address;
-    private String birthday;
+    private String password;
     private boolean gender;
-    private String createAt;
-    // private String updateAt;
+    private boolean admin;
+    private boolean online;
+    private LocalDate birthday;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    public String getId() {
+    public User() {
+    }
+
+    public User(
+            UUID id, String username, String displayName, String email, String address, String password,
+            boolean gender, boolean admin, boolean online,
+            LocalDate birthday, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.username = username;
+        this.displayName = displayName;
+        this.email = email;
+        this.address = address;
+        this.password = password;
+        this.gender = gender;
+        this.admin = admin;
+        this.online = online;
+        this.birthday = birthday;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getUser_name() {
-        return user_name;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public void setUser_name(String user_name) {
-        this.user_name = user_name;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getEmail() {
@@ -54,22 +81,6 @@ public class User {
         this.email = email;
     }
 
-    public boolean getIsAdmin() {
-        return isAdmin;
-    }
-
-    public void setAdmin(boolean isAdmin) {
-        this.isAdmin = isAdmin;
-    }
-
-    public boolean getIsOnline() {
-        return isOnline;
-    }
-
-    public void setOnline(boolean isOnline) {
-        this.isOnline = isOnline;
-    }
-
     public String getAddress() {
         return address;
     }
@@ -78,12 +89,12 @@ public class User {
         this.address = address;
     }
 
-    public String getBirthday() {
-        return birthday;
+    public String getPassword() {
+        return password;
     }
 
-    public void setBirthday(String birthday) {
-        this.birthday = birthday;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public boolean isGender() {
@@ -94,31 +105,109 @@ public class User {
         this.gender = gender;
     }
 
-    public String getCreateAt() {
-        return createAt;
+    public boolean isAdmin() {
+        return admin;
     }
 
-    public void setCreateAt(String createAt) {
-        this.createAt = createAt;
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 
-    public User() {
-
+    public boolean isOnline() {
+        return online;
     }
 
-    public User(String id, String user_name, String name, String address, String birthday, boolean gender,
-            String email, boolean isOnline, boolean isAdmin) {
-        this.id = id;
-        this.name = name;
-        this.user_name = user_name;
-        this.address = address;
+    public void setOnline(boolean online) {
+        this.online = online;
+    }
+
+    public String getBirthday() {
+        if (birthday == null)
+            return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String formatted = birthday.format(formatter);
+        return formatted;
+    }
+
+    public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
-        this.gender = gender;
-        this.email = email;
-        this.isOnline = isOnline;
-        this.isAdmin = isAdmin;
+    }
 
-        this.createAt = "" + LocalDateTime.now();
+    public String getCreatedAt() {
+        if (createdAt == null)
+            return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
+        String formatted = createdAt.format(formatter);
+        return formatted;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getUpdatedAt() {
+        if (updatedAt == null)
+            return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
+        String formatted = updatedAt.format(formatter);
+        return formatted;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "User {" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", displayName='" + displayName + '\'' +
+                ", email='" + email + '\'' +
+                ", address='" + address + '\'' +
+                ", gender=" + gender +
+                ", admin=" + admin +
+                ", online=" + online +
+                ", birthday=" + birthday +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
+
+    // Querry
+    public static List<User> getAllUser() {
+        List<User> list = new ArrayList<User>();
+        Connection conn = DBConnection.getConnection();
+
+        String sql = "SELECT * FROM users";
+        try (Statement st = conn.createStatement()) {
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+                User user = new User();
+                user.setId(UUID.fromString(rs.getString("id")));
+                user.setUsername(rs.getString("username"));
+                user.setDisplayName(rs.getString("display_name"));
+                user.setEmail(rs.getString("email"));
+                user.setAddress(rs.getString("address"));
+                user.setPassword(rs.getString("password"));
+                user.setGender(rs.getBoolean("gender"));
+                user.setAdmin(rs.getBoolean("admin"));
+                user.setAdmin(rs.getBoolean("is_online"));
+                user.setBirthday(rs.getDate("birthday") != null ? rs.getDate("birthday").toLocalDate() : null);
+                user.setCreatedAt(
+                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+                user.setUpdatedAt(
+                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+
+                list.add(user);
+            }
+            return list;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 
     public static User login(String user_name, String password) {
@@ -131,15 +220,21 @@ public class User {
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         User u = new User();
-                        u.setId(rs.getString("id"));
-                        u.setName(rs.getString("display_name"));
-                        u.setUser_name(rs.getString("username"));
+                        u.setId(UUID.fromString(rs.getString("id")));
+                        u.setDisplayName(rs.getString("display_name"));
+                        u.setUsername(rs.getString("username"));
                         u.setEmail(rs.getString("email"));
                         u.setAdmin(rs.getBoolean("admin"));
                         u.setAddress(rs.getString("address"));
-                        u.setBirthday(rs.getString("birthday"));
                         u.setGender(rs.getBoolean("gender"));
-                        u.setCreateAt(rs.getString("created_at"));
+                        u.setBirthday(rs.getDate("birthday") != null ? rs.getDate("birthday").toLocalDate() : null);
+                        u.setCreatedAt(
+                                rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime()
+                                        : null);
+                        u.setUpdatedAt(
+                                rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime()
+                                        : null);
+
                         // u.setUpdateAt(rs.getString("updated_at"));
                         return u;
                     } else {
@@ -153,7 +248,8 @@ public class User {
         }
     }
 
-    public static boolean register(String username, String password, String name, String email) {
+    public static boolean register(String username, String password, String name,
+            String email) {
         try {
             Connection conn = DBConnection.getConnection();
             // Check if username already exists
@@ -167,7 +263,7 @@ public class User {
                 }
             }
 
-            String sql = "INSERT INTO users (id, username, password, display_name, email, admin, is_online, address, birthday, gender, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO users (id, username, password, display_name, email,admin, is_online, address, birthday, gender, created_at) VALUES (?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 String now = LocalDateTime.now().toString();
                 ps.setString(1, java.util.UUID.randomUUID().toString());
@@ -182,7 +278,6 @@ public class User {
                 ps.setBoolean(10, true); // Default gender (true for male, just a default)
                 ps.setString(11, now);
 
-
                 int rowsAffected = ps.executeUpdate();
                 return rowsAffected > 0;
             }
@@ -190,10 +285,5 @@ public class User {
             e.printStackTrace();
             return false;
         }
-    }
-
-    @Override
-    public String toString() {
-        return this.user_name;
     }
 }

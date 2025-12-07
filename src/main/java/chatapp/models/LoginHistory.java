@@ -1,6 +1,7 @@
-package chatapp.models.dashboard;
+package chatapp.models;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 public class LoginHistory {
@@ -35,16 +36,24 @@ public class LoginHistory {
         this.userId = userId;
     }
 
-    public LocalDateTime getTime() {
-        return time;
+    public String getTime() {
+        if (time == null)
+            return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
+        String formatted = time.format(formatter);
+        return formatted;
     }
 
     public void setTime(LocalDateTime time) {
         this.time = time;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public String getCreatedAt() {
+        if (createdAt == null)
+            return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
+        String formatted = createdAt.format(formatter);
+        return formatted;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
