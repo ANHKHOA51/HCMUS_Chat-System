@@ -13,13 +13,14 @@ chatapp\controllers\dashboard\DashboardController.class
 chatapp\views\ContactListView$2.class
 chatapp\utils\FXMLPaths.class
 chatapp\views\ForgotPasswordView.class
-chatapp\utils\FXMLPaths$Auth.class
+chatapp\controllers\dashboard\AddUserController.class
 chatapp\controllers\AuthController$SignupHandler.class
 chatapp\test\MockData.class
 chatapp\views\UserListView.class
 chatapp\controllers\dashboard\UserController.class
 chatapp\views\ProfileView.class
 chatapp\App.class
+chatapp\controllers\dashboard\UpdateUserController.class
 chatapp\models\ChatGroup.class
 chatapp\models\FriendShip.class
 module-info.class
@@ -41,3 +42,4 @@ chatapp\controllers\FriendController.class
 chatapp\models\ConversationMember.class
 chatapp\views\ContactListView.class
 chatapp\views\cells\UserFriendListCell.class
+chatapp\dto\LoginHistoryDTO.class

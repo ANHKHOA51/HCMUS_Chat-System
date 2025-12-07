@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
@@ -11,11 +12,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chatapp.controllers.dashboard.AddUserController">
    <children>
       <BorderPane layoutX="200.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <top>
-            <Label prefHeight="90.0" prefWidth="86.0" text="Register" BorderPane.alignment="CENTER">
+            <Label prefHeight="90.0" text="Add user" BorderPane.alignment="CENTER">
                <font>
                   <Font size="24.0" />
                </font>
@@ -26,22 +27,22 @@
                <children>
                   <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="1200.0">
                      <children>
-                        <Label prefWidth="100.0" text="User account">
-                           <HBox.margin>
-                              <Insets left="200.0" />
-                           </HBox.margin>
-                        </Label>
-                        <TextField prefHeight="26.0" prefWidth="400.0" />
-                     </children>
-                  </HBox>
-                  <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="1200.0">
-                     <children>
                         <Label prefWidth="100.0" text="User name">
                            <HBox.margin>
                               <Insets left="200.0" />
                            </HBox.margin>
                         </Label>
-                        <TextField prefWidth="400.0" />
+                        <TextField fx:id="usernameField" prefHeight="26.0" prefWidth="400.0" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="1200.0">
+                     <children>
+                        <Label prefWidth="100.0" text="display name">
+                           <HBox.margin>
+                              <Insets left="200.0" />
+                           </HBox.margin>
+                        </Label>
+                        <TextField fx:id="displayNameField" prefWidth="400.0" />
                      </children>
                   </HBox>
                   <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="1200.0">
@@ -51,7 +52,23 @@
                               <Insets left="200.0" />
                            </HBox.margin>
                         </Label>
-                        <TextField prefWidth="400.0" />
+                        <TextField fx:id="emailField" prefWidth="400.0" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="200.0">
+                     <children>
+                        <Label prefWidth="100.0" text="Role">
+                           <HBox.margin>
+                              <Insets left="200.0" />
+                           </HBox.margin>
+                        </Label>
+                        <ComboBox fx:id="roleCombox" prefWidth="150.0" />
+                        <Label prefWidth="80.0" text="Gender">
+                           <HBox.margin>
+                              <Insets left="50.0" />
+                           </HBox.margin>
+                        </Label>
+                        <ComboBox fx:id="genderCombox" prefWidth="150.0" />
                      </children>
                   </HBox>
                   <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="1200.0">
@@ -61,7 +78,7 @@
                               <Insets left="200.0" />
                            </HBox.margin>
                         </Label>
-                        <TextField prefWidth="400.0" />
+                        <TextField fx:id="addressField" prefWidth="400.0" />
                      </children>
                   </HBox>
                   <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="1200.0">
@@ -71,7 +88,7 @@
                               <Insets left="200.0" />
                            </HBox.margin>
                         </Label>
-                        <DatePicker />
+                        <DatePicker fx:id="birthdayField" />
                      </children>
                   </HBox>
                   <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="1200.0">
@@ -81,7 +98,7 @@
                               <Insets left="200.0" />
                            </HBox.margin>
                         </Label>
-                        <TextField prefWidth="400.0" />
+                        <TextField fx:id="passwordField" prefWidth="400.0" />
                      </children>
                   </HBox>
                   <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="1200.0">
@@ -91,18 +108,22 @@
                               <Insets left="200.0" />
                            </HBox.margin>
                         </Label>
-                        <TextField prefWidth="400.0" />
+                        <TextField fx:id="confirmPasswordField" prefWidth="400.0" />
                      </children>
                   </HBox>
+                  <Label fx:id="errorLable" text="Username and password is require" textFill="RED" visible="false">
+                     <VBox.margin>
+                        <Insets left="300.0" />
+                     </VBox.margin>
+                  </Label>
                   <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                      <children>
-                        <Button mnemonicParsing="false" text="Register">
+                        <Button mnemonicParsing="false" onAction="#onAdd" text="Add">
                            <HBox.margin>
                               <Insets right="16.0" />
                            </HBox.margin>
                         </Button>
-                        <Button mnemonicParsing="false" text="Login" />
-                        <Button mnemonicParsing="false" text="Back">
+                        <Button mnemonicParsing="false" onAction="#onBack" text="Back">
                            <HBox.margin>
                               <Insets left="16.0" />
                            </HBox.margin>

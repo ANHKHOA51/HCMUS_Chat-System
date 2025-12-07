@@ -13,9 +13,9 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public abstract class DashboardController implements Initializable {
-    private Stage stage;
-    private Scene scene;
-    private Parent root;
+    protected Stage stage;
+    protected Scene scene;
+    protected Parent root;
 
     @FXML
     void navigateActiveUser(ActionEvent event) throws IOException {

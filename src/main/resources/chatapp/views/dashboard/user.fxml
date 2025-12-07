@@ -199,7 +199,7 @@
                                                             <Insets right="220.0" />
                                                          </HBox.margin>
                                                       </Label>
-                                                      <Button mnemonicParsing="false" text="Get list friend" />
+                                                      <Button mnemonicParsing="false" onAction="#getListFriend" text="Get list friend" />
                                                    </children>
                                                    <padding>
                                                       <Insets left="16.0" right="16.0" />
@@ -210,7 +210,7 @@
                                                     <TableColumn fx:id="friendUserIdCol" prefWidth="50.0" text="User id" />
                                                     <TableColumn fx:id="friendUserNameCol" prefWidth="120.0" text="User name" />
                                                       <TableColumn fx:id="friendEmailCol" prefWidth="192.0" text="Email" />
-                                                      <TableColumn fx:id="friendStatusCol" prefWidth="90.0" text="Status" />
+                                                      <TableColumn fx:id="friendStatusCol" prefWidth="90.0" text="Online" />
                                                   </columns>
                                                 </TableView>
                                              </children>
@@ -227,7 +227,7 @@
                                                             <Insets right="180.0" />
                                                          </HBox.margin>
                                                       </Label>
-                                                      <Button mnemonicParsing="false" text="Get activity history" />
+                                                      <Button mnemonicParsing="false" onAction="#getActivityHistory" text="Get activity history" />
                                                    </children>
                                                    <padding>
                                                       <Insets left="16.0" right="16.0" />
