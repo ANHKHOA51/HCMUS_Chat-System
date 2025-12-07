@@ -92,12 +92,12 @@
                            <children>
                               <HBox alignment="CENTER" prefHeight="40.0" prefWidth="340.0">
                                  <children>
-                                    <Button mnemonicParsing="false" text="Lock user">
+                                    <Button fx:id="lockUser" disable="true" mnemonicParsing="false" onAction="#onLockUser" text="Lock user">
                                        <HBox.margin>
                                           <Insets right="8.0" />
                                        </HBox.margin>
                                     </Button>
-                                    <Button disable="true" mnemonicParsing="false" text="Unlock user">
+                                    <Button fx:id="unlockUser" disable="true" mnemonicParsing="false" onAction="#onUnlockUser" text="Unlock user">
                                        <HBox.margin>
                                           <Insets right="8.0" />
                                        </HBox.margin>

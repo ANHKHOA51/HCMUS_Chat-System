@@ -46,6 +46,9 @@ public class AddUserController extends DashboardController {
     private Label errorLable;
 
     @FXML
+    private Label successLable;
+
+    @FXML
     private ComboBox<String> roleCombox;
 
     @FXML
@@ -124,6 +127,9 @@ public class AddUserController extends DashboardController {
             birthdayField.setValue(null);
             passwordField.setText(null);
             confirmPasswordField.setText(null);
+
+            errorLable.setVisible(false);
+            successLable.setVisible(true);
         }
     }
 

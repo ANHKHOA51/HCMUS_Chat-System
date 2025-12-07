@@ -3,6 +3,7 @@ package chatapp.controllers.dashboard;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import chatapp.dto.LoginHistoryDTO;
@@ -15,7 +16,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -84,6 +89,12 @@ public class UserController extends DashboardController {
     @FXML
     private ComboBox<String> statusCombox;
 
+    @FXML
+    private Button lockUser;
+
+    @FXML
+    private Button unlockUser;
+
     private ObservableList<User> userList;
     private ObservableList<User> friendList;
     private ObservableList<LoginHistoryDTO> logingHistoryList;
@@ -117,6 +128,14 @@ public class UserController extends DashboardController {
 
         statusList = FXCollections.observableArrayList("online", "offline", "both");
         statusCombox.setItems(statusList);
+
+        tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                boolean isLock = newSelection.isLock();
+                lockUser.setDisable(isLock);
+                unlockUser.setDisable(!isLock);
+            }
+        });
     }
 
     @FXML
@@ -147,23 +166,31 @@ public class UserController extends DashboardController {
 
     @FXML
     void deleteUser(ActionEvent event) {
-        // User selectedUser = tableView.getSelectionModel().getSelectedItem();
-        // if (selectedUser == null)
-        // return;
+        User selectedUser = tableView.getSelectionModel().getSelectedItem();
+        if (selectedUser == null)
+            return;
 
-        // Alert alert = new Alert(AlertType.CONFIRMATION);
-        // alert.setTitle("Confirmation");
-        // alert.setHeaderText("Delete account?");
-        // alert.setContentText("Do you want to delete account " +
-        // selectedUser.getUser_name() + "?");
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation");
+        alert.setHeaderText("Delete account?");
+        alert.setContentText("Do you want to delete account " +
+                selectedUser.getUsername() + "?");
 
-        // ButtonType buttonTypeYes = new ButtonType("Yes", ButtonData.YES);
-        // ButtonType buttonTypeCancle = new ButtonType("Cancle",
-        // ButtonData.CANCEL_CLOSE);
+        ButtonType buttonTypeYes = new ButtonType("Yes", ButtonData.YES);
+        ButtonType buttonTypeCancle = new ButtonType("Cancle",
+                ButtonData.CANCEL_CLOSE);
 
-        // alert.getButtonTypes().setAll(buttonTypeYes, buttonTypeCancle);
-        // Optional<ButtonType> result = alert.showAndWait();
-        // System.out.println(result);
+        alert.getButtonTypes().setAll(buttonTypeYes, buttonTypeCancle);
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent() && result.get() == buttonTypeYes) {
+            boolean success = User.deleteUser(selectedUser.getId());
+            if (success) {
+                userList.remove(selectedUser);
+            }
+        } else {
+            return;
+        }
     }
 
     @FXML
@@ -242,6 +269,34 @@ public class UserController extends DashboardController {
     void statusComboxChanged(ActionEvent event) {
         changeStatus = true;
         filterBtn.setDisable(!(changeStatus && changeField));
+    }
+
+    @FXML
+    void onLockUser(ActionEvent event) {
+        User selectedUser = tableView.getSelectionModel().getSelectedItem();
+        if (selectedUser == null)
+            return;
+
+        boolean result = User.updateFieldUser("lock", true, "id", selectedUser.getId());
+        if (result) {
+            userList.remove(selectedUser);
+            selectedUser.setLock(true);
+            userList.add(selectedUser);
+        }
+    }
+
+    @FXML
+    void onUnlockUser(ActionEvent event) {
+        User selectedUser = tableView.getSelectionModel().getSelectedItem();
+        if (selectedUser == null)
+            return;
+
+        boolean result = User.updateFieldUser("lock", false, "id", selectedUser.getId());
+        if (result) {
+            userList.remove(selectedUser);
+            selectedUser.setLock(false);
+            userList.add(selectedUser);
+        }
     }
 
 }

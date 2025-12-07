@@ -116,6 +116,11 @@
                         <Insets left="300.0" />
                      </VBox.margin>
                   </Label>
+                  <Label fx:id="successLable" text="Successfully" textFill="LIME" visible="false">
+                     <VBox.margin>
+                        <Insets left="300.0" />
+                     </VBox.margin>
+                  </Label>
                   <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                      <children>
                         <Button mnemonicParsing="false" onAction="#onAdd" text="Add">

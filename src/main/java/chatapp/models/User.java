@@ -27,6 +27,7 @@ public class User {
     private boolean gender;
     private boolean admin;
     private boolean online;
+    private boolean lock;
     private LocalDate birthday;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -124,6 +125,14 @@ public class User {
         this.online = online;
     }
 
+    public boolean isLock() {
+        return lock;
+    }
+
+    public void setLock(boolean lock) {
+        this.lock = lock;
+    }
+
     public String getBirthday() {
         if (birthday == null)
             return "";
@@ -203,6 +212,7 @@ public class User {
                 user.setGender(rs.getBoolean("gender"));
                 user.setAdmin(rs.getBoolean("admin"));
                 user.setOnline(rs.getBoolean("is_online"));
+                user.setLock(rs.getBoolean("lock"));
                 user.setBirthday(rs.getDate("birthday") != null ? rs.getDate("birthday").toLocalDate() : null);
                 user.setCreatedAt(
                         rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
@@ -251,6 +261,7 @@ public class User {
                 user.setGender(rs.getBoolean("gender"));
                 user.setAdmin(rs.getBoolean("admin"));
                 user.setOnline(rs.getBoolean("is_online"));
+                user.setLock(rs.getBoolean("lock"));
                 user.setBirthday(rs.getDate("birthday") != null ? rs.getDate("birthday").toLocalDate() : null);
                 user.setCreatedAt(
                         rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
@@ -329,6 +340,7 @@ public class User {
                 user.setGender(rs.getBoolean("gender"));
                 user.setAdmin(rs.getBoolean("admin"));
                 user.setOnline(rs.getBoolean("is_online"));
+                user.setLock(rs.getBoolean("lock"));
                 user.setBirthday(rs.getDate("birthday") != null ? rs.getDate("birthday").toLocalDate() : null);
                 user.setCreatedAt(
                         rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
@@ -401,6 +413,51 @@ public class User {
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean deleteUser(UUID id) {
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                DELETE FROM users WHERE id = ?
+                """;
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, id);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean updateFieldUser(String field, Object value, String filterField, Object filterValue) {
+        List<String> listField = List.of("username", "email", "address", "display_name", "admin", "password",
+                "birthday", "gender", "is_online", "lock");
+        if (!listField.contains(field)) {
+            throw new IllegalArgumentException("Invalid field name!");
+        }
+
+        List<String> listFilterField = List.of("id", "username", "email");
+        if (!listFilterField.contains(filterField)) {
+            throw new IllegalArgumentException("Invalid filter field name!");
+        }
+
+        Connection conn = DBConnection.getConnection();
+        String sql = "UPDATE users SET " + field + " = ? WHERE " + filterField + " = ?";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, value);
+            ps.setObject(2, filterValue);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
