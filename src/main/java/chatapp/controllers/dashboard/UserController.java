@@ -121,7 +121,8 @@ public class UserController extends DashboardController {
 
     @FXML
     void addUser(ActionEvent event) throws IOException {
-        root = FXMLLoader.load(getClass().getResource(FXMLPaths.Dashboard.ADD_USER));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(FXMLPaths.Dashboard.ADD_USER));
+        root = loader.load();
         stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         scene = new Scene(root);
         stage.setScene(scene);
@@ -130,7 +131,14 @@ public class UserController extends DashboardController {
 
     @FXML
     void updateUser(ActionEvent event) throws IOException {
-        root = FXMLLoader.load(getClass().getResource(FXMLPaths.Dashboard.UPDATE_USER));
+        User selectedUser = tableView.getSelectionModel().getSelectedItem();
+        if (selectedUser == null)
+            return;
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(FXMLPaths.Dashboard.UPDATE_USER));
+        root = loader.load();
+        UpdateUserController controller = loader.getController();
+        controller.setUpdateUserId(selectedUser.getId());
         stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         scene = new Scene(root);
         stage.setScene(scene);
@@ -160,7 +168,6 @@ public class UserController extends DashboardController {
 
     @FXML
     void getActivityHistory(ActionEvent event) {
-        System.out.println("TEST");
         User selectedUser = tableView.getSelectionModel().getSelectedItem();
         if (selectedUser == null)
             return;

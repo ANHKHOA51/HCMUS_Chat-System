@@ -132,6 +132,10 @@ public class User {
         return formatted;
     }
 
+    public LocalDate getBirthdayUnformat() {
+        return birthday;
+    }
+
     public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
     }
@@ -203,7 +207,7 @@ public class User {
                 user.setCreatedAt(
                         rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
                 user.setUpdatedAt(
-                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+                        rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toLocalDateTime() : null);
 
                 list.add(user);
             }
@@ -251,7 +255,7 @@ public class User {
                 user.setCreatedAt(
                         rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
                 user.setUpdatedAt(
-                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+                        rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toLocalDateTime() : null);
 
                 listFriends.add(user);
             }
@@ -299,14 +303,19 @@ public class User {
         return list;
     }
 
-    public static User getUserByUsername(String username) {
+    public static User getUser(String field, Object value) {
+        List<String> listField = List.of("id", "username", "email");
+        if (!listField.contains(field)) {
+            throw new IllegalArgumentException("Invalid field name!");
+        }
+
         User user = null;
         Connection conn = DBConnection.getConnection();
-        String sql = "SELECT * FROM users WHERE username = ?";
+        String sql = "SELECT * FROM users WHERE " + field + " = ?";
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, username);
+            ps.setObject(1, value);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
@@ -324,7 +333,7 @@ public class User {
                 user.setCreatedAt(
                         rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
                 user.setUpdatedAt(
-                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+                        rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toLocalDateTime() : null);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -332,53 +341,6 @@ public class User {
 
         return user;
     }
-
-    public static User getUserByEmail(String email) {
-        User user = null;
-        Connection conn = DBConnection.getConnection();
-        String sql = "SELECT * FROM users WHERE email = ?";
-
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, email);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                user = new User();
-                user.setId(UUID.fromString(rs.getString("id")));
-                user.setUsername(rs.getString("username"));
-                user.setDisplayName(rs.getString("display_name"));
-                user.setEmail(rs.getString("email"));
-                user.setAddress(rs.getString("address"));
-                user.setPassword(rs.getString("password"));
-                user.setGender(rs.getBoolean("gender"));
-                user.setAdmin(rs.getBoolean("admin"));
-                user.setOnline(rs.getBoolean("is_online"));
-                user.setBirthday(rs.getDate("birthday") != null ? rs.getDate("birthday").toLocalDate() : null);
-                user.setCreatedAt(
-                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
-                user.setUpdatedAt(
-                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return user;
-    }
-
-    // private UUID id;
-    // private String username;
-    // private String displayName;
-    // private String email;
-    // private String address;
-    // private String password;
-    // private boolean gender;
-    // private boolean admin;
-    // private boolean online;
-    // private LocalDate birthday;
-    // private LocalDateTime createdAt;
-    // private LocalDateTime updatedAt;
 
     public static boolean addUser(String username, String displayName, String email, String address, Boolean admin,
             Boolean gender,
@@ -406,6 +368,39 @@ public class User {
 
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean updateUser(UUID id, String username, String displayName, String email, String address,
+            Boolean admin,
+            Boolean gender,
+            LocalDate birthday,
+            String password) {
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                UPDATE users
+                SET username = ?, display_name = ?, email = ?, address = ?, admin = ?, gender = ?, birthday = ?, password = ? , updated_at = ?
+                WHERE id = ?
+                """;
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, username);
+            ps.setString(2, displayName);
+            ps.setString(3, email);
+            ps.setString(4, address);
+            ps.setBoolean(5, admin);
+            ps.setBoolean(6, gender);
+            ps.setDate(7, Date.valueOf(birthday));
+            ps.setString(8, password);
+            ps.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setObject(10, id);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

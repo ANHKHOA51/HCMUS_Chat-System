@@ -65,7 +65,7 @@ public class AddUserController extends DashboardController {
         }
 
         // check email
-        User userCheckk = User.getUserByEmail(emailField.getText());
+        User userCheckk = User.getUser("email", emailField.getText());
         if (userCheckk != null) {
             errorLable.setText("email already exist");
             errorLable.setVisible(true);
@@ -73,7 +73,7 @@ public class AddUserController extends DashboardController {
         }
 
         // check username
-        userCheckk = User.getUserByUsername(usernameField.getText());
+        userCheckk = User.getUser("username", usernameField.getText());
         if (userCheckk != null) {
             errorLable.setText("username already exist");
             errorLable.setVisible(true);

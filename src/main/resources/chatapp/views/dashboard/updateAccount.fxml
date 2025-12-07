@@ -63,6 +63,12 @@
                            </HBox.margin>
                         </Label>
                         <ComboBox fx:id="roleCombox" prefWidth="150.0" />
+                        <Label prefWidth="80.0" text="Gender">
+                           <HBox.margin>
+                              <Insets left="50.0" />
+                           </HBox.margin>
+                        </Label>
+                        <ComboBox fx:id="genderCombox" prefWidth="150.0" />
                      </children>
                   </HBox>
                   <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="1200.0">
@@ -95,6 +101,16 @@
                         <TextField fx:id="passwordField" prefWidth="400.0" />
                      </children>
                   </HBox>
+                  <Label fx:id="errorLable" text="Label" textFill="RED" visible="false">
+                     <VBox.margin>
+                        <Insets left="300.0" />
+                     </VBox.margin>
+                  </Label>
+                  <Label fx:id="successLabel" text="Successfully" textFill="LIME" visible="false">
+                     <VBox.margin>
+                        <Insets left="300.0" />
+                     </VBox.margin>
+                  </Label>
                   <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                      <children>
                         <Button mnemonicParsing="false" onAction="#onUpdate" text="Update">
