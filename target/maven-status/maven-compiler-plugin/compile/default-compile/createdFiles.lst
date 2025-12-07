@@ -22,6 +22,7 @@ chatapp\views\ProfileView.class
 chatapp\App.class
 chatapp\controllers\dashboard\UpdateUserController.class
 chatapp\models\ChatGroup.class
+chatapp\models\Report.class
 chatapp\models\FriendShip.class
 module-info.class
 chatapp\controllers\dashboard\FriendController.class
@@ -30,12 +31,12 @@ chatapp\dto\ChatGroupDTO.class
 chatapp\models\Conversation.class
 chatapp\controllers\dashboard\ActivityController.class
 chatapp\utils\FXMLPaths$User.class
+chatapp\dto\ReportDTO.class
 chatapp\views\MessageView.class
 chatapp\controllers\ProfileController.class
 chatapp\models\Message.class
 chatapp\controllers\dashboard\LoginHistoryController.class
 chatapp\db\DBConnection.class
-chatapp\dto\ReportView.class
 chatapp\views\cells\FriendReqCell.class
 chatapp\controllers\dashboard\RegistrationController.class
 chatapp\controllers\MessageController.class

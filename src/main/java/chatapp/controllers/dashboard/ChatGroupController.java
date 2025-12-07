@@ -1,12 +1,10 @@
 package chatapp.controllers.dashboard;
 
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import chatapp.dto.ChatGroupDTO;
-import chatapp.models.ChatGroup;
 import chatapp.models.Conversation;
 import chatapp.models.User;
 import javafx.collections.FXCollections;
