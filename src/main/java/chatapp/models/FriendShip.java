@@ -1,10 +1,19 @@
 package chatapp.models;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-public class FriendShip {
+import chatapp.db.DBConnection;
+import chatapp.dto.UserFriendsDTO;
+
+public class Friendship {
     private UUID id;
     private UUID userId;
     private UUID friendId;
@@ -14,10 +23,10 @@ public class FriendShip {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public FriendShip() {
+    public Friendship() {
     }
 
-    public FriendShip(UUID id, UUID userId, UUID friendId, UUID requesterId,
+    public Friendship(UUID id, UUID userId, UUID friendId, UUID requesterId,
             String status, LocalDateTime acceptedAt, LocalDateTime createdAt,
             LocalDateTime updatedAt) {
         this.id = id;
@@ -118,5 +127,63 @@ public class FriendShip {
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';
+    }
+
+    // query
+    public static List<UserFriendsDTO> getListUserFriends() {
+        List<UserFriendsDTO> list = new ArrayList<>();
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                SELECT
+                    u.id AS id,
+                    u.username AS username,
+                    u.display_name AS display_name,
+                    u.email AS email,
+                    COUNT(DISTINCT
+                        CASE
+                            WHEN f.user_id = u.id THEN f.friend_id
+                            WHEN f.friend_id = u.id THEN f.user_id
+                        END
+                    ) AS num_friends,
+                    COUNT(DISTINCT
+                        CASE
+                            WHEN fof.user_id = u.id THEN fof.friend_id
+                            ELSE fof.user_id
+                        END
+                    ) AS num_friends_of_friend
+                FROM users u
+                LEFT JOIN friendships f
+                    ON (f.user_id = u.id OR f.friend_id = u.id) AND f.status = 'accepted'
+                LEFT JOIN friendships fof
+                    ON (
+                            (fof.user_id = f.user_id OR fof.friend_id = f.user_id)
+                        OR (fof.user_id = f.friend_id OR fof.friend_id = f.friend_id)
+                    )
+                    AND fof.user_id != u.id
+                    AND fof.friend_id != u.id
+                    AND fof.status = 'accepted'
+                GROUP BY u.id, u.username;
+                    """;
+
+        try {
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+                UserFriendsDTO item = new UserFriendsDTO();
+                item.setId(UUID.fromString(rs.getString("id")));
+                item.setUsername(rs.getString("username"));
+                item.setDisplayName(rs.getString("display_name"));
+                item.setEmail(rs.getString("email"));
+                item.setNumFriends(rs.getInt("num_friends"));
+                item.setNumFriendsOfFriends(rs.getInt("num_friends_of_friend"));
+
+                list.add(item);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 }

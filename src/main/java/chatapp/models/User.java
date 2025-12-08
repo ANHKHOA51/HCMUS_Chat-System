@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import chatapp.db.DBConnection;
 import chatapp.dto.LoginHistoryDTO;
+import chatapp.dto.UserFriendsDTO;
 
 public class User {
     private UUID id;

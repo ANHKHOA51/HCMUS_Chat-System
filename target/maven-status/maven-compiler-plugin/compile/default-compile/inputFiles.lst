@@ -23,10 +23,11 @@ D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\co
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\views\SignupView.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\models\ChatGroup.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\models\Message.java
+D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\dto\UserFriendsDTO.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\controllers\dashboard\ChatGroupController.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\controllers\MessageController.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\App.java
-D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\models\FriendShip.java
+D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\models\Friendship.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\models\User.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\views\MessageView.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\controllers\dashboard\FriendController.java

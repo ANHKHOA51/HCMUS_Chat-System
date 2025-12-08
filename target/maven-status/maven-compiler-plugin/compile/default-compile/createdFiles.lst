@@ -1,5 +1,6 @@
 chatapp\models\User.class
 chatapp\views\cells\UserCanChatCell.class
+chatapp\dto\UserFriendsDTO.class
 chatapp\views\ContactListView$1.class
 chatapp\views\SignupView.class
 chatapp\models\ChatCache.class
@@ -8,6 +9,7 @@ chatapp\controllers\dashboard\ChatGroupController.class
 chatapp\utils\FXMLPaths$Dashboard.class
 chatapp\models\LoginHistory.class
 chatapp\controllers\AuthController.class
+chatapp\models\Friendship.class
 chatapp\views\LoginView.class
 chatapp\controllers\dashboard\DashboardController.class
 chatapp\views\ContactListView$2.class
@@ -23,7 +25,6 @@ chatapp\App.class
 chatapp\controllers\dashboard\UpdateUserController.class
 chatapp\models\ChatGroup.class
 chatapp\models\Report.class
-chatapp\models\FriendShip.class
 module-info.class
 chatapp\controllers\dashboard\FriendController.class
 chatapp\controllers\dashboard\ReportController.class
