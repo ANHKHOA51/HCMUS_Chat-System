@@ -30,6 +30,7 @@ chatapp/db/DBConnection.class
 chatapp/App.class
 chatapp/views/FriendOptionView.class
 chatapp/views/cells/UserCanChatCell.class
+chatapp/controllers/FriendController$Mode.class
 chatapp/controllers/dashboard/FriendController.class
 chatapp/models/LoginHistory.class
 module-info.class

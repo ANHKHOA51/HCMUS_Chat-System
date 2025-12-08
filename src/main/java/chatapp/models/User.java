@@ -234,9 +234,8 @@ public class User {
         return list;
     }
 
-    private void setId(UUID fromString) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setId'");
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public static List<User> getFriends(UUID userId) {

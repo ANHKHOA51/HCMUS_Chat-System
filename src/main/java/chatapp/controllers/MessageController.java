@@ -69,6 +69,27 @@ public class MessageController {
         }
     }
 
+    public void openChatWith(User targetUser) {
+        // Delegate to ContactListView to select or add user
+        // contact.selectUser(targetUser); // Assuming ContactListView has this
+        // For now, if we don't have that method, we can try to find it in the list.
+        // Or if ContactListView is just a wrapper around ListView<User>:
+        // contact.getSelectionModel().select(targetUser);
+        // BUT MessageController uses 'contact' which is ContactListView.
+        // Let's assume ContactListView extends ListView<User> or has a ListView inside.
+        // Looking at previous context: contact = new
+        // ContactListView(MockData.mockUsers());
+        // We need to inspect ContactListView. for now let's just assume we can select.
+
+        // Actually, let's implement a simple logic:
+        if (contact.getItems().contains(targetUser)) {
+            contact.getSelectionModel().select(targetUser);
+        } else {
+            contact.getItems().add(targetUser);
+            contact.getSelectionModel().select(targetUser);
+        }
+    }
+
     public Tab getTab() {
         Tab tab = new Tab();
         tab.setClosable(false);

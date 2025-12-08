@@ -41,14 +41,13 @@ public class FriendReqCell extends ListCell<User> {
         declineBtn.setStyle(defaultDelBtn + buttonStyle);
         declineBtn.setOnMouseEntered(e -> declineBtn.setStyle(hoverDelBtn + buttonStyle));
         declineBtn.setOnMouseExited(e -> declineBtn.setStyle(defaultDelBtn + buttonStyle));
-        
+
         acptBtn.setFocusTraversable(false);
         String hoverAcptBtn = "-fx-cursor: hand; -fx-opacity: 1; -fx-background-color: lightgreen;";
         String defaultAcptBtn = "-fx-background-color: lightgreen; -fx-opacity: 0.6;";
         acptBtn.setStyle(defaultAcptBtn + buttonStyle);
         acptBtn.setOnMouseEntered(e -> acptBtn.setStyle(hoverAcptBtn + buttonStyle));
         acptBtn.setOnMouseExited(e -> acptBtn.setStyle(defaultAcptBtn + buttonStyle));
-        
 
         buttonsBox.getChildren().addAll(acptBtn, declineBtn);
 
@@ -80,7 +79,8 @@ public class FriendReqCell extends ListCell<User> {
         } else {
             setText(null);
             // adjust name text -- replace with actual getter if available
-            String display = (user.toString() == null ? "" : user.toString());
+            String display = user.getDisplayName() != null && !user.getDisplayName().isEmpty() ? user.getDisplayName()
+                    : user.getUsername();
             // if your User has getUsername(), use: user.getUsername()
             nameLabel.setText(display);
 
@@ -104,7 +104,6 @@ public class FriendReqCell extends ListCell<User> {
     public Button getAcceptBtn() {
         return acptBtn;
     }
-
 
     // Consumer-based setters: caller gets the User directly
     public void setOnDecline(Consumer<User> c) {

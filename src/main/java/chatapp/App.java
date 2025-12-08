@@ -74,7 +74,16 @@ public class App extends Application {
                         stage.setScene(authCtl.getScene());
                         stage.centerOnScreen();
                     });
-                    FriendController frCtl = new FriendController();
+                    FriendController frCtl = new FriendController(cur_user);
+
+                    frCtl.setOnOpenChat(targetUser -> {
+                        pane.getSelectionModel().select(0); // Assuming MessageController is at index 0
+                        // TODO: Ideally msgCtl should have a method to select/open chat with this user
+                        // Since MessageController uses internal ContactListView, we might need to
+                        // expose a method
+                        // to select the user if they exist in the list, or add them.
+                        msgCtl.openChatWith(targetUser);
+                    });
 
                     pane.getTabs().add(msgCtl.getTab());
                     pane.getTabs().add(frCtl.getTab());

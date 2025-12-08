@@ -186,4 +186,162 @@ public class FriendShip {
 
         return list;
     }
+
+    public static List<User> getFriendsList(UUID userId) {
+        List<User> list = new ArrayList<>();
+        Connection conn = DBConnection.getConnection();
+        // Get friends where status is accepted. Consider both (user_id, friend_id) directions if your design treats (A, B) same as (B, A).
+        // Based on script.sql: check (user_id <> friend_id).
+        String sql = """
+            SELECT u.*
+            FROM users u
+            JOIN friendships f ON (f.user_id = u.id OR f.friend_id = u.id)
+            WHERE (f.user_id = ? OR f.friend_id = ?)
+            AND u.id != ?
+            AND f.status = 'accepted'
+        """;
+
+        try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, userId);
+            ps.setObject(2, userId);
+            ps.setObject(3, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(mapResultSetToUser(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static List<User> getPendingRequests(UUID userId) {
+        List<User> list = new ArrayList<>();
+        Connection conn = DBConnection.getConnection();
+        // Incoming requests: user is friend_id, requester is user_id (usually).
+        // requester_id column explicitly tracks who sent it.
+        // So we want friendships where friend_id = userId AND status = 'pending'.
+        // The user who sent it is 'requester_id' (which should match user_id if logic follows).
+        // Let's join with Users to get the details of the requester.
+        String sql = """
+            SELECT u.*
+            FROM users u
+            JOIN friendships f ON f.requester_id = u.id
+            WHERE f.friend_id = ?
+            AND f.status = 'pending'
+        """;
+        try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(mapResultSetToUser(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static boolean sendFriendRequest(UUID requesterId, UUID targetId) {
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+            INSERT INTO friendships (user_id, friend_id, requester_id, status, created_at, updated_at)
+            VALUES (?, ?, ?, 'pending', NOW(), NOW())
+        """;
+        try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, requesterId);
+            ps.setObject(2, targetId);
+            ps.setObject(3, requesterId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean acceptFriendRequest(UUID userId, UUID requesterId) {
+        Connection conn = DBConnection.getConnection();
+        // userId is the one accepting (so they are the friend_id in the row, or we just find the row by both IDs)
+        String sql = """
+            UPDATE friendships
+            SET status = 'accepted', accepted_at = NOW(), updated_at = NOW()
+            WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)
+            AND status = 'pending'
+        """;
+        try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, requesterId);
+            ps.setObject(2, userId);
+            ps.setObject(3, userId);
+            ps.setObject(4, requesterId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean removeFriend(UUID userId, UUID friendId) {
+        Connection conn = DBConnection.getConnection();
+        String sql = "DELETE FROM friendships WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)";
+        try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, userId);
+            ps.setObject(2, friendId);
+            ps.setObject(3, friendId);
+            ps.setObject(4, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean blockUser(UUID userId, UUID blockedId) {
+        Connection conn = DBConnection.getConnection();
+        // 1. Remove existing friendship if any
+        removeFriend(userId, blockedId);
+        // 2. Insert blocked record
+        String sql = """
+            INSERT INTO friendships (user_id, friend_id, requester_id, status, created_at, updated_at)
+            VALUES (?, ?, ?, 'blocked', NOW(), NOW())
+        """;
+        try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, userId);
+            ps.setObject(2, blockedId);
+            ps.setObject(3, userId); // The one who blocks is the "requester" of the block action
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static List<User> searchUsers(String keyword, UUID currentUserId) {
+        List<User> list = new ArrayList<>();
+        Connection conn = DBConnection.getConnection();
+        String sql = "SELECT * FROM users WHERE (username ILIKE ? OR display_name ILIKE ?) AND id != ?";
+        try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword + "%");
+            ps.setString(2, "%" + keyword + "%");
+            ps.setObject(3, currentUserId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(mapResultSetToUser(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    private static User mapResultSetToUser(ResultSet rs) throws SQLException {
+        User u = new User();
+        u.setId(rs.getString("id")); // User.setId takes String based on previous view
+        u.setUsername(rs.getString("username"));
+        u.setDisplayName(rs.getString("display_name"));
+        u.setEmail(rs.getString("email"));
+        u.setOnline(rs.getBoolean("is_online"));
+        u.setAdmin(rs.getBoolean("admin"));
+        // ... map other fields if necessary
+        return u;
+    }
 }

@@ -105,7 +105,8 @@ public class UserFriendListCell extends ListCell<User> {
         } else {
             setText(null);
             // adjust name text -- replace with actual getter if available
-            String display = (user.toString() == null ? "" : user.toString());
+            String display = user.getDisplayName() != null && !user.getDisplayName().isEmpty() ? user.getDisplayName()
+                    : user.getUsername();
             // if your User has getUsername(), use: user.getUsername()
             nameLabel.setText(display);
 
