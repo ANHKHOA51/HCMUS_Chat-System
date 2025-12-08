@@ -58,8 +58,8 @@ public class User {
         return id;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public void setId(String id) {
+        this.id = UUID.fromString(id);
     }
 
     public String getUsername() {
@@ -232,6 +232,11 @@ public class User {
         }
 
         return list;
+    }
+
+    private void setId(UUID fromString) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setId'");
     }
 
     public static List<User> getFriends(UUID userId) {
