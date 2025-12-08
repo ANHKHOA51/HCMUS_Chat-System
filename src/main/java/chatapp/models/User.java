@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 import chatapp.db.DBConnection;
+import chatapp.dto.ActivityUserDTO;
 import chatapp.dto.LoginHistoryDTO;
 import chatapp.dto.UserFriendsDTO;
 
@@ -467,6 +468,84 @@ public class User {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static List<ActivityUserDTO> getListActiviyUser() {
+        List<ActivityUserDTO> list = new ArrayList<>();
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                SELECT u.id AS id, u.username AS username, COUNT(distinct lh.id) AS logins, COUNT(distinct m.id) AS messages,
+                    (
+                        COUNT(DISTINCT lh.id) +
+                        COUNT(DISTINCT m.id)
+                    ) AS total
+                FROM users AS u
+                LEFT JOIN login_history AS lh ON lh.user_id = u.id
+                LEFT JOIN messages AS m ON m.sender_id = u.id
+                GROUP BY u.username, u.id
+                HAVING COUNT(distinct lh.id) > 0 OR COUNT(distinct m.id) > 0
+                    """;
+        try {
+            Statement st = conn.createStatement();
+
+            ResultSet rs = st.executeQuery(sql);
+            while (rs.next()) {
+                ActivityUserDTO item = new ActivityUserDTO();
+                item.setId(UUID.fromString(rs.getString("id")));
+                item.setUsername(rs.getString("username"));
+                item.setNumLogins(rs.getInt("logins"));
+                item.setNumMessages(rs.getInt("messages"));
+                item.setTotal(rs.getInt("total"));
+
+                list.add(item);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static List<ActivityUserDTO> getListActiviyUserByDate(LocalDate from, LocalDate to) {
+        List<ActivityUserDTO> list = new ArrayList<>();
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                SELECT u.id AS id, u.username AS username, COUNT(distinct lh.id) AS logins, COUNT(distinct m.id) AS messages,
+                    (
+                        COUNT(DISTINCT lh.id) +
+                        COUNT(DISTINCT m.id)
+                    ) AS total
+                FROM users AS u
+                LEFT JOIN login_history AS lh ON lh.user_id = u.id AND lh.created_at BETWEEN ? AND ?
+                LEFT JOIN messages AS m ON m.sender_id = u.id AND m.created_at BETWEEN ? AND ?
+                GROUP BY u.username, u.id
+                HAVING COUNT(distinct lh.id) > 0 OR COUNT(distinct m.id) > 0
+                    """;
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            Timestamp startTime = Timestamp.valueOf(from.atStartOfDay());
+            Timestamp endTime = Timestamp.valueOf(to.atTime(23, 59, 59));
+
+            ps.setTimestamp(1, startTime);
+            ps.setTimestamp(2, endTime);
+            ps.setTimestamp(3, startTime);
+            ps.setTimestamp(4, endTime);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                ActivityUserDTO item = new ActivityUserDTO();
+                item.setId(UUID.fromString(rs.getString("id")));
+                item.setUsername(rs.getString("username"));
+                item.setNumLogins(rs.getInt("logins"));
+                item.setNumMessages(rs.getInt("messages"));
+                item.setTotal(rs.getInt("total"));
+
+                list.add(item);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     // User

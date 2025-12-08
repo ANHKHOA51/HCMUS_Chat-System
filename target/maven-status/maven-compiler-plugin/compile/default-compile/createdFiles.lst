@@ -12,6 +12,7 @@ chatapp\controllers\AuthController.class
 chatapp\models\Friendship.class
 chatapp\views\LoginView.class
 chatapp\controllers\dashboard\DashboardController.class
+chatapp\dto\ActivityUserDTO.class
 chatapp\views\ContactListView$2.class
 chatapp\utils\FXMLPaths.class
 chatapp\views\ForgotPasswordView.class

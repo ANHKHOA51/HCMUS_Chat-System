@@ -65,6 +65,10 @@ public class LoginHistoryDTO {
         return formatted;
     }
 
+    public LocalDateTime getTimeUnformat() {
+        return time;
+    }
+
     public void setTime(LocalDateTime time) {
         this.time = time;
     }

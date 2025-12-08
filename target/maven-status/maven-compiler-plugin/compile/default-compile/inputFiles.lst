@@ -1,6 +1,7 @@
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\controllers\FriendController.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\models\ConversationMember.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\views\ContactListView.java
+D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\dto\ActivityUserDTO.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\views\ProfileView.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\controllers\dashboard\ReportController.java
 D:\HCMUS\Year3\HK1_25_26\java\project\HCMUS_Chat-System\src\main\java\chatapp\views\LoginView.java
