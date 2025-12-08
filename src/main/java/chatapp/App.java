@@ -14,6 +14,7 @@ import chatapp.controllers.FriendController;
 import chatapp.controllers.MessageController;
 import chatapp.controllers.ProfileController;
 import chatapp.db.DBConnection;
+import chatapp.models.LoginHistory;
 // import chatapp.db.DBConnection;
 import chatapp.models.User;
 
@@ -37,6 +38,11 @@ public class App extends Application {
             if (user != null) {
                 cur_user = user;
                 cur_user.setOnline(true);
+                User.updateFieldUser("is_online", cur_user.isOnline(), "id", cur_user.getId());
+                boolean result = LoginHistory.saveLoginHistory(cur_user.getId());
+                if (!result) {
+                    return;
+                }
 
                 if (cur_user.isAdmin()) {
                     try {

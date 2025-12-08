@@ -1,10 +1,12 @@
 package chatapp.models;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -13,6 +15,8 @@ import java.util.List;
 import java.util.UUID;
 
 import chatapp.db.DBConnection;
+import chatapp.dto.LoginHistoryDTO;
+import chatapp.dto.UserFriendsDTO;
 
 public class User {
     private UUID id;
@@ -24,6 +28,7 @@ public class User {
     private boolean gender;
     private boolean admin;
     private boolean online;
+    private boolean lock;
     private LocalDate birthday;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -121,12 +126,24 @@ public class User {
         this.online = online;
     }
 
+    public boolean isLock() {
+        return lock;
+    }
+
+    public void setLock(boolean lock) {
+        this.lock = lock;
+    }
+
     public String getBirthday() {
         if (birthday == null)
             return "";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String formatted = birthday.format(formatter);
         return formatted;
+    }
+
+    public LocalDate getBirthdayUnformat() {
+        return birthday;
     }
 
     public void setBirthday(LocalDate birthday) {
@@ -139,6 +156,10 @@ public class User {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
         String formatted = createdAt.format(formatter);
         return formatted;
+    }
+
+    public LocalDateTime getCreatedAtUnformat() {
+        return createdAt;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
@@ -171,15 +192,17 @@ public class User {
                 ", birthday=" + birthday +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
-                '}';
+                "}, \n";
     }
 
     // Querry
+
+    // Admin
     public static List<User> getAllUser() {
         List<User> list = new ArrayList<User>();
         Connection conn = DBConnection.getConnection();
 
-        String sql = "SELECT * FROM users";
+        String sql = "SELECT * FROM users ORDER BY id ASC";
         try (Statement st = conn.createStatement()) {
             ResultSet rs = st.executeQuery(sql);
 
@@ -193,12 +216,13 @@ public class User {
                 user.setPassword(rs.getString("password"));
                 user.setGender(rs.getBoolean("gender"));
                 user.setAdmin(rs.getBoolean("admin"));
-                user.setAdmin(rs.getBoolean("is_online"));
+                user.setOnline(rs.getBoolean("is_online"));
+                user.setLock(rs.getBoolean("lock"));
                 user.setBirthday(rs.getDate("birthday") != null ? rs.getDate("birthday").toLocalDate() : null);
                 user.setCreatedAt(
                         rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
                 user.setUpdatedAt(
-                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+                        rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toLocalDateTime() : null);
 
                 list.add(user);
             }
@@ -210,6 +234,242 @@ public class User {
         return list;
     }
 
+    public static List<User> getFriends(UUID userId) {
+        List<User> listFriends = new ArrayList<User>();
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                    SELECT u.*
+                    FROM friendships AS f
+                    JOIN users AS u ON u.id = CASE
+                            WHEN f.user_id = ? THEN f.friend_id
+                            ELSE f.user_id
+                        END
+                    WHERE (f.user_id = ? OR f.friend_id = ?)
+                    AND status = 'accepted'
+                """;
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, userId);
+            ps.setObject(2, userId);
+            ps.setObject(3, userId);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                User user = new User();
+                user.setId(UUID.fromString(rs.getString("id")));
+                user.setUsername(rs.getString("username"));
+                user.setDisplayName(rs.getString("display_name"));
+                user.setEmail(rs.getString("email"));
+                user.setAddress(rs.getString("address"));
+                user.setPassword(rs.getString("password"));
+                user.setGender(rs.getBoolean("gender"));
+                user.setAdmin(rs.getBoolean("admin"));
+                user.setOnline(rs.getBoolean("is_online"));
+                user.setLock(rs.getBoolean("lock"));
+                user.setBirthday(rs.getDate("birthday") != null ? rs.getDate("birthday").toLocalDate() : null);
+                user.setCreatedAt(
+                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+                user.setUpdatedAt(
+                        rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toLocalDateTime() : null);
+
+                listFriends.add(user);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return listFriends;
+    }
+
+    public static List<LoginHistoryDTO> getLoginHistory(UUID userId) {
+        List<LoginHistoryDTO> list = new ArrayList<LoginHistoryDTO>();
+
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                SELECT ls.id AS id, u.id AS user_id, u.username AS username, ls.time AS time
+                FROM login_history AS ls
+                JOIN users AS u ON u.id = ls.user_id
+                WHERE ls.user_id = ?
+                """;
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, userId);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                LoginHistoryDTO loginHistory = new LoginHistoryDTO();
+                loginHistory.setId(UUID.fromString(rs.getString("id")));
+                loginHistory.setUserId(UUID.fromString(rs.getString("user_id")));
+                loginHistory.setUsername(rs.getString("username"));
+                loginHistory
+                        .setTime(rs.getTimestamp("time") != null ? rs.getTimestamp("time").toLocalDateTime() : null);
+                loginHistory.setActivity("Log in");
+
+                list.add(loginHistory);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public static User getUser(String field, Object value) {
+        List<String> listField = List.of("id", "username", "email");
+        if (!listField.contains(field)) {
+            throw new IllegalArgumentException("Invalid field name!");
+        }
+
+        User user = null;
+        Connection conn = DBConnection.getConnection();
+        String sql = "SELECT * FROM users WHERE " + field + " = ?";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, value);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                user = new User();
+                user.setId(UUID.fromString(rs.getString("id")));
+                user.setUsername(rs.getString("username"));
+                user.setDisplayName(rs.getString("display_name"));
+                user.setEmail(rs.getString("email"));
+                user.setAddress(rs.getString("address"));
+                user.setPassword(rs.getString("password"));
+                user.setGender(rs.getBoolean("gender"));
+                user.setAdmin(rs.getBoolean("admin"));
+                user.setOnline(rs.getBoolean("is_online"));
+                user.setLock(rs.getBoolean("lock"));
+                user.setBirthday(rs.getDate("birthday") != null ? rs.getDate("birthday").toLocalDate() : null);
+                user.setCreatedAt(
+                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+                user.setUpdatedAt(
+                        rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toLocalDateTime() : null);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return user;
+    }
+
+    public static boolean addUser(String username, String displayName, String email, String address, Boolean admin,
+            Boolean gender,
+            LocalDate birthday,
+            String password) {
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                INSERT INTO users (id, username, display_name, email, address, password, gender, admin, is_online, birthday, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """;
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, UUID.randomUUID());
+            ps.setString(2, username);
+            ps.setString(3, displayName);
+            ps.setString(4, email);
+            ps.setString(5, address);
+            ps.setString(6, password);
+            ps.setBoolean(7, gender);
+            ps.setBoolean(8, admin);
+            ps.setBoolean(9, false);
+            ps.setDate(10, Date.valueOf(birthday));
+            ps.setTimestamp(11, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setTimestamp(12, Timestamp.valueOf(LocalDateTime.now()));
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean updateUser(UUID id, String username, String displayName, String email, String address,
+            Boolean admin,
+            Boolean gender,
+            LocalDate birthday,
+            String password) {
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                UPDATE users
+                SET username = ?, display_name = ?, email = ?, address = ?, admin = ?, gender = ?, birthday = ?, password = ? , updated_at = ?
+                WHERE id = ?
+                """;
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, username);
+            ps.setString(2, displayName);
+            ps.setString(3, email);
+            ps.setString(4, address);
+            ps.setBoolean(5, admin);
+            ps.setBoolean(6, gender);
+            ps.setDate(7, Date.valueOf(birthday));
+            ps.setString(8, password);
+            ps.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setObject(10, id);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean deleteUser(UUID id) {
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                DELETE FROM users WHERE id = ?
+                """;
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, id);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean updateFieldUser(String field, Object value, String filterField, Object filterValue) {
+        List<String> listField = List.of("username", "email", "address", "display_name", "admin", "password",
+                "birthday", "gender", "is_online", "lock");
+        if (!listField.contains(field)) {
+            throw new IllegalArgumentException("Invalid field name!");
+        }
+
+        List<String> listFilterField = List.of("id", "username", "email");
+        if (!listFilterField.contains(filterField)) {
+            throw new IllegalArgumentException("Invalid filter field name!");
+        }
+
+        Connection conn = DBConnection.getConnection();
+        String sql = "UPDATE users SET " + field + " = ? WHERE " + filterField + " = ?";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, value);
+            ps.setObject(2, filterValue);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // User
     public static User login(String user_name, String password) {
         try {
             Connection conn = DBConnection.getConnection();

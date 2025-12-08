@@ -8,6 +8,7 @@ module chatapp {
     opens chatapp to javafx.fxml;
     opens chatapp.controllers.dashboard to javafx.fxml;
     opens chatapp.models to javafx.base;
+    opens chatapp.dto to javafx.base;
 
     exports chatapp;
 }

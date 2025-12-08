@@ -12,14 +12,9 @@ public class FXMLPaths {
         public static final String REPORT = DASHBOARD_BASE + "report.fxml";
         public static final String ACTIVITY = DASHBOARD_BASE + "activity.fxml";
         public static final String FRIEND = DASHBOARD_BASE + "friend.fxml";
-    }
+        public static final String ADD_USER = DASHBOARD_BASE + "addUserForm.fxml";
+        public static final String UPDATE_USER = DASHBOARD_BASE + "updateAccount.fxml";
 
-    public static class Auth {
-        private static final String AUTH_BASE = "/chatapp/views/auth/";
-
-        public static final String LOG_IN = AUTH_BASE + "loginForm.fxml";
-        public static final String REGISTER = AUTH_BASE + "registerForm.fxml";
-        public static final String UPDATE_ACCOUNT = AUTH_BASE + "updateAccount.fxml";
     }
 
     public static class User {

@@ -3,8 +3,10 @@ package chatapp.controllers.dashboard;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
+import chatapp.dto.LoginHistoryDTO;
 import chatapp.models.User;
 import chatapp.utils.FXMLPaths;
 import javafx.collections.FXCollections;
@@ -12,44 +14,44 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 public class UserController extends DashboardController {
     @FXML
-    private TableView<?> activityTableView;
+    private TableView<LoginHistoryDTO> activityTableView;
 
     @FXML
-    private TableColumn<?, ?> activityUserIdCol;
+    private TableColumn<LoginHistoryDTO, String> activityUserIdCol;
     @FXML
-    private TableColumn<?, ?> activityUserNamId;
+    private TableColumn<LoginHistoryDTO, String> activityUserNamId;
     @FXML
-    private TableColumn<?, ?> activityTimeCol;
+    private TableColumn<LoginHistoryDTO, String> activityTimeCol;
     @FXML
-    private TableColumn<?, ?> activityCol;
+    private TableColumn<LoginHistoryDTO, String> activityCol;
 
     @FXML
-    private TableView<?> friendTableView;
+    private TableView<User> friendTableView;
 
     @FXML
-    private TableColumn<?, ?> friendUserIdCol;
+    private TableColumn<User, String> friendUserIdCol;
     @FXML
-    private TableColumn<?, ?> friendUserNameCol;
+    private TableColumn<User, String> friendUserNameCol;
     @FXML
-    private TableColumn<?, ?> friendEmailCol;
+    private TableColumn<User, String> friendEmailCol;
     @FXML
-    private TableColumn<?, ?> friendStatusCol;
+    private TableColumn<User, Boolean> friendStatusCol;
 
     @FXML
     private TableView<User> tableView;
@@ -87,8 +89,15 @@ public class UserController extends DashboardController {
     @FXML
     private ComboBox<String> statusCombox;
 
+    @FXML
+    private Button lockUser;
+
+    @FXML
+    private Button unlockUser;
+
     private ObservableList<User> userList;
     private ObservableList<User> friendList;
+    private ObservableList<LoginHistoryDTO> logingHistoryList;
     private ObservableList<String> fieldList;
     private ObservableList<String> statusList;
 
@@ -119,61 +128,135 @@ public class UserController extends DashboardController {
 
         statusList = FXCollections.observableArrayList("online", "offline", "both");
         statusCombox.setItems(statusList);
+
+        tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                boolean isLock = newSelection.isLock();
+                lockUser.setDisable(isLock);
+                unlockUser.setDisable(!isLock);
+            }
+        });
     }
 
     @FXML
     void addUser(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource(FXMLPaths.Auth.REGISTER));
-        Stage stage = new Stage();
-        stage.setTitle("TEST");
-        Scene scene = new Scene(root);
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(FXMLPaths.Dashboard.ADD_USER));
+        root = loader.load();
+        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        scene = new Scene(root);
         stage.setScene(scene);
-        stage.showAndWait();
+        stage.show();
     }
 
     @FXML
     void updateUser(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource(FXMLPaths.Auth.REGISTER));
-        Stage stage = new Stage();
-        stage.setTitle("TEST");
-        Scene scene = new Scene(root);
+        User selectedUser = tableView.getSelectionModel().getSelectedItem();
+        if (selectedUser == null)
+            return;
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(FXMLPaths.Dashboard.UPDATE_USER));
+        root = loader.load();
+        UpdateUserController controller = loader.getController();
+        controller.setUpdateUserId(selectedUser.getId());
+        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        scene = new Scene(root);
         stage.setScene(scene);
-        stage.showAndWait();
+        stage.show();
     }
 
     @FXML
     void deleteUser(ActionEvent event) {
-        // User selectedUser = tableView.getSelectionModel().getSelectedItem();
-        // if (selectedUser == null)
-        // return;
+        User selectedUser = tableView.getSelectionModel().getSelectedItem();
+        if (selectedUser == null)
+            return;
 
-        // Alert alert = new Alert(AlertType.CONFIRMATION);
-        // alert.setTitle("Confirmation");
-        // alert.setHeaderText("Delete account?");
-        // alert.setContentText("Do you want to delete account " +
-        // selectedUser.getUser_name() + "?");
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation");
+        alert.setHeaderText("Delete account?");
+        alert.setContentText("Do you want to delete account " +
+                selectedUser.getUsername() + "?");
 
-        // ButtonType buttonTypeYes = new ButtonType("Yes", ButtonData.YES);
-        // ButtonType buttonTypeCancle = new ButtonType("Cancle",
-        // ButtonData.CANCEL_CLOSE);
+        ButtonType buttonTypeYes = new ButtonType("Yes", ButtonData.YES);
+        ButtonType buttonTypeCancle = new ButtonType("Cancle",
+                ButtonData.CANCEL_CLOSE);
 
-        // alert.getButtonTypes().setAll(buttonTypeYes, buttonTypeCancle);
-        // Optional<ButtonType> result = alert.showAndWait();
-        // System.out.println(result);
+        alert.getButtonTypes().setAll(buttonTypeYes, buttonTypeCancle);
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent() && result.get() == buttonTypeYes) {
+            boolean success = User.deleteUser(selectedUser.getId());
+            if (success) {
+                userList.remove(selectedUser);
+            }
+        } else {
+            return;
+        }
     }
 
     @FXML
     void getActivityHistory(ActionEvent event) {
+        User selectedUser = tableView.getSelectionModel().getSelectedItem();
+        if (selectedUser == null)
+            return;
 
+        List<LoginHistoryDTO> loginHistory = User.getLoginHistory(selectedUser.getId());
+
+        logingHistoryList = FXCollections.observableArrayList(loginHistory);
+
+        activityUserIdCol.setCellValueFactory(new PropertyValueFactory<>("userId"));
+        activityUserNamId.setCellValueFactory(new PropertyValueFactory<>("username"));
+        activityTimeCol.setCellValueFactory(new PropertyValueFactory<>("time"));
+        activityCol.setCellValueFactory(new PropertyValueFactory<>("activity"));
+
+        activityTableView.setItems(logingHistoryList);
     }
 
     @FXML
     void getListFriend(ActionEvent event) {
+        User selectedUser = tableView.getSelectionModel().getSelectedItem();
+        if (selectedUser == null)
+            return;
 
+        List<User> listFriends = User.getFriends(selectedUser.getId());
+        friendList = FXCollections.observableArrayList(listFriends);
+
+        friendUserIdCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        friendUserNameCol.setCellValueFactory(new PropertyValueFactory<>("username"));
+        friendEmailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
+        friendStatusCol.setCellValueFactory(new PropertyValueFactory<>("online"));
+
+        friendTableView.setItems(friendList);
     }
 
     @FXML
     void filterUser(ActionEvent event) {
+        String field = fieldCombox.getValue();
+        String status = statusCombox.getValue();
+        String filterValue = filterValueField.getText();
+
+        ObservableList<User> filterUsers = FXCollections.observableArrayList();
+
+        for (User user : userList) {
+            if (field == "User name" && user.getUsername().contains(filterValue)) {
+                if (status == "both") {
+                    filterUsers.add(user);
+                } else if (status == "offline" && user.isOnline() == false) {
+                    filterUsers.add(user);
+                } else if (status == "online" && user.isOnline() == true) {
+                    filterUsers.add(user);
+                }
+            } else if (field == "Name" && user.getDisplayName().contains(filterValue)) {
+                if (status == "both") {
+                    filterUsers.add(user);
+                } else if (status == "offline" && user.isOnline() == false) {
+                    filterUsers.add(user);
+                } else if (status == "online" && user.isOnline() == true) {
+                    filterUsers.add(user);
+                }
+            }
+        }
+
+        tableView.setItems(filterUsers);
     }
 
     @FXML
@@ -186,6 +269,34 @@ public class UserController extends DashboardController {
     void statusComboxChanged(ActionEvent event) {
         changeStatus = true;
         filterBtn.setDisable(!(changeStatus && changeField));
+    }
+
+    @FXML
+    void onLockUser(ActionEvent event) {
+        User selectedUser = tableView.getSelectionModel().getSelectedItem();
+        if (selectedUser == null)
+            return;
+
+        boolean result = User.updateFieldUser("lock", true, "id", selectedUser.getId());
+        if (result) {
+            userList.remove(selectedUser);
+            selectedUser.setLock(true);
+            userList.add(selectedUser);
+        }
+    }
+
+    @FXML
+    void onUnlockUser(ActionEvent event) {
+        User selectedUser = tableView.getSelectionModel().getSelectedItem();
+        if (selectedUser == null)
+            return;
+
+        boolean result = User.updateFieldUser("lock", false, "id", selectedUser.getId());
+        if (result) {
+            userList.remove(selectedUser);
+            selectedUser.setLock(false);
+            userList.add(selectedUser);
+        }
     }
 
 }
