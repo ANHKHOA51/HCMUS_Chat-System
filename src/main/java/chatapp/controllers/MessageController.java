@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import chatapp.models.Conversation;
+import chatapp.models.GroupUser;
 import chatapp.models.User;
 import java.util.UUID;
 import chatapp.views.ContactListView;
@@ -48,8 +49,8 @@ public class MessageController {
         }
     }
 
-    // send message for a specific MessageView / contactId
-    private void sendMessageFor(MessageView mv, String contactId) {
+    // send message for a specific MessageView / contact
+    private void sendMessageFor(MessageView mv, User contact) {
         if (mv == null)
             return;
         String text = mv.getTextField().getText();
@@ -57,15 +58,22 @@ public class MessageController {
             return;
         text = text.trim();
         if (!text.isEmpty()) {
-            UUID targetId = UUID.fromString(contactId);
-            Conversation conv = chatapp.dao.ConversationDAO.getPrivateConversation(user.getId(), targetId);
-            if (conv == null) {
-                conv = chatapp.dao.ConversationDAO.createPrivateConversation(user.getId(), targetId);
-            }
-            if (conv != null) {
-                chatapp.dao.MessageDAO.send(conv.getId(), user.getId(), text);
+            if (contact instanceof GroupUser) {
+                // It is a group, contact.getId() is the conversation ID
+                chatapp.dao.MessageDAO.send(contact.getId(), user.getId(), text);
                 mv.sendMessage(text);
                 mv.getTextField().clear();
+            } else {
+                UUID targetId = contact.getId();
+                Conversation conv = chatapp.dao.ConversationDAO.getPrivateConversation(user.getId(), targetId);
+                if (conv == null) {
+                    conv = chatapp.dao.ConversationDAO.createPrivateConversation(user.getId(), targetId);
+                }
+                if (conv != null) {
+                    chatapp.dao.MessageDAO.send(conv.getId(), user.getId(), text);
+                    mv.sendMessage(text);
+                    mv.getTextField().clear();
+                }
             }
         }
     }
@@ -94,17 +102,24 @@ public class MessageController {
     }
 
     private void loadChatView(User targetUser) {
-        Conversation conv = chatapp.dao.ConversationDAO.getPrivateConversation(user.getId(), targetUser.getId());
+        UUID conversationId;
+        if (targetUser instanceof GroupUser) {
+            conversationId = targetUser.getId();
+        } else {
+            Conversation conv = chatapp.dao.ConversationDAO.getPrivateConversation(user.getId(), targetUser.getId());
+            conversationId = (conv != null) ? conv.getId() : null;
+        }
+
         MessageView mv = views.computeIfAbsent(targetUser.getId().toString(), k -> {
             MessageView view = new MessageView();
-            view.getTextField().setOnAction(e -> sendMessageFor(view, targetUser.getId().toString()));
-            view.getButton().setOnAction(e -> sendMessageFor(view, targetUser.getId().toString()));
+            view.getTextField().setOnAction(e -> sendMessageFor(view, targetUser));
+            view.getButton().setOnAction(e -> sendMessageFor(view, targetUser));
             return view;
         });
 
         mv.clearMessages();
-        if (conv != null) {
-            java.util.List<chatapp.models.Message> messages = chatapp.dao.MessageDAO.getMessages(conv.getId());
+        if (conversationId != null) {
+            java.util.List<chatapp.models.Message> messages = chatapp.dao.MessageDAO.getMessages(conversationId);
             for (chatapp.models.Message m : messages) {
                 boolean isMine = m.getSenderId().equals(user.getId());
                 mv.addMessage(m.getContent(), isMine);

@@ -23,6 +23,7 @@ chatapp/views/ProfileView.class
 chatapp/dto/ChatGroupDTO.class
 chatapp/controllers/AuthController.class
 chatapp/controllers/ProfileController.class
+chatapp/models/GroupUser.class
 chatapp/models/Report.class
 chatapp/views/SignupView.class
 chatapp/controllers/MessageController.class
@@ -38,11 +39,13 @@ chatapp/controllers/dashboard/FriendController.class
 chatapp/models/LoginHistory.class
 module-info.class
 chatapp/views/ContactListView.class
+chatapp/utils/DbTask.class
 chatapp/models/ChatCache.class
 chatapp/models/ConversationMember.class
 chatapp/controllers/FriendController.class
 chatapp/utils/FXMLPaths$User.class
 chatapp/dao/UserDAO.class
+chatapp/views/CreateGroupView.class
 chatapp/models/Message.class
 chatapp/views/MessageView.class
 chatapp/views/ContactListView$2.class

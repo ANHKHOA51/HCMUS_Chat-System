@@ -162,4 +162,61 @@ public class ConversationDAO {
         }
         return null;
     }
+
+    public static Conversation createChatGroup(String groupName, UUID creatorId, List<UUID> memberIds) {
+        Connection conn = DBConnection.getConnection();
+        try {
+            conn.setAutoCommit(false);
+
+            // 1. Create Conversation
+            UUID convId = UUID.randomUUID();
+            String sqlConv = "INSERT INTO conversations (id, title, isGroup, created_by, created_at) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement psConv = conn.prepareStatement(sqlConv);
+            psConv.setObject(1, convId);
+            psConv.setString(2, groupName);
+            psConv.setBoolean(3, true);
+            psConv.setObject(4, creatorId);
+            psConv.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+            psConv.executeUpdate();
+
+            // 2. Add Creator as Admin
+            String sqlMem = "INSERT INTO conversation_members (conversation_id, user_id, role) VALUES (?, ?, ?)";
+            PreparedStatement psMem = conn.prepareStatement(sqlMem);
+
+            psMem.setObject(1, convId);
+            psMem.setObject(2, creatorId);
+            psMem.setString(3, "admin");
+            psMem.addBatch();
+
+            // 3. Add Members
+            for (UUID memberId : memberIds) {
+                psMem.setObject(1, convId);
+                psMem.setObject(2, memberId);
+                psMem.setString(3, "member");
+                psMem.addBatch();
+            }
+            psMem.executeBatch();
+
+            conn.commit();
+            conn.setAutoCommit(true);
+
+            Conversation c = new Conversation();
+            c.setId(convId);
+            c.setGroup(true);
+            c.setTitle(groupName);
+            c.setCreatedBy(creatorId);
+            c.setCreatedAt(LocalDateTime.now());
+            return c;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                conn.rollback();
+                conn.setAutoCommit(true);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return null;
+    }
 }

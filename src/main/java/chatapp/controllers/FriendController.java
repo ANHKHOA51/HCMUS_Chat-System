@@ -5,8 +5,17 @@ import chatapp.models.User;
 import chatapp.views.FriendOptionView;
 import chatapp.views.UserListView;
 import chatapp.views.cells.FriendReqCell;
+import chatapp.utils.DbTask;
+import javafx.concurrent.Task;
+import chatapp.models.Conversation;
+import chatapp.models.GroupUser;
+import chatapp.dao.ConversationDAO;
+import chatapp.views.CreateGroupView;
 import chatapp.views.cells.UserCanChatCell;
 import chatapp.views.cells.UserFriendListCell;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Tab;
@@ -49,46 +58,79 @@ public class FriendController {
     }
 
     private void refreshFriendsList() {
-        ObservableList<User> friends = FXCollections
-                .observableArrayList(FriendShipDAO.getFriendsList(currentUser.getId()));
-        userList.getUserListView().setItems(friends);
+        // Show loading state?
+        // userList.getUserListView().setPlaceholder(new
+        // javafx.scene.control.Label("Loading..."));
 
-        userList.getUserListView().setCellFactory(param -> {
-            UserFriendListCell cell = new UserFriendListCell();
-            cell.setOnDelete(u -> handleUnfriend(u));
-            cell.setOnBlock(u -> handleBlock(u));
-            return cell;
+        DbTask<java.util.List<User>> task = new DbTask<>(() -> {
+            return FriendShipDAO.getFriendsList(currentUser.getId());
         });
+
+        task.setOnSucceeded(e -> {
+            ObservableList<User> friends = FXCollections.observableArrayList(task.getValue());
+            userList.getUserListView().setItems(friends);
+
+            userList.getUserListView().setCellFactory(param -> {
+                UserFriendListCell cell = new UserFriendListCell();
+                cell.setOnDelete(u -> handleUnfriend(u));
+                cell.setOnBlock(u -> handleBlock(u));
+                return cell;
+            });
+        });
+
+        task.setOnFailed(e -> {
+            task.getException().printStackTrace();
+        });
+
+        new Thread(task).start();
     }
 
     private void loadRequests() {
         currentMode = Mode.REQUESTS;
-        ObservableList<User> requests = FXCollections
-                .observableArrayList(FriendShipDAO.getPendingRequests(currentUser.getId()));
-        userList.getUserListView().setItems(requests);
 
-        userList.getUserListView().setCellFactory(param -> {
-            FriendReqCell cell = new FriendReqCell();
-            cell.setOnAccept(u -> handleAccept(u));
-            cell.setOnDecline(u -> handleDecline(u)); // Deleting request is same as removeFriend/Decline logic
-            return cell;
+        DbTask<java.util.List<User>> task = new DbTask<>(() -> {
+            return FriendShipDAO.getPendingRequests(currentUser.getId());
         });
+
+        task.setOnSucceeded(e -> {
+            ObservableList<User> requests = FXCollections.observableArrayList(task.getValue());
+            userList.getUserListView().setItems(requests);
+
+            userList.getUserListView().setCellFactory(param -> {
+                FriendReqCell cell = new FriendReqCell();
+                cell.setOnAccept(u -> handleAccept(u));
+                cell.setOnDecline(u -> handleDecline(u));
+                return cell;
+            });
+        });
+
+        new Thread(task).start();
     }
 
     private void loadOnline() {
         currentMode = Mode.ONLINE;
-        // Filter friends list for online only
-        ObservableList<User> friends = FXCollections
-                .observableArrayList(FriendShipDAO.getFriendsList(currentUser.getId()));
-        ObservableList<User> onlineFriends = friends.filtered(User::isOnline);
-        userList.getUserListView().setItems(onlineFriends);
 
-        userList.getUserListView().setCellFactory(param -> {
-            UserCanChatCell cell = new UserCanChatCell();
-            cell.setOnChat(u -> handleChat(u));
-            cell.setOnCreateGroup(u -> handleCreateGroup(u));
-            return cell;
+        DbTask<java.util.List<User>> task = new DbTask<>(() -> {
+            return FriendShipDAO.getFriendsList(currentUser.getId());
         });
+
+        task.setOnSucceeded(e -> {
+            // Filter locally on UI thread or background? Background is better if list is
+            // huge.
+            // But User objects need to be clean.
+            ObservableList<User> friends = FXCollections.observableArrayList(task.getValue());
+            ObservableList<User> onlineFriends = friends.filtered(User::isOnline);
+            userList.getUserListView().setItems(onlineFriends);
+
+            userList.getUserListView().setCellFactory(param -> {
+                UserCanChatCell cell = new UserCanChatCell();
+                cell.setOnChat(u -> handleChat(u));
+                cell.setOnCreateGroup(u -> handleCreateGroup(u));
+                return cell;
+            });
+        });
+
+        new Thread(task).start();
     }
 
     private void wireOptions() {
@@ -143,134 +185,113 @@ public class FriendController {
             if (query.isEmpty()) {
                 userList.getUserListView().setItems(FXCollections.observableArrayList());
             } else {
-                ObservableList<User> results = FXCollections
-                        .observableArrayList(FriendShipDAO.searchUsers(query, currentUser.getId()));
-                userList.getUserListView().setItems(results);
-
-                // Update cell factory for search results based on relationship
-                userList.getUserListView().setCellFactory(param -> {
-                    // We need a custom cell that checks relationship dynamically
-                    // Since we can't easily change cell type per item in a single ListView without
-                    // custom Cell implementation
-                    // We will use UserFriendListCell but customize buttons.
-                    // Ideally we should have a 'UniversalCell' but for now let's reuse
-                    // UserFriendListCell and hack visibility
-
-                    UserFriendListCell cell = new UserFriendListCell() {
-                        @Override
-                        protected void updateItem(User user, boolean empty) {
-                            super.updateItem(user, empty);
-                            if (empty || user == null) {
-                                setGraphic(null);
-                                return;
-                            }
-
-                            String rel = FriendShipDAO.getRelationship(currentUser.getId(), user.getId());
-
-                            // Reset buttons
-                            getDeleteButton().setVisible(false);
-                            getBlockButton().setVisible(false);
-                            getSendRequestButton().setVisible(false);
-
-                            // We also need a 'Chat' button... UserFriendListCell doesn't have it.
-                            // It seems we might need to add a Chat button to UserFriendListCell or switch
-                            // to UserCanChatCell
-                            // But ListView uses one CellFactory.
-                            // If we want mixed types, we need a Cell that can handle all or switch node.
-
-                            // Let's use UserFriendListCell buttons for now.
-                            // If friend -> Show 'Block' (Report Spam). Unfriend?
-                            // User asked: "Find user... Then can chat, create group"
-                            // If not friend -> Show 'Send Request'
-
-                            if ("friends".equals(rel)) {
-                                // Make 'Send Request' act as 'Chat'? No, label is fixed.
-                                // We should probably just show 'Block' here.
-                                // To allow Chat/Group, we really need UserCanChatCell.
-                                // Logic: Search result list contains Friends AND Strangers.
-                                // If we use UserFriendListCell, we lack Chat button.
-
-                                // Alternative: Only show Strangers in Search?
-                                // User said "Find person based on name... Then can chat". Implies finding
-                                // friends too?
-                                // Or finding strangers and add them, then chat?
-                                // "Find people... to Chat" usually implies finding friends.
-                                // But "Find people... (not blocked)" implies finding anyone.
-
-                                // Correct approach: Simple Universal Cell logic inside updateItem
-                                // But we are stuck with specific Cell classes.
-
-                                // Hack: UserFriendListCell has 3 buttons.
-                                // Label 'Send Request' -> 'Chat'?
-                                getSendRequestButton().setText("Chat");
-                                getSendRequestButton().setVisible(true);
-                                getSendRequestButton().setOnAction(e -> handleChat(user));
-
-                                getBlockButton().setVisible(true); // Report Spam
-                                getDeleteButton().setVisible(true); // Unfriend?
-                                getDeleteButton().setText("Group"); // Reuse Del for Group?
-                                getDeleteButton().setStyle("-fx-background-color: orange; -fx-text-fill: white;");
-                                getDeleteButton().setOnAction(e -> handleCreateGroup(user));
-
-                            } else if ("pending_sent".equals(rel)) {
-                                getSendRequestButton().setText("Sent");
-                                getSendRequestButton().setDisable(true);
-                                getSendRequestButton().setVisible(true);
-                                getBlockButton().setVisible(true);
-                            } else if ("pending_received".equals(rel)) {
-                                // Show Accept?
-                                getSendRequestButton().setText("Accept");
-                                getSendRequestButton().setVisible(true);
-                                getSendRequestButton().setOnAction(e -> handleAccept(user));
-                                getBlockButton().setVisible(true);
-                            } else if ("none".equals(rel)) {
-                                getSendRequestButton().setText("Add");
-                                getSendRequestButton().setVisible(true);
-                                getSendRequestButton().setDisable(false);
-                                getSendRequestButton().setOnAction(e -> handleSendRequest(user));
-                                getBlockButton().setVisible(true);
-                            } else {
-                                // Blocked? Search shouldn't show them if they blocked me.
-                                // If I blocked them, maybe show Unblock?
-                                // Current req: "Search ... (not see people who blocked me)"
-                            }
-                        }
-                    };
-                    return cell;
+                DbTask<java.util.List<User>> task = new DbTask<>(() -> {
+                    return FriendShipDAO.searchUsers(query, currentUser.getId());
                 });
+
+                task.setOnSucceeded(e -> {
+                    ObservableList<User> results = FXCollections.observableArrayList(task.getValue());
+                    userList.getUserListView().setItems(results);
+
+                    userList.getUserListView().setCellFactory(param -> {
+                        return new UserFriendListCell() {
+                            @Override
+                            protected void updateItem(User user, boolean empty) {
+                                super.updateItem(user, empty);
+                                if (empty || user == null) {
+                                    setGraphic(null);
+                                    return;
+                                }
+
+                                String rel = FriendShipDAO.getRelationship(currentUser.getId(), user.getId());
+
+                                getDeleteButton().setVisible(false);
+                                getBlockButton().setVisible(false);
+                                getSendRequestButton().setVisible(false);
+
+                                if ("friends".equals(rel)) {
+                                    getSendRequestButton().setText("Chat");
+                                    getSendRequestButton().setVisible(true);
+                                    getSendRequestButton().setOnAction(e -> handleChat(user));
+
+                                    getBlockButton().setVisible(true);
+                                    getDeleteButton().setVisible(true);
+                                    getDeleteButton().setText("Group");
+                                    getDeleteButton().setStyle("-fx-background-color: orange; -fx-text-fill: white;");
+                                    getDeleteButton().setOnAction(e -> handleCreateGroup(user));
+
+                                } else if ("pending_sent".equals(rel)) {
+                                    getSendRequestButton().setText("Sent");
+                                    getSendRequestButton().setDisable(true);
+                                    getSendRequestButton().setVisible(true);
+                                    getBlockButton().setVisible(true);
+                                } else if ("pending_received".equals(rel)) {
+                                    getSendRequestButton().setText("Accept");
+                                    getSendRequestButton().setVisible(true);
+                                    getSendRequestButton().setOnAction(e -> handleAccept(user));
+                                    getBlockButton().setVisible(true);
+                                } else if ("none".equals(rel)) {
+                                    getSendRequestButton().setText("Add");
+                                    getSendRequestButton().setVisible(true);
+                                    getSendRequestButton().setDisable(false);
+                                    getSendRequestButton().setOnAction(e -> handleSendRequest(user));
+                                    getBlockButton().setVisible(true);
+                                }
+                            }
+                        };
+                    });
+                });
+
+                new Thread(task).start();
             }
         } else {
-            // For FRIENDS, REQUESTS, ONLINE: Filter the *currently loaded* list
-            // Issue: We are not reloading from DB, just filtering current items.
-            // But refreshFriendsList() etc reload from DB.
-            // We should store the 'original' list in a variable to filter against?
-            // Or just rely on currentItems? If we filter, we lose items.
-            // Better: keep a cached copy or reload and filter.
+            // For FRIENDS, REQUESTS, ONLINE: Filter currently loaded items logic...
+            // Since we switched to loading via DB whenever mode changes, the list is fresh.
+            // We can just filter the current items in the ListView.
+            // Ideally we should cache the full list when loading.
 
-            // Optimized:
-            ObservableList<User> allItems = FXCollections.observableArrayList();
-            if (currentMode == Mode.FRIENDS) {
-                allItems = FXCollections.observableArrayList(FriendShipDAO.getFriendsList(currentUser.getId()));
-            } else if (currentMode == Mode.REQUESTS) {
-                allItems = FXCollections.observableArrayList(FriendShipDAO.getPendingRequests(currentUser.getId()));
-            } else if (currentMode == Mode.ONLINE) {
-                allItems = FXCollections.observableArrayList(FriendShipDAO.getFriendsList(currentUser.getId()));
-                allItems = FXCollections.observableArrayList(allItems.filtered(User::isOnline));
-            }
+            // Simplification: Trigger a background reload + filter? Or assume items are
+            // already there?
+            // If we just filter, we need the original list.
+            // Let's reload + filter in background for correctness.
 
-            if (query.isEmpty()) {
-                userList.getUserListView().setItems(allItems);
-            } else {
-                ObservableList<User> filtered = allItems
-                        .filtered(u -> (u.getUsername() != null && u.getUsername().toLowerCase().contains(query)) ||
-                                (u.getDisplayName() != null && u.getDisplayName().toLowerCase().contains(query)));
-                userList.getUserListView().setItems(filtered);
-            }
+            DbTask<java.util.List<User>> task = new DbTask<>(() -> {
+                java.util.List<User> all = new java.util.ArrayList<>();
+                if (currentMode == Mode.FRIENDS) {
+                    all = FriendShipDAO.getFriendsList(currentUser.getId());
+                } else if (currentMode == Mode.REQUESTS) {
+                    all = FriendShipDAO.getPendingRequests(currentUser.getId());
+                } else if (currentMode == Mode.ONLINE) {
+                    all = FriendShipDAO.getFriendsList(currentUser.getId());
+                    // Filter online in loop or steam
+                    // We can't use FXCollections.filtered in background thread on User object
+                    // easily if it binds?
+                    // User object is POJO.
+                    java.util.List<User> onl = new java.util.ArrayList<>();
+                    for (User u : all)
+                        if (u.isOnline())
+                            onl.add(u);
+                    all = onl;
+                }
 
-            // Re-apply cell factory because setting items might rely on view's default?
-            // No, cell factory is set on the ListView, it stays.
-            // But we need to ensure correct factory is set if we switch properly.
-            // Switching modes sets factory. Filtering just updates items.
+                if (!query.isEmpty()) {
+                    java.util.List<User> filtered = new java.util.ArrayList<>();
+                    for (User u : all) {
+                        if ((u.getUsername() != null && u.getUsername().toLowerCase().contains(query)) ||
+                                (u.getDisplayName() != null && u.getDisplayName().toLowerCase().contains(query))) {
+                            filtered.add(u);
+                        }
+                    }
+                    return filtered;
+                }
+                return all;
+            });
+
+            task.setOnSucceeded(e -> {
+                userList.getUserListView().setItems(FXCollections.observableArrayList(task.getValue()));
+            });
+
+            new Thread(task).start();
         }
     }
 
@@ -347,8 +368,57 @@ public class FriendController {
     }
 
     private void handleCreateGroup(User u) {
-        System.out.println("Create group with " + u.getUsername());
-        // TODO: implement group creation dialog
+        CreateGroupView view = new CreateGroupView();
+
+        // Load friends
+        java.util.List<User> friends = FriendShipDAO.getFriendsList(currentUser.getId());
+        view.getFriendsListView().getItems().addAll(friends);
+
+        // Pre-select target user
+        if (u != null) {
+            view.getFriendsListView().getSelectionModel().select(u);
+        }
+
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle("Create Group");
+        stage.setScene(new Scene(view));
+
+        view.getCancelButton().setOnAction(e -> stage.close());
+
+        view.getCreateButton().setOnAction(e -> {
+            String name = view.getGroupNameField().getText().trim();
+            ObservableList<User> selected = view.getFriendsListView().getSelectionModel().getSelectedItems();
+
+            if (name.isEmpty()) {
+                // simple alert or error
+                System.out.println("Group name empty");
+                return;
+            }
+            if (selected.isEmpty()) {
+                System.out.println("No members selected");
+                return;
+            }
+
+            java.util.List<java.util.UUID> memberIds = new java.util.ArrayList<>();
+            for (User member : selected) {
+                memberIds.add(member.getId());
+            }
+
+            Conversation conv = ConversationDAO.createChatGroup(name, currentUser.getId(), memberIds);
+            if (conv != null) {
+                System.out.println("Group created: " + conv.getId());
+                stage.close();
+                // Open Chat with Group
+                if (onOpenChat != null) {
+                    onOpenChat.accept(new GroupUser(conv));
+                }
+            } else {
+                System.out.println("Failed to create group");
+            }
+        });
+
+        stage.showAndWait();
     }
 
     public Tab getTab() {
