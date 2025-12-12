@@ -173,6 +173,10 @@ public class MessageView extends BorderPane {
         this.onSearch = onSearch;
     }
 
+    public Button getInfoButton() {
+        return infoChat;
+    }
+
     public BorderPane getView() {
         return this;
     }

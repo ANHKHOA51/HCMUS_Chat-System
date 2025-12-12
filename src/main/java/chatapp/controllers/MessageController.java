@@ -13,6 +13,12 @@ import javafx.collections.FXCollections;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
+import chatapp.views.GroupInfoView;
+import chatapp.models.GroupMember;
+import chatapp.dao.ConversationDAO;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class MessageController {
     User user;
@@ -32,7 +38,11 @@ public class MessageController {
         this.user = u;
         // Load friends instead of mock data
         java.util.List<User> friends = chatapp.dao.FriendShipDAO.getFriendsList(u.getId());
-        contact = new ContactListView(FXCollections.observableArrayList(friends));
+        java.util.List<chatapp.models.GroupUser> groups = ConversationDAO.getGroupsForUser(u.getId());
+        javafx.collections.ObservableList<User> allContacts = FXCollections.observableArrayList();
+        allContacts.addAll(friends);
+        allContacts.addAll(groups);
+        contact = new ContactListView(allContacts);
         contact.setPrefWidth(300);
 
         split.setLeft(contact);
@@ -145,6 +155,8 @@ public class MessageController {
                 // Let's implement: If we are viewing a chat with senderId, refresh.
 
                 javafx.application.Platform.runLater(() -> {
+                    reloadContactList(); // Sync contacts/groups
+
                     MessageView mv = views.get(senderId.toString());
                     if (mv != null) {
                         // It is a private chat with this user
@@ -158,17 +170,26 @@ public class MessageController {
                     // Let's iterate all open views and refresh?
                     // Safe approach for V1.
                     for (Map.Entry<String, MessageView> entry : views.entrySet()) {
-                        // entry.getKey() is conversationalist ID (User ID or Group ID).
-                        // We can force refresh all.
                         String key = entry.getKey();
                         try {
-                            UUID uuid = UUID.fromString(key);
-                            // Need to reconstruct User object slightly better or refactor refreshChat to
-                            // take UUID
-                            // refreshChat takes User.
-                            // Let's refactor refreshChat to be more robust or just call it if we can
-                            // resolve user.
-                            // For now, only Direct Private Chat refresh implemented reliably.
+                            // If key is ID. Refresh it.
+                            MessageView v = entry.getValue();
+                            // We need user object.
+                            // Hack: Just call refreshChat with dummy User with ID?
+                            // refreshChat uses ID.
+                            User dummy = new User();
+                            dummy.setId(UUID.fromString(key));
+                            // Determine if group?
+                            // We can check if key is in groups list
+                            boolean isGroup = false;
+                            for (User c : contact.getItems()) {
+                                if (c.getId().toString().equals(key) && c instanceof GroupUser) {
+                                    isGroup = true;
+                                    dummy = c; // Use real object
+                                    break;
+                                }
+                            }
+                            refreshChat(dummy, v);
                         } catch (Exception e) {
                         }
                     }
@@ -255,6 +276,12 @@ public class MessageController {
             MessageView view = new MessageView();
             view.getTextField().setOnAction(e -> sendMessageFor(view, targetUser));
             view.getButton().setOnAction(e -> sendMessageFor(view, targetUser));
+
+            boolean isGroup = targetUser instanceof GroupUser;
+            view.getInfoButton().setVisible(isGroup); // Only show for groups for now
+            if (isGroup) {
+                view.getInfoButton().setOnAction(e -> handleGroupInfo((GroupUser) targetUser));
+            }
 
             // Delete Message Handler
             view.setOnDeleteMessage(msg -> {
@@ -377,11 +404,221 @@ public class MessageController {
         }
     }
 
+    private void handleGroupInfo(GroupUser group) {
+        GroupInfoView view = new GroupInfoView();
+
+        // Setup Stage
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle("Group Info");
+        stage.setScene(new Scene(view));
+        stage.setWidth(500);
+        stage.setHeight(600);
+
+        // Initial Load
+        loadGroupData(group, view);
+
+        // Actions
+        view.getRenameBtn().setOnAction(e -> {
+            String newName = view.getGroupNameField().getText().trim();
+            if (!newName.isEmpty()) {
+                boolean success = ConversationDAO.renameConversation(group.getId(), newName);
+                if (success) {
+                    group.setDisplayName(newName); // Update local object
+                    loadGroupData(group, view); // Refresh
+                    contact.refresh(); // Refresh contact list UI
+                } else {
+                    view.setError("Unsufficient permissions or error.");
+                }
+            }
+        });
+
+        view.getAddMemberBtn().setOnAction(e -> {
+            // Pick a friend to add
+            // Simple approach: ChoiceDialog with friends NOT in group
+            java.util.List<User> friends = chatapp.dao.FriendShipDAO.getFriendsList(user.getId());
+            java.util.List<GroupMember> currentMembers = ConversationDAO.getGroupMembers(group.getId());
+
+            java.util.List<User> eligible = new java.util.ArrayList<>();
+            for (User f : friends) {
+                boolean exists = false;
+                for (GroupMember m : currentMembers) {
+                    if (m.getId().equals(f.getId())) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists)
+                    eligible.add(f);
+            }
+
+            if (eligible.isEmpty()) {
+                view.setError("No eligible friends to add.");
+                return;
+            }
+
+            javafx.scene.control.Dialog<User> dialog = new javafx.scene.control.Dialog<>();
+            dialog.setTitle("Add Member");
+            dialog.setHeaderText("Choose a friend:");
+
+            javafx.scene.control.ButtonType addButtonType = new javafx.scene.control.ButtonType("Add",
+                    javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(addButtonType, javafx.scene.control.ButtonType.CANCEL);
+
+            javafx.scene.control.ComboBox<User> combo = new javafx.scene.control.ComboBox<>(
+                    FXCollections.observableArrayList(eligible));
+            combo.setConverter(new javafx.util.StringConverter<User>() {
+                @Override
+                public String toString(User object) {
+                    return object != null ? object.getDisplayName() : "";
+                }
+
+                @Override
+                public User fromString(String string) {
+                    return null;
+                }
+            });
+            combo.getSelectionModel().selectFirst();
+
+            javafx.scene.layout.VBox content = new javafx.scene.layout.VBox(10,
+                    new javafx.scene.control.Label("Friend:"), combo);
+            dialog.getDialogPane().setContent(content);
+
+            dialog.setResultConverter(b -> {
+                if (b == addButtonType)
+                    return combo.getSelectionModel().getSelectedItem();
+                return null;
+            });
+            dialog.showAndWait().ifPresent(selected -> {
+                boolean success = ConversationDAO.addMember(group.getId(), selected.getId());
+                if (success) {
+                    loadGroupData(group, view);
+                } else {
+                    view.setError("Failed to add member.");
+                }
+            });
+        });
+
+        view.getLeaveBtn().setOnAction(e -> {
+            // Confirm?
+            boolean success = ConversationDAO.removeMember(group.getId(), user.getId());
+            if (success) {
+                stage.close();
+                contact.getItems().remove(group);
+                split.setCenter(null);
+            }
+        });
+
+        stage.showAndWait();
+    }
+
+    private void loadGroupData(GroupUser group, GroupInfoView view) {
+        // Name
+        view.getGroupNameField().setText(group.getDisplayName());
+
+        // Members
+        java.util.List<GroupMember> members = ConversationDAO.getGroupMembers(group.getId());
+        view.getMembersListView().setItems(FXCollections.observableArrayList(members));
+
+        // Check if current user is admin
+        boolean isAdmin = false;
+        for (GroupMember m : members) {
+            if (m.getId().equals(user.getId()) && "admin".equals(m.getRole())) {
+                isAdmin = true;
+                break;
+            }
+        }
+
+        final boolean finalIsAdmin = isAdmin;
+
+        // Set permissions on view controls
+        view.getRenameBtn().setDisable(!isAdmin);
+        // view.getAddMemberBtn().setDisable(!isAdmin); // Anyone can add? Let's say yes
+        // for now or restrict to admin.
+        // Requirement 12.c just says "Thêm thành viên". 12.e says "Xoá: chỉ admin".
+        // Let's assume Add is unrestricted or restricted.
+        // Usually safer to restrict to admin, but "Create group" allows anyone to add
+        // initial members.
+        // Let's allow anyone to add.
+
+        // Setup List Cell Factory for Actions (Kick/Promote)
+        view.getMembersListView().setCellFactory(param -> new javafx.scene.control.ListCell<>() {
+            @Override
+            protected void updateItem(GroupMember item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    javafx.scene.layout.HBox hbox = new javafx.scene.layout.HBox(10);
+                    javafx.scene.control.Label nameLbl = new javafx.scene.control.Label(
+                            item.getDisplayName() + (item.getId().equals(user.getId()) ? " (You)" : ""));
+                    javafx.scene.control.Label roleLbl = new javafx.scene.control.Label(item.getRole());
+                    roleLbl.setStyle("-fx-text-fill: grey; -fx-font-size: 10px;");
+
+                    javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
+                    javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+
+                    hbox.getChildren().addAll(nameLbl, roleLbl, spacer);
+
+                    if (finalIsAdmin && !item.getId().equals(user.getId())) {
+                        javafx.scene.control.Button kickBtn = new javafx.scene.control.Button("X");
+                        kickBtn.setStyle("-fx-text-fill: red;");
+                        kickBtn.setOnAction(ev -> {
+                            boolean ok = ConversationDAO.removeMember(group.getId(), item.getId());
+                            if (ok)
+                                loadGroupData(group, view);
+                        });
+                        hbox.getChildren().add(kickBtn);
+
+                        if (!"admin".equals(item.getRole())) {
+                            javafx.scene.control.Button promoteBtn = new javafx.scene.control.Button("Promote");
+                            promoteBtn.setOnAction(ev -> {
+                                boolean ok = ConversationDAO.updateMemberRole(group.getId(), item.getId(), "admin");
+                                if (ok)
+                                    loadGroupData(group, view);
+                            });
+                            hbox.getChildren().add(promoteBtn);
+                        }
+                    }
+
+                    setGraphic(hbox);
+                }
+            }
+        });
+    }
+
     public Tab getTab() {
         Tab tab = new Tab();
         tab.setClosable(false);
         tab.setContent(split);
         tab.setText("Message");
         return tab;
+    }
+
+    private void reloadContactList() {
+        // Run on UI thread? The caller (setupSocket) runs inside Platform.runLater
+        // already.
+        // But if called from elsewhere... safest to assume we need to manage thread or
+        // caller does.
+        // Since setupSocket does runLater, we are okay.
+
+        java.util.List<User> friends = chatapp.dao.FriendShipDAO.getFriendsList(user.getId());
+        java.util.List<chatapp.models.GroupUser> groups = ConversationDAO.getGroupsForUser(user.getId());
+
+        User selected = contact.getSelectionModel().getSelectedItem();
+
+        javafx.collections.ObservableList<User> items = contact.getItems();
+        items.clear();
+        items.addAll(friends);
+        items.addAll(groups);
+
+        if (selected != null) {
+            for (User u : items) {
+                if (u.getId().equals(selected.getId())) {
+                    contact.getSelectionModel().select(u);
+                    break;
+                }
+            }
+        }
     }
 }

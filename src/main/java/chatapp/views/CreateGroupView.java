@@ -30,6 +30,17 @@ public class CreateGroupView extends VBox {
         friendsListView = new ListView<>();
         friendsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         VBox.setVgrow(friendsListView, Priority.ALWAYS);
+        friendsListView.setCellFactory(param -> new javafx.scene.control.ListCell<>() {
+            @Override
+            protected void updateItem(User item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getDisplayName() != null ? item.getDisplayName() : item.getUsername());
+                }
+            }
+        });
 
         HBox buttonBox = new HBox(10);
         createButton = new Button("Create");

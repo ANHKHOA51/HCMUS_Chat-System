@@ -4,6 +4,7 @@ import chatapp.db.DBConnection;
 import chatapp.dto.ChatGroupDTO;
 import chatapp.models.Conversation;
 import chatapp.models.User;
+import chatapp.models.GroupMember;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -258,5 +259,141 @@ public class ConversationDAO {
             e.printStackTrace();
         }
         return list;
+    }
+
+    public static List<chatapp.models.GroupUser> getGroupsForUser(UUID userId) {
+        List<chatapp.models.GroupUser> list = new ArrayList<>();
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                SELECT c.*
+                FROM conversations c
+                JOIN conversation_members cm ON c.id = cm.conversation_id
+                WHERE c.isGroup = TRUE AND cm.user_id = ?
+                """;
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                chatapp.models.Conversation c = new Conversation();
+                c.setId(UUID.fromString(rs.getString("id")));
+                c.setTitle(rs.getString("title"));
+                c.setGroup(true);
+                // c.setCreatedBy(...) // Optional
+
+                chatapp.models.GroupUser gu = new chatapp.models.GroupUser(c);
+                list.add(gu);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static List<GroupMember> getGroupMembers(UUID conversationId) {
+        List<GroupMember> list = new ArrayList<>();
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                SELECT u.*, cm.role
+                FROM conversation_members cm
+                JOIN users u ON u.id = cm.user_id
+                WHERE cm.conversation_id = ?
+                ORDER BY cm.role ASC, u.username ASC
+                """; // Role ASC usually puts 'admin' before 'member' alphabetically
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, conversationId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                User u = new User();
+                u.setId(UUID.fromString(rs.getString("id")));
+                u.setUsername(rs.getString("username"));
+                u.setDisplayName(rs.getString("display_name"));
+                // u.setGender(rs.getBoolean("gender")); // Assume not critical for list
+                u.setOnline(rs.getBoolean("is_online"));
+
+                GroupMember gm = new GroupMember(u, rs.getString("role"));
+                list.add(gm);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static boolean renameConversation(UUID conversationId, String newName) {
+        Connection conn = DBConnection.getConnection();
+        String sql = "UPDATE conversations SET title = ? WHERE id = ? AND isGroup = TRUE";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, newName);
+            ps.setObject(2, conversationId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean addMember(UUID conversationId, UUID userId) {
+        Connection conn = DBConnection.getConnection();
+        // Check if already member?
+        String sql = "INSERT INTO conversation_members (conversation_id, user_id, role) VALUES (?, ?, 'member') ON CONFLICT DO NOTHING";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, conversationId);
+            ps.setObject(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean removeMember(UUID conversationId, UUID userId) {
+        Connection conn = DBConnection.getConnection();
+        String sql = "DELETE FROM conversation_members WHERE conversation_id = ? AND user_id = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, conversationId);
+            ps.setObject(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean updateMemberRole(UUID conversationId, UUID userId, String newRole) {
+        Connection conn = DBConnection.getConnection();
+        String sql = "UPDATE conversation_members SET role = ? WHERE conversation_id = ? AND user_id = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, newRole);
+            ps.setObject(2, conversationId);
+            ps.setObject(3, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean isAdmin(UUID conversationId, UUID userId) {
+        Connection conn = DBConnection.getConnection();
+        String sql = "SELECT role FROM conversation_members WHERE conversation_id = ? AND user_id = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, conversationId);
+            ps.setObject(2, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return "admin".equals(rs.getString("role"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

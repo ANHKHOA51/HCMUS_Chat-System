@@ -1,4 +1,5 @@
 chatapp/controllers/dashboard/LoginHistoryController.class
+chatapp/controllers/MessageController$2.class
 chatapp/controllers/dashboard/UserController.class
 chatapp/views/ContactListView$1.class
 chatapp/dao/MessageDAO.class
@@ -18,6 +19,7 @@ chatapp/views/cells/UserFriendListCell.class
 chatapp/controllers/FriendController$1.class
 chatapp/dao/FriendShipDAO.class
 chatapp/views/UserListView.class
+chatapp/models/GroupMember.class
 chatapp/controllers/dashboard/RegistrationController.class
 chatapp/views/ProfileView.class
 chatapp/dto/ChatGroupDTO.class
@@ -41,6 +43,7 @@ chatapp/controllers/dashboard/FriendController.class
 chatapp/models/LoginHistory.class
 module-info.class
 chatapp/views/ContactListView.class
+chatapp/controllers/MessageController$3.class
 chatapp/utils/DbTask.class
 chatapp/models/ChatCache.class
 chatapp/models/ConversationMember.class
@@ -55,6 +58,8 @@ chatapp/views/ContactListView$2.class
 chatapp/dto/LoginHistoryDTO.class
 chatapp/views/cells/FriendReqCell.class
 chatapp/models/User.class
+chatapp/views/CreateGroupView$1.class
+chatapp/views/GroupInfoView.class
 chatapp/controllers/dashboard/ReportController.class
 chatapp/dao/ConversationDAO.class
 chatapp/test/MockData.class

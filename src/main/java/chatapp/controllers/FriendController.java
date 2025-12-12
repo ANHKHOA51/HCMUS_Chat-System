@@ -26,6 +26,7 @@ public class FriendController {
     FriendOptionView fov;
     UserListView userList;
     private BorderPane split = new BorderPane();
+    private chatapp.server.ChatClientWrapper socketClient;
 
     // Mode tracking
     private enum Mode {
@@ -382,7 +383,11 @@ public class FriendController {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Create Group");
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle("Create Group");
         stage.setScene(new Scene(view));
+        stage.setWidth(500);
+        stage.setHeight(600);
 
         view.getCancelButton().setOnAction(e -> stage.close());
 
@@ -413,6 +418,15 @@ public class FriendController {
                 if (onOpenChat != null) {
                     onOpenChat.accept(new GroupUser(conv));
                 }
+
+                // Notify members
+                if (socketClient != null) {
+                    for (java.util.UUID mid : memberIds) {
+                        if (!mid.equals(currentUser.getId())) {
+                            socketClient.notifyUser(mid);
+                        }
+                    }
+                }
             } else {
                 System.out.println("Failed to create group");
             }
@@ -430,6 +444,7 @@ public class FriendController {
     }
 
     public void setupSocket(chatapp.server.ChatClientWrapper socketClient) {
+        this.socketClient = socketClient;
         if (socketClient != null) {
             socketClient.setOnUserOnline(userId -> {
                 javafx.application.Platform.runLater(() -> updateUserStatus(userId, true));

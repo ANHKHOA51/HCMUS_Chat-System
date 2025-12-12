@@ -12,12 +12,14 @@
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/controllers/FriendController.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/views/MessageView.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/views/CreateGroupView.java
+/home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/models/GroupMember.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/server/ChatClientWrapper.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/dao/MessageDAO.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/views/cells/UserCanChatCell.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/views/ForgotPasswordView.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/utils/FXMLPaths.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/dto/UserFriendsDTO.java
+/home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/views/GroupInfoView.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/models/FriendShip.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/views/LoginView.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/controllers/dashboard/ActivityController.java
