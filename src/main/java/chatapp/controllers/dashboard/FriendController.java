@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import chatapp.dto.UserFriendsDTO;
-import chatapp.models.Friendship;
+import chatapp.models.FriendShip;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -45,7 +45,7 @@ public class FriendController extends DashboardController {
 
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
-        List<UserFriendsDTO> list = Friendship.getListUserFriends();
+        List<UserFriendsDTO> list = FriendShip.getListUserFriends();
 
         listUsers = FXCollections.observableArrayList(list);
 

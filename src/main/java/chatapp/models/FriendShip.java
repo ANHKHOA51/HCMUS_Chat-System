@@ -13,7 +13,7 @@ import java.util.UUID;
 import chatapp.db.DBConnection;
 import chatapp.dto.UserFriendsDTO;
 
-public class Friendship {
+public class FriendShip {
     private UUID id;
     private UUID userId;
     private UUID friendId;
@@ -23,10 +23,10 @@ public class Friendship {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Friendship() {
+    public FriendShip() {
     }
 
-    public Friendship(UUID id, UUID userId, UUID friendId, UUID requesterId,
+    public FriendShip(UUID id, UUID userId, UUID friendId, UUID requesterId,
             String status, LocalDateTime acceptedAt, LocalDateTime createdAt,
             LocalDateTime updatedAt) {
         this.id = id;
