@@ -151,4 +151,96 @@ public class Conversation {
         }
         return list;
     }
+
+    public static Conversation getPrivateConversation(UUID user1, UUID user2) {
+        Connection conn = DBConnection.getConnection();
+        // Determine private chat: conversation joined by BOTH user1 and user2 AND
+        // isGroup = false
+        // Query: find conversation_id in members where user_id = user1
+        // INTERSECT find conversation_id in members where user_id = user2
+        // JOIN conversations to check isGroup = false
+
+        String sql = """
+                    SELECT c.*
+                    FROM conversations c
+                    JOIN conversation_members cm1 ON c.id = cm1.conversation_id
+                    JOIN conversation_members cm2 ON c.id = cm2.conversation_id
+                    WHERE c.isGroup = FALSE
+                    AND cm1.user_id = ?
+                    AND cm2.user_id = ?
+                    LIMIT 1;
+                """;
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, user1);
+            ps.setObject(2, user2);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Conversation c = new Conversation();
+                c.setId(UUID.fromString(rs.getString("id")));
+                c.setGroup(rs.getBoolean("isGroup"));
+                c.setTitle(rs.getString("title"));
+                c.setCreatedBy(rs.getString("created_by") != null ? UUID.fromString(rs.getString("created_by")) : null);
+                c.setCreatedAt(
+                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+                return c;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Conversation createPrivateConversation(UUID user1, UUID user2) {
+        Connection conn = DBConnection.getConnection();
+        try {
+            conn.setAutoCommit(false);
+
+            // 1. Create Conversation
+            UUID convId = UUID.randomUUID();
+            String sqlConv = "INSERT INTO conversations (id, isGroup, created_by) VALUES (?, ?, ?)";
+            PreparedStatement psConv = conn.prepareStatement(sqlConv);
+            psConv.setObject(1, convId);
+            psConv.setBoolean(2, false);
+            psConv.setObject(3, user1); // Initiator
+            psConv.executeUpdate();
+
+            // 2. Add Members
+            String sqlMem = "INSERT INTO conversation_members (conversation_id, user_id, role) VALUES (?, ?, ?)";
+            PreparedStatement psMem = conn.prepareStatement(sqlMem);
+
+            // Member 1
+            psMem.setObject(1, convId);
+            psMem.setObject(2, user1);
+            psMem.setString(3, "member");
+            psMem.executeUpdate();
+
+            // Member 2
+            psMem.setObject(1, convId);
+            psMem.setObject(2, user2);
+            psMem.setString(3, "member");
+            psMem.executeUpdate();
+
+            conn.commit();
+            conn.setAutoCommit(true);
+
+            Conversation c = new Conversation();
+            c.setId(convId);
+            c.setGroup(false);
+            c.setCreatedBy(user1);
+            c.setCreatedAt(LocalDateTime.now());
+            return c;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                conn.rollback();
+                conn.setAutoCommit(true);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return null;
+    }
 }

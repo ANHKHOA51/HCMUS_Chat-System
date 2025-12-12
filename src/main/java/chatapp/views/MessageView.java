@@ -80,11 +80,9 @@ public class MessageView extends BorderPane {
 
         // hover effect for delete button
         delMessage.setOnMouseEntered(e -> delMessage.setStyle(
-            "-fx-font-size: 10px; -fx-background-radius: 8px; -fx-padding: 0; -fx-background-color: #e74c3c; -fx-text-fill: white;"
-        ));
+                "-fx-font-size: 10px; -fx-background-radius: 8px; -fx-padding: 0; -fx-background-color: #e74c3c; -fx-text-fill: white;"));
         delMessage.setOnMouseExited(e -> delMessage.setStyle(
-            "-fx-opacity: 0;"
-        ));
+                "-fx-opacity: 0;"));
 
         chat.setWrapText(true);
         HBox bubble;
@@ -101,10 +99,9 @@ public class MessageView extends BorderPane {
         String bg = isMine ? "#9292ff" : "#E5E5EA";
         chat.setStyle(
                 "-fx-background-color: " + bg + ";" +
-                " -fx-padding: 5;" +
-                " -fx-background-radius: 10;" +
-                " -fx-text-fill: black;"
-        );
+                        " -fx-padding: 5;" +
+                        " -fx-background-radius: 10;" +
+                        " -fx-text-fill: black;");
 
         bubble.setAlignment(isMine ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
         bubble.setStyle(" -fx-padding: 3;");
@@ -126,8 +123,7 @@ public class MessageView extends BorderPane {
 
         msgList.getChildren().add(bb);
 
-
-        //TODO: Remove this example response later
+        // TODO: Remove this example response later
         HBox res = createBubble("This is an example response message", false);
 
         msgList.getChildren().add(res);
@@ -139,6 +135,17 @@ public class MessageView extends BorderPane {
 
     public Button getButton() {
         return sendBtn;
+    }
+
+    public void clearMessages() {
+        msgList.getChildren().clear();
+    }
+
+    public void addMessage(String message, boolean isMine) {
+        if (message == null)
+            return;
+        HBox bubble = createBubble(message, isMine);
+        msgList.getChildren().add(bubble);
     }
 
     public BorderPane getView() {

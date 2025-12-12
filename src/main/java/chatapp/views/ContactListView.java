@@ -21,7 +21,8 @@ public class ContactListView extends ListView<User> {
                         return;
                     }
                     super.updateItem(u, empty);
-                    String display = (u.toString() == null ? "" : u.toString());
+                    String display = (u.getDisplayName() != null && !u.getDisplayName().isEmpty()) ? u.getDisplayName()
+                            : u.getUsername();
                     setText(display);
                 }
             };
@@ -45,7 +46,8 @@ public class ContactListView extends ListView<User> {
                         return;
                     }
                     super.updateItem(u, empty);
-                    String display = (u.toString() == null ? "" : u.toString());
+                    String display = (u.getDisplayName() != null && !u.getDisplayName().isEmpty()) ? u.getDisplayName()
+                            : u.getUsername();
                     setText(display);
                 }
             };

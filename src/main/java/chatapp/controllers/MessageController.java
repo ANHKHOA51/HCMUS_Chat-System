@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import chatapp.models.User;
+import chatapp.models.FriendShip;
+import chatapp.models.Conversation;
+import chatapp.models.Message;
+import java.util.UUID;
 import chatapp.test.MockData;
 import chatapp.views.ContactListView;
 import chatapp.views.MessageView;
@@ -27,31 +31,24 @@ public class MessageController {
 
     public MessageController(User u) {
         this.user = u;
-        contact = new ContactListView(MockData.mockUsers());
+        // Load friends instead of mock data
+        java.util.List<User> friends = chatapp.models.FriendShip.getFriendsList(u.getId());
+        contact = new ContactListView(FXCollections.observableArrayList(friends));
         contact.setPrefWidth(300);
 
         split.setLeft(contact);
         split.setCenter(null);
 
-        // MultipleSelectionModel<User> sel = (MultipleSelectionModel<User>)
-        // contact.getSelectionModel();
-        // if (sel != null) {
-        // sel.selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-        // if (newVal != null) {
-        // // reuse per-contact view so state (history, draft) is preserved
-        // MessageView view = views.computeIfAbsent(newVal.getId(), k -> {
-        // MessageView mv = new MessageView();
-        // // handlers capture mv and the contact id (user id string)
-        // mv.getTextField().setOnAction(e -> sendMessageFor(mv, newVal.getId()));
-        // mv.getButton().setOnAction(e -> sendMessageFor(mv, newVal.getId()));
-        // return mv;
-        // });
-        // split.setCenter(view);
-        // } else {
-        // split.setCenter(null);
-        // }
-        // });
-        // }
+        MultipleSelectionModel<User> sel = contact.getSelectionModel();
+        if (sel != null) {
+            sel.selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null) {
+                    // Load chat for the selected user
+                    // reuse per-contact view so state is preserved or updated
+                    openChatWith(newVal);
+                }
+            });
+        }
     }
 
     // send message for a specific MessageView / contactId
@@ -63,31 +60,60 @@ public class MessageController {
             return;
         text = text.trim();
         if (!text.isEmpty()) {
-            mv.sendMessage(text);
-            mv.getTextField().clear();
-            // TODO: persist message to conversation store for contactId if needed
+            UUID targetId = UUID.fromString(contactId);
+            Conversation conv = chatapp.models.Conversation.getPrivateConversation(user.getId(), targetId);
+            if (conv == null) {
+                conv = chatapp.models.Conversation.createPrivateConversation(user.getId(), targetId);
+            }
+            if (conv != null) {
+                chatapp.models.Message.send(conv.getId(), user.getId(), text);
+                mv.sendMessage(text);
+                mv.getTextField().clear();
+            }
         }
     }
 
     public void openChatWith(User targetUser) {
-        // Delegate to ContactListView to select or add user
-        // contact.selectUser(targetUser); // Assuming ContactListView has this
-        // For now, if we don't have that method, we can try to find it in the list.
-        // Or if ContactListView is just a wrapper around ListView<User>:
-        // contact.getSelectionModel().select(targetUser);
-        // BUT MessageController uses 'contact' which is ContactListView.
-        // Let's assume ContactListView extends ListView<User> or has a ListView inside.
-        // Looking at previous context: contact = new
-        // ContactListView(MockData.mockUsers());
-        // We need to inspect ContactListView. for now let's just assume we can select.
-
-        // Actually, let's implement a simple logic:
-        if (contact.getItems().contains(targetUser)) {
-            contact.getSelectionModel().select(targetUser);
-        } else {
+        // Ensure user is in the list
+        if (!contact.getItems().contains(targetUser)) {
             contact.getItems().add(targetUser);
+            // Select the newly added user
             contact.getSelectionModel().select(targetUser);
+            // The listener will trigger openChatWith again, so we can return?
+            // Better to decouple: openChatWith ensures selection, and selection triggers
+            // loadChatView.
+            // But openChatWith is called by App.java.
+            return;
         }
+
+        // If not selected, select it (this triggers listener)
+        if (!targetUser.equals(contact.getSelectionModel().getSelectedItem())) {
+            contact.getSelectionModel().select(targetUser);
+            return;
+        }
+
+        // Logic to load messages and set view (called by listener or effectively here)
+        loadChatView(targetUser);
+    }
+
+    private void loadChatView(User targetUser) {
+        Conversation conv = chatapp.models.Conversation.getPrivateConversation(user.getId(), targetUser.getId());
+        MessageView mv = views.computeIfAbsent(targetUser.getId().toString(), k -> {
+            MessageView view = new MessageView();
+            view.getTextField().setOnAction(e -> sendMessageFor(view, targetUser.getId().toString()));
+            view.getButton().setOnAction(e -> sendMessageFor(view, targetUser.getId().toString()));
+            return view;
+        });
+
+        mv.clearMessages();
+        if (conv != null) {
+            java.util.List<chatapp.models.Message> messages = chatapp.models.Message.getMessages(conv.getId());
+            for (chatapp.models.Message m : messages) {
+                boolean isMine = m.getSenderId().equals(user.getId());
+                mv.addMessage(m.getContent(), isMine);
+            }
+        }
+        split.setCenter(mv);
     }
 
     public Tab getTab() {
