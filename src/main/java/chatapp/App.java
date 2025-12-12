@@ -21,6 +21,8 @@ import chatapp.models.User;
 import chatapp.utils.FXMLPaths;
 
 public class App extends Application {
+    private static App instance;
+    public static chatapp.server.ChatClientWrapper socketClient;
     private User cur_user;
 
     @Override
@@ -60,13 +62,26 @@ public class App extends Application {
                         stage.setScene(adminScene);
                         stage.centerOnScreen();
                         stage.setTitle("Admin Dashboard");
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                         System.out.println("Failed to load Admin Dashboard");
                     }
                 } else {
                     TabPane pane = new TabPane();
                     MessageController msgCtl = new MessageController(cur_user);
+
+                    // Start Socket Client
+                    try {
+                        socketClient = new chatapp.server.ChatClientWrapper(new java.net.URI("ws://localhost:8887"),
+                                cur_user.getId());
+                        socketClient.connect();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    // Add callbacks AFTER socketClient is created
+                    msgCtl.setupSocket(socketClient);
+
                     ProfileController pfCtl = new ProfileController(cur_user);
                     pfCtl.setOnSignOut(() -> {
                         cur_user = null;
@@ -75,13 +90,10 @@ public class App extends Application {
                         stage.centerOnScreen();
                     });
                     FriendController frCtl = new FriendController(cur_user);
+                    frCtl.setupSocket(socketClient);
 
                     frCtl.setOnOpenChat(targetUser -> {
                         pane.getSelectionModel().select(0); // Assuming MessageController is at index 0
-                        // TODO: Ideally msgCtl should have a method to select/open chat with this user
-                        // Since MessageController uses internal ContactListView, we might need to
-                        // expose a method
-                        // to select the user if they exist in the list, or add them.
                         msgCtl.openChatWith(targetUser);
                     });
 
@@ -118,6 +130,14 @@ public class App extends Application {
             authCtl.showLogin();
         });
 
+    }
+
+    @Override
+    public void stop() throws Exception {
+        if (socketClient != null) {
+            socketClient.close();
+        }
+        System.exit(0);
     }
 
     public static void main(String[] args) {

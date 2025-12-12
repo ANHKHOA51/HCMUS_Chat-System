@@ -26,6 +26,7 @@ chatapp/controllers/ProfileController.class
 chatapp/models/GroupUser.class
 chatapp/models/Report.class
 chatapp/views/SignupView.class
+chatapp/controllers/MessageController$1.class
 chatapp/controllers/MessageController.class
 chatapp/controllers/AuthController$SignupHandler.class
 chatapp/controllers/dashboard/ActivityController.class
@@ -34,6 +35,7 @@ chatapp/db/DBConnection.class
 chatapp/App.class
 chatapp/views/FriendOptionView.class
 chatapp/views/cells/UserCanChatCell.class
+chatapp/server/ChatClientWrapper.class
 chatapp/controllers/FriendController$Mode.class
 chatapp/controllers/dashboard/FriendController.class
 chatapp/models/LoginHistory.class
@@ -43,6 +45,7 @@ chatapp/utils/DbTask.class
 chatapp/models/ChatCache.class
 chatapp/models/ConversationMember.class
 chatapp/controllers/FriendController.class
+chatapp/server/ChatServer.class
 chatapp/utils/FXMLPaths$User.class
 chatapp/dao/UserDAO.class
 chatapp/views/CreateGroupView.class

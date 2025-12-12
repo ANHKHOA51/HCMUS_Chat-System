@@ -219,4 +219,44 @@ public class ConversationDAO {
         }
         return null;
     }
+
+    public static Conversation getConversation(UUID id) {
+        Connection conn = DBConnection.getConnection();
+        String sql = "SELECT * FROM conversations WHERE id = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Conversation c = new Conversation();
+                c.setId(UUID.fromString(rs.getString("id")));
+                c.setTitle(rs.getString("title"));
+                c.setGroup(rs.getBoolean("isGroup"));
+                c.setCreatedBy(rs.getString("created_by") != null ? UUID.fromString(rs.getString("created_by")) : null);
+                c.setCreatedAt(
+                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+                return c;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static List<UUID> getConversationMemberIds(UUID conversationId) {
+        List<UUID> list = new ArrayList<>();
+        Connection conn = DBConnection.getConnection();
+        String sql = "SELECT user_id FROM conversation_members WHERE conversation_id = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, conversationId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(UUID.fromString(rs.getString("user_id")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

@@ -27,11 +27,16 @@
             <version>42.7.8</version> <!-- kiểm tra version mới nhất nếu cần -->
         </dependency>
         <dependency>
-    <groupId>io.github.cdimascio</groupId>
-    <artifactId>dotenv-java</artifactId>
-    <version>3.2.0</version>
-</dependency>
-    </dependencies>
+        <groupId>io.github.cdimascio</groupId>
+        <artifactId>dotenv-java</artifactId>
+        <version>3.2.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.java-websocket</groupId>
+        <artifactId>Java-WebSocket</artifactId>
+        <version>1.6.0</version>
+    </dependency>
+</dependencies>
     <build>
         <plugins>
             <plugin>
@@ -75,6 +80,19 @@
                                 <option>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</option>
                             </options>
                             <mainClass>chatapp/chatapp.App</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>server</id>
+                        <configuration>
+                            <mainClass>chatapp.server.ChatServer</mainClass>
                         </configuration>
                     </execution>
                 </executions>

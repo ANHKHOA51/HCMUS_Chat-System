@@ -12,6 +12,7 @@
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/controllers/FriendController.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/views/MessageView.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/views/CreateGroupView.java
+/home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/server/ChatClientWrapper.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/dao/MessageDAO.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/views/cells/UserCanChatCell.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/views/ForgotPasswordView.java
@@ -24,6 +25,7 @@
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/utils/DbTask.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/views/cells/UserFriendListCell.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/dao/FriendShipDAO.java
+/home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/server/ChatServer.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/controllers/dashboard/UserController.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/models/GroupUser.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/models/ConversationMember.java

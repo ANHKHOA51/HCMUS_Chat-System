@@ -13,9 +13,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.scene.Parent;
-import javafx.scene.layout.Pane;
-import javafx.application.Platform;
 
 public class MessageView extends BorderPane {
     private VBox msgList = new VBox();;
@@ -25,6 +22,11 @@ public class MessageView extends BorderPane {
     private TextField searchMessage = new TextField();
     private Button infoChat = new Button("Info");
     private Label lbl = new Label();
+    private Button clearBtn = new Button("Clear");
+
+    private java.util.function.Consumer<chatapp.models.Message> onDeleteMessage;
+    private Runnable onClearHistory;
+    private java.util.function.Consumer<String> onSearch;
 
     public MessageView() {
         super();
@@ -41,7 +43,17 @@ public class MessageView extends BorderPane {
         inpLayout.setSpacing(6);
         HBox header = new HBox(6);
         header.setPadding(new Insets(10));
-        header.getChildren().addAll(lbl, searchMessage, infoChat);
+        header.getChildren().addAll(lbl, searchMessage, infoChat, clearBtn);
+
+        searchMessage.setOnAction(e -> {
+            if (onSearch != null)
+                onSearch.accept(searchMessage.getText());
+        });
+
+        clearBtn.setOnAction(e -> {
+            if (onClearHistory != null)
+                onClearHistory.run();
+        });
         setTop(header);
         setBottom(inpLayout);
         setCenter(scroll);
@@ -61,39 +73,55 @@ public class MessageView extends BorderPane {
 
         HBox header = new HBox(6);
         header.setPadding(new Insets(10));
-        header.getChildren().addAll(lbl, searchMessage, infoChat);
+        header.getChildren().addAll(lbl, searchMessage, infoChat, clearBtn);
+
+        searchMessage.setOnAction(e -> {
+            if (onSearch != null)
+                onSearch.accept(searchMessage.getText());
+        });
+
+        clearBtn.setOnAction(e -> {
+            if (onClearHistory != null)
+                onClearHistory.run();
+        });
         setTop(header);
         setBottom(inpLayout);
         setCenter(scroll);
     }
 
-    private HBox createBubble(String msg, boolean isMine) {
-        Label chat = new Label(msg);
-        Button delMessage = new Button("X");
+    private HBox createBubble(chatapp.models.Message msg, boolean isMine) {
+        if (msg.isDeleted()) {
+            // Maybe show "Message Deleted"? Or don't show at all?
+            Label deletedLbl = new Label("Message Unsent");
+            deletedLbl.setStyle("-fx-font-style: italic; -fx-text-fill: grey;");
+            HBox bubble = new HBox(deletedLbl);
+            bubble.setAlignment(isMine ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
+            bubble.setPadding(new Insets(5));
+            return bubble;
+        }
 
-        // Make delete button small and square
-        delMessage.setPrefSize(16, 16);
-        delMessage.setMinSize(16, 16);
-        delMessage.setMaxSize(16, 16);
-        delMessage.setFocusTraversable(false);
-        delMessage.setStyle("-fx-opacity: 0;");
+        String content = msg.getContent();
+        Label chat = new Label(content);
 
-        // hover effect for delete button
-        delMessage.setOnMouseEntered(e -> delMessage.setStyle(
-                "-fx-font-size: 10px; -fx-background-radius: 8px; -fx-padding: 0; -fx-background-color: #e74c3c; -fx-text-fill: white;"));
-        delMessage.setOnMouseExited(e -> delMessage.setStyle(
-                "-fx-opacity: 0;"));
+        javafx.scene.control.ContextMenu contextMenu = new javafx.scene.control.ContextMenu();
+        javafx.scene.control.MenuItem deleteItem = new javafx.scene.control.MenuItem("Delete");
+        deleteItem.setOnAction(e -> {
+            if (onDeleteMessage != null)
+                onDeleteMessage.accept(msg);
+        });
+        contextMenu.getItems().add(deleteItem);
+        chat.setContextMenu(contextMenu);
 
         chat.setWrapText(true);
         HBox bubble;
         if (isMine) {
             Text text = new Text("You");
             text.setFont(Font.font(10));
-            bubble = new HBox(6, delMessage, chat, text);
+            bubble = new HBox(6, chat, text);
         } else {
             Text text = new Text("Friend");
             text.setFont(Font.font(10));
-            bubble = new HBox(6, text, chat, delMessage);
+            bubble = new HBox(6, text, chat);
         }
         chat.setMaxWidth(400);
         String bg = isMine ? "#9292ff" : "#E5E5EA";
@@ -106,27 +134,12 @@ public class MessageView extends BorderPane {
         bubble.setAlignment(isMine ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
         bubble.setStyle(" -fx-padding: 3;");
 
-        delMessage.setOnAction(ev -> {
-            Parent parent = bubble.getParent();
-            if (parent instanceof Pane) {
-                Platform.runLater(() -> {
-                    ((Pane) parent).getChildren().remove(bubble);
-                });
-            }
-        });
-
         return bubble;
     }
 
-    public void sendMessage(String message) {
-        HBox bb = createBubble(message, true);
-
+    public void sendMessage(chatapp.models.Message msg) {
+        HBox bb = createBubble(msg, true);
         msgList.getChildren().add(bb);
-
-        // TODO: Remove this example response later
-        HBox res = createBubble("This is an example response message", false);
-
-        msgList.getChildren().add(res);
     }
 
     public TextField getTextField() {
@@ -141,11 +154,23 @@ public class MessageView extends BorderPane {
         msgList.getChildren().clear();
     }
 
-    public void addMessage(String message, boolean isMine) {
+    public void addMessage(chatapp.models.Message message, boolean isMine) {
         if (message == null)
             return;
         HBox bubble = createBubble(message, isMine);
         msgList.getChildren().add(bubble);
+    }
+
+    public void setOnDeleteMessage(java.util.function.Consumer<chatapp.models.Message> onDelete) {
+        this.onDeleteMessage = onDelete;
+    }
+
+    public void setOnClearHistory(Runnable onClear) {
+        this.onClearHistory = onClear;
+    }
+
+    public void setOnSearch(java.util.function.Consumer<String> onSearch) {
+        this.onSearch = onSearch;
     }
 
     public BorderPane getView() {

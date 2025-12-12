@@ -428,4 +428,38 @@ public class FriendController {
         tab.setText("Friends");
         return tab;
     }
+
+    public void setupSocket(chatapp.server.ChatClientWrapper socketClient) {
+        if (socketClient != null) {
+            socketClient.setOnUserOnline(userId -> {
+                javafx.application.Platform.runLater(() -> updateUserStatus(userId, true));
+            });
+            socketClient.setOnUserOffline(userId -> {
+                javafx.application.Platform.runLater(() -> updateUserStatus(userId, false));
+            });
+        }
+    }
+
+    private void updateUserStatus(java.util.UUID userId, boolean isOnline) {
+        ObservableList<User> items = userList.getUserListView().getItems();
+        if (items == null)
+            return;
+
+        boolean found = false;
+        for (User u : items) {
+            if (u.getId().equals(userId)) {
+                u.setOnline(isOnline);
+                found = true;
+            }
+        }
+
+        if (found) {
+            userList.getUserListView().refresh();
+            // If in ONLINE mode, we might need to remove connection if offline, or add if
+            // online?
+            if (currentMode == Mode.ONLINE) {
+                loadOnline(); // Reload list to correctly filter
+            }
+        }
+    }
 }

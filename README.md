@@ -39,3 +39,6 @@ Ensure you have the following installed:
 
     *   **Administrator:**
         *   Username: `admin`
+
+
+mvn exec:java@server

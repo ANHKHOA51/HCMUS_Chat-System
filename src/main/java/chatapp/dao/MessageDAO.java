@@ -64,4 +64,91 @@ public class MessageDAO {
         }
         return null; // Failed
     }
+
+    public static boolean deleteMessage(UUID messageId) {
+        Connection conn = chatapp.db.DBConnection.getConnection();
+        String sql = "UPDATE messages SET is_deleted = TRUE WHERE id = ?";
+        try {
+            java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, messageId);
+            return ps.executeUpdate() > 0;
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean deleteAllMessages(UUID conversationId) {
+        Connection conn = chatapp.db.DBConnection.getConnection();
+        String sql = "UPDATE messages SET is_deleted = TRUE WHERE conversation_id = ?";
+        try {
+            java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, conversationId);
+            return ps.executeUpdate() > 0;
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static List<Message> searchMessages(UUID conversationId, String query) {
+        List<Message> list = new ArrayList<>();
+        Connection conn = chatapp.db.DBConnection.getConnection();
+        String sql = "SELECT * FROM messages WHERE conversation_id = ? AND content ILIKE ? AND is_deleted = FALSE ORDER BY created_at ASC";
+        try {
+            java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, conversationId);
+            ps.setString(2, "%" + query + "%");
+            java.sql.ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Message m = new Message();
+                m.setId(UUID.fromString(rs.getString("id")));
+                m.setConversationId(UUID.fromString(rs.getString("conversation_id")));
+                m.setSenderId(UUID.fromString(rs.getString("sender_id")));
+                m.setContent(rs.getString("content"));
+                m.setDeleted(rs.getBoolean("is_deleted"));
+                m.setCreatedAt(
+                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+                list.add(m);
+            }
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static List<Message> searchAllMessages(UUID userId, String query) {
+        List<Message> list = new ArrayList<>();
+        Connection conn = chatapp.db.DBConnection.getConnection();
+        // Join with conversation_members to ensure user is part of conversation
+        String sql = """
+                    SELECT m.*
+                    FROM messages m
+                    JOIN conversation_members cm ON m.conversation_id = cm.conversation_id
+                    WHERE cm.user_id = ?
+                    AND m.content ILIKE ?
+                    AND m.is_deleted = FALSE
+                    ORDER BY m.created_at DESC
+                """;
+        try {
+            java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, userId);
+            ps.setString(2, "%" + query + "%");
+            java.sql.ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Message m = new Message();
+                m.setId(UUID.fromString(rs.getString("id")));
+                m.setConversationId(UUID.fromString(rs.getString("conversation_id")));
+                m.setSenderId(UUID.fromString(rs.getString("sender_id")));
+                m.setContent(rs.getString("content"));
+                m.setDeleted(rs.getBoolean("is_deleted"));
+                m.setCreatedAt(
+                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+                list.add(m);
+            }
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
