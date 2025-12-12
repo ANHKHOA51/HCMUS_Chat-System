@@ -213,6 +213,7 @@ public class User {
     // Querry
 
     // Admin
+    @Deprecated
     public static List<User> getAllUser() {
         List<User> list = new ArrayList<User>();
         Connection conn = DBConnection.getConnection();
@@ -253,6 +254,7 @@ public class User {
         this.id = id;
     }
 
+    @Deprecated
     public static List<User> getFriends(UUID userId) {
         List<User> listFriends = new ArrayList<User>();
         Connection conn = DBConnection.getConnection();
@@ -302,6 +304,7 @@ public class User {
         return listFriends;
     }
 
+    @Deprecated
     public static List<LoginHistoryDTO> getLoginHistory(UUID userId) {
         List<LoginHistoryDTO> list = new ArrayList<LoginHistoryDTO>();
 
@@ -338,6 +341,7 @@ public class User {
         return list;
     }
 
+    @Deprecated
     public static User getUser(String field, Object value) {
         List<String> listField = List.of("id", "username", "email");
         if (!listField.contains(field)) {
@@ -378,6 +382,7 @@ public class User {
         return user;
     }
 
+    @Deprecated
     public static boolean addUser(String username, String displayName, String email, String address, Boolean admin,
             Boolean gender,
             LocalDate birthday,
@@ -410,6 +415,7 @@ public class User {
         }
     }
 
+    @Deprecated
     public static boolean updateUser(UUID id, String username, String displayName, String email, String address,
             Boolean admin,
             Boolean gender,
@@ -443,6 +449,7 @@ public class User {
         }
     }
 
+    @Deprecated
     public static boolean deleteUser(UUID id) {
         Connection conn = DBConnection.getConnection();
         String sql = """
@@ -460,6 +467,7 @@ public class User {
         }
     }
 
+    @Deprecated
     public static boolean updateFieldUser(String field, Object value, String filterField, Object filterValue) {
         List<String> listField = List.of("username", "email", "address", "display_name", "admin", "password",
                 "birthday", "gender", "is_online", "lock");
@@ -489,6 +497,7 @@ public class User {
     }
 
     // User
+    @Deprecated
     public static User login(String user_name, String password) {
         try {
             Connection conn = DBConnection.getConnection();
@@ -527,6 +536,7 @@ public class User {
         }
     }
 
+    @Deprecated
     public static boolean register(String username, String password, String name,
             String email) {
         try {

@@ -1,136 +1,19 @@
-package chatapp.models;
+package chatapp.dao;
 
+import chatapp.db.DBConnection;
+import chatapp.dto.UserFriendsDTO;
+import chatapp.models.User;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import chatapp.db.DBConnection;
-import chatapp.dto.UserFriendsDTO;
+public class FriendShipDAO {
 
-public class FriendShip {
-    private UUID id;
-    private UUID userId;
-    private UUID friendId;
-    private UUID requesterId;
-    private String status;
-    private LocalDateTime acceptedAt;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-    public FriendShip() {
-    }
-
-    public FriendShip(UUID id, UUID userId, UUID friendId, UUID requesterId,
-            String status, LocalDateTime acceptedAt, LocalDateTime createdAt,
-            LocalDateTime updatedAt) {
-        this.id = id;
-        this.userId = userId;
-        this.friendId = friendId;
-        this.requesterId = requesterId;
-        this.status = status;
-        this.acceptedAt = acceptedAt;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public void setUserId(UUID userId) {
-        this.userId = userId;
-    }
-
-    public UUID getFriendId() {
-        return friendId;
-    }
-
-    public void setFriendId(UUID friendId) {
-        this.friendId = friendId;
-    }
-
-    public UUID getRequesterId() {
-        return requesterId;
-    }
-
-    public void setRequesterId(UUID requesterId) {
-        this.requesterId = requesterId;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getAcceptedAt() {
-        if (acceptedAt == null)
-            return "";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
-        String formatted = acceptedAt.format(formatter);
-        return formatted;
-    }
-
-    public void setAcceptedAt(LocalDateTime acceptedAt) {
-        this.acceptedAt = acceptedAt;
-    }
-
-    public String getCreatedAt() {
-        if (createdAt == null)
-            return "";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
-        String formatted = createdAt.format(formatter);
-        return formatted;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getUpdatedAt() {
-        if (updatedAt == null)
-            return "";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
-        String formatted = updatedAt.format(formatter);
-        return formatted;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    @Override
-    public String toString() {
-        return "FriendShip{" +
-                "id=" + id +
-                ", userId=" + userId +
-                ", friendId=" + friendId +
-                ", requesterId=" + requesterId +
-                ", status='" + status + '\'' +
-                ", acceptedAt=" + acceptedAt +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
-    }
-
-    // query
-    @Deprecated
     public static List<UserFriendsDTO> getListUserFriends() {
         List<UserFriendsDTO> list = new ArrayList<>();
         Connection conn = DBConnection.getConnection();
@@ -188,13 +71,9 @@ public class FriendShip {
         return list;
     }
 
-    @Deprecated
     public static List<User> getFriendsList(UUID userId) {
         List<User> list = new ArrayList<>();
         Connection conn = DBConnection.getConnection();
-        // Get friends where status is accepted. Consider both (user_id, friend_id)
-        // directions if your design treats (A, B) same as (B, A).
-        // Based on script.sql: check (user_id <> friend_id).
         String sql = """
                     SELECT u.*
                     FROM users u
@@ -218,16 +97,9 @@ public class FriendShip {
         return list;
     }
 
-    @Deprecated
     public static List<User> getPendingRequests(UUID userId) {
         List<User> list = new ArrayList<>();
         Connection conn = DBConnection.getConnection();
-        // Incoming requests: user is friend_id, requester is user_id (usually).
-        // requester_id column explicitly tracks who sent it.
-        // So we want friendships where friend_id = userId AND status = 'pending'.
-        // The user who sent it is 'requester_id' (which should match user_id if logic
-        // follows).
-        // Let's join with Users to get the details of the requester.
         String sql = """
                     SELECT u.*
                     FROM users u
@@ -247,7 +119,6 @@ public class FriendShip {
         return list;
     }
 
-    @Deprecated
     public static boolean sendFriendRequest(UUID requesterId, UUID targetId) {
         Connection conn = DBConnection.getConnection();
         String sql = """
@@ -265,11 +136,8 @@ public class FriendShip {
         }
     }
 
-    @Deprecated
     public static boolean acceptFriendRequest(UUID userId, UUID requesterId) {
         Connection conn = DBConnection.getConnection();
-        // userId is the one accepting (so they are the friend_id in the row, or we just
-        // find the row by both IDs)
         String sql = """
                     UPDATE friendships
                     SET status = 'accepted', accepted_at = NOW(), updated_at = NOW()
@@ -288,7 +156,6 @@ public class FriendShip {
         }
     }
 
-    @Deprecated
     public static boolean removeFriend(UUID userId, UUID friendId) {
         Connection conn = DBConnection.getConnection();
         String sql = "DELETE FROM friendships WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)";
@@ -304,12 +171,11 @@ public class FriendShip {
         }
     }
 
-    @Deprecated
     public static boolean blockUser(UUID userId, UUID blockedId) {
-        Connection conn = DBConnection.getConnection();
         // 1. Remove existing friendship if any
         removeFriend(userId, blockedId);
         // 2. Insert blocked record
+        Connection conn = DBConnection.getConnection();
         String sql = """
                     INSERT INTO friendships (user_id, friend_id, requester_id, status, created_at, updated_at)
                     VALUES (?, ?, ?, 'blocked', NOW(), NOW())
@@ -317,7 +183,7 @@ public class FriendShip {
         try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setObject(1, userId);
             ps.setObject(2, blockedId);
-            ps.setObject(3, userId); // The one who blocks is the "requester" of the block action
+            ps.setObject(3, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -325,14 +191,9 @@ public class FriendShip {
         }
     }
 
-    @Deprecated
     public static List<User> searchUsers(String keyword, UUID currentUserId) {
         List<User> list = new ArrayList<>();
         Connection conn = DBConnection.getConnection();
-        // Exclude users who blocked me:
-        // "blocked" status: user_id blocked friend_id. requester_id is the blocker.
-        // If I am blocked by X: friendship(user_id=me/X, friend_id=X/me,
-        // status='blocked', requester_id=X)
         String sql = """
                     SELECT u.*
                     FROM users u
@@ -369,9 +230,6 @@ public class FriendShip {
         return list;
     }
 
-    // Check relationship: "friends", "pending_sent", "pending_received", "blocked",
-    // "none"
-    @Deprecated
     public static String getRelationship(UUID userId, UUID targetId) {
         Connection conn = DBConnection.getConnection();
         String sql = "SELECT status, requester_id FROM friendships WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)";
@@ -389,7 +247,7 @@ public class FriendShip {
                 if ("accepted".equals(status))
                     return "friends";
                 if ("blocked".equals(status))
-                    return "blocked"; // Either I blocked them or they blocked me (though search hides blockers)
+                    return "blocked";
                 if ("pending".equals(status)) {
                     if (requesterV.equals(userId))
                         return "pending_sent";
@@ -410,9 +268,17 @@ public class FriendShip {
         user.setUsername(rs.getString("username"));
         user.setDisplayName(rs.getString("display_name"));
         user.setEmail(rs.getString("email"));
-        user.setOnline(rs.getBoolean("is_online"));
+        user.setAddress(rs.getString("address"));
+        user.setPassword(rs.getString("password"));
+        user.setGender(rs.getBoolean("gender"));
         user.setAdmin(rs.getBoolean("admin"));
-        // ... map other fields if necessary
+        user.setOnline(rs.getBoolean("is_online"));
+        user.setLock(rs.getBoolean("lock"));
+        user.setBirthday(rs.getDate("birthday") != null ? rs.getDate("birthday").toLocalDate() : null);
+        user.setCreatedAt(
+                rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+        user.setUpdatedAt(
+                rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toLocalDateTime() : null);
         return user;
     }
 }

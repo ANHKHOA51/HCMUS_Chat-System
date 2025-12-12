@@ -1,6 +1,6 @@
 package chatapp.controllers;
 
-import chatapp.models.FriendShip;
+import chatapp.dao.FriendShipDAO;
 import chatapp.models.User;
 import chatapp.views.FriendOptionView;
 import chatapp.views.UserListView;
@@ -50,7 +50,7 @@ public class FriendController {
 
     private void refreshFriendsList() {
         ObservableList<User> friends = FXCollections
-                .observableArrayList(FriendShip.getFriendsList(currentUser.getId()));
+                .observableArrayList(FriendShipDAO.getFriendsList(currentUser.getId()));
         userList.getUserListView().setItems(friends);
 
         userList.getUserListView().setCellFactory(param -> {
@@ -64,7 +64,7 @@ public class FriendController {
     private void loadRequests() {
         currentMode = Mode.REQUESTS;
         ObservableList<User> requests = FXCollections
-                .observableArrayList(FriendShip.getPendingRequests(currentUser.getId()));
+                .observableArrayList(FriendShipDAO.getPendingRequests(currentUser.getId()));
         userList.getUserListView().setItems(requests);
 
         userList.getUserListView().setCellFactory(param -> {
@@ -79,7 +79,7 @@ public class FriendController {
         currentMode = Mode.ONLINE;
         // Filter friends list for online only
         ObservableList<User> friends = FXCollections
-                .observableArrayList(FriendShip.getFriendsList(currentUser.getId()));
+                .observableArrayList(FriendShipDAO.getFriendsList(currentUser.getId()));
         ObservableList<User> onlineFriends = friends.filtered(User::isOnline);
         userList.getUserListView().setItems(onlineFriends);
 
@@ -144,7 +144,7 @@ public class FriendController {
                 userList.getUserListView().setItems(FXCollections.observableArrayList());
             } else {
                 ObservableList<User> results = FXCollections
-                        .observableArrayList(FriendShip.searchUsers(query, currentUser.getId()));
+                        .observableArrayList(FriendShipDAO.searchUsers(query, currentUser.getId()));
                 userList.getUserListView().setItems(results);
 
                 // Update cell factory for search results based on relationship
@@ -165,7 +165,7 @@ public class FriendController {
                                 return;
                             }
 
-                            String rel = FriendShip.getRelationship(currentUser.getId(), user.getId());
+                            String rel = FriendShipDAO.getRelationship(currentUser.getId(), user.getId());
 
                             // Reset buttons
                             getDeleteButton().setVisible(false);
@@ -250,11 +250,11 @@ public class FriendController {
             // Optimized:
             ObservableList<User> allItems = FXCollections.observableArrayList();
             if (currentMode == Mode.FRIENDS) {
-                allItems = FXCollections.observableArrayList(FriendShip.getFriendsList(currentUser.getId()));
+                allItems = FXCollections.observableArrayList(FriendShipDAO.getFriendsList(currentUser.getId()));
             } else if (currentMode == Mode.REQUESTS) {
-                allItems = FXCollections.observableArrayList(FriendShip.getPendingRequests(currentUser.getId()));
+                allItems = FXCollections.observableArrayList(FriendShipDAO.getPendingRequests(currentUser.getId()));
             } else if (currentMode == Mode.ONLINE) {
-                allItems = FXCollections.observableArrayList(FriendShip.getFriendsList(currentUser.getId()));
+                allItems = FXCollections.observableArrayList(FriendShipDAO.getFriendsList(currentUser.getId()));
                 allItems = FXCollections.observableArrayList(allItems.filtered(User::isOnline));
             }
 
@@ -276,7 +276,7 @@ public class FriendController {
 
     // Action Handlers
     private void handleUnfriend(User u) {
-        boolean success = FriendShip.removeFriend(currentUser.getId(), u.getId());
+        boolean success = FriendShipDAO.removeFriend(currentUser.getId(), u.getId());
         if (success) {
             refreshFriendsList();
             if (currentMode == Mode.SEARCH)
@@ -287,7 +287,7 @@ public class FriendController {
     }
 
     private void handleBlock(User u) {
-        boolean success = FriendShip.blockUser(currentUser.getId(), u.getId());
+        boolean success = FriendShipDAO.blockUser(currentUser.getId(), u.getId());
         if (success) {
             refreshFriendsList();
             if (currentMode == Mode.SEARCH)
@@ -298,7 +298,7 @@ public class FriendController {
     }
 
     private void handleAccept(User u) {
-        boolean success = FriendShip.acceptFriendRequest(currentUser.getId(), u.getId());
+        boolean success = FriendShipDAO.acceptFriendRequest(currentUser.getId(), u.getId());
         if (success) {
             loadRequests(); // Refresh
             if (currentMode == Mode.SEARCH)
@@ -310,7 +310,7 @@ public class FriendController {
 
     private void handleDecline(User u) {
         // Decline is same as remove pending friendship
-        boolean success = FriendShip.removeFriend(currentUser.getId(), u.getId());
+        boolean success = FriendShipDAO.removeFriend(currentUser.getId(), u.getId());
         if (success) {
             loadRequests();
             if (currentMode == Mode.SEARCH)
@@ -321,7 +321,7 @@ public class FriendController {
     }
 
     private void handleSendRequest(User u) {
-        boolean success = FriendShip.sendFriendRequest(currentUser.getId(), u.getId());
+        boolean success = FriendShipDAO.sendFriendRequest(currentUser.getId(), u.getId());
         if (success) {
             System.out.println("Friend request sent to " + u.getUsername());
             if (currentMode == Mode.SEARCH) {

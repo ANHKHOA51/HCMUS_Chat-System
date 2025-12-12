@@ -34,11 +34,11 @@ public class App extends Application {
         stage.show();
 
         authCtl.setOnLogin((username, password) -> {
-            User user = User.login(username, password);
+            User user = chatapp.dao.UserDAO.login(username, password);
             if (user != null) {
                 cur_user = user;
                 cur_user.setOnline(true);
-                User.updateFieldUser("is_online", cur_user.isOnline(), "id", cur_user.getId());
+                chatapp.dao.UserDAO.updateFieldUser("is_online", cur_user.isOnline(), "id", cur_user.getId());
                 boolean result = LoginHistory.saveLoginHistory(cur_user.getId());
                 if (!result) {
                     return;
@@ -102,7 +102,7 @@ public class App extends Application {
 
         authCtl.setOnSignup((username, password, name, email) -> {
             System.out.println("Signup requested: " + username);
-            boolean success = User.register(username, password, name, email);
+            boolean success = chatapp.dao.UserDAO.register(username, password, name, email);
             if (success) {
                 System.out.println("Signup successful");
                 authCtl.showLogin();

@@ -1,94 +1,18 @@
-package chatapp.models;
+package chatapp.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import chatapp.db.DBConnection;
+import chatapp.dto.ChatGroupDTO;
+import chatapp.models.Conversation;
+import chatapp.models.User;
+
+import java.sql.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import chatapp.db.DBConnection;
-import chatapp.dto.ChatGroupDTO;
+public class ConversationDAO {
 
-public class Conversation {
-    private UUID id;
-    private UUID createdBy;
-    private boolean group;
-    private String title;
-    private LocalDateTime createdAt;
-
-    public Conversation() {
-    }
-
-    public Conversation(UUID id, UUID createdBy, boolean group, String title, LocalDateTime createdAt) {
-        this.id = id;
-        this.createdBy = createdBy;
-        this.group = group;
-        this.title = title;
-        this.createdAt = createdAt;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public UUID getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(UUID createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public boolean isGroup() {
-        return group;
-    }
-
-    public void setGroup(boolean group) {
-        this.group = group;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getCreatedAt() {
-        if (createdAt == null)
-            return "";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
-        String formatted = createdAt.format(formatter);
-        return formatted;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    @Override
-    public String toString() {
-        return "Conversation{" +
-                "id=" + id +
-                ", createdBy=" + createdBy +
-                ", group=" + group +
-                ", title='" + title + '\'' +
-                ", createdAt=" + createdAt +
-                '}';
-    }
-
-    // Query
-    @Deprecated
     public static List<ChatGroupDTO> getListChatGroup() {
         List<ChatGroupDTO> list = new ArrayList<>();
         Connection conn = DBConnection.getConnection();
@@ -122,7 +46,6 @@ public class Conversation {
         return list;
     }
 
-    @Deprecated
     public static List<User> getListMembers(UUID conversation_id, String role) {
         List<User> list = new ArrayList<>();
         Connection conn = DBConnection.getConnection();
@@ -154,15 +77,8 @@ public class Conversation {
         return list;
     }
 
-    @Deprecated
     public static Conversation getPrivateConversation(UUID user1, UUID user2) {
         Connection conn = DBConnection.getConnection();
-        // Determine private chat: conversation joined by BOTH user1 and user2 AND
-        // isGroup = false
-        // Query: find conversation_id in members where user_id = user1
-        // INTERSECT find conversation_id in members where user_id = user2
-        // JOIN conversations to check isGroup = false
-
         String sql = """
                     SELECT c.*
                     FROM conversations c
@@ -195,7 +111,6 @@ public class Conversation {
         return null;
     }
 
-    @Deprecated
     public static Conversation createPrivateConversation(UUID user1, UUID user2) {
         Connection conn = DBConnection.getConnection();
         try {

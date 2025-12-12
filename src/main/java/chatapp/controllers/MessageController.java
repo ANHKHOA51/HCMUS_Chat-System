@@ -3,12 +3,9 @@ package chatapp.controllers;
 import java.util.HashMap;
 import java.util.Map;
 
-import chatapp.models.User;
-import chatapp.models.FriendShip;
 import chatapp.models.Conversation;
-import chatapp.models.Message;
+import chatapp.models.User;
 import java.util.UUID;
-import chatapp.test.MockData;
 import chatapp.views.ContactListView;
 import chatapp.views.MessageView;
 import javafx.collections.FXCollections;
@@ -32,7 +29,7 @@ public class MessageController {
     public MessageController(User u) {
         this.user = u;
         // Load friends instead of mock data
-        java.util.List<User> friends = chatapp.models.FriendShip.getFriendsList(u.getId());
+        java.util.List<User> friends = chatapp.dao.FriendShipDAO.getFriendsList(u.getId());
         contact = new ContactListView(FXCollections.observableArrayList(friends));
         contact.setPrefWidth(300);
 
@@ -61,12 +58,12 @@ public class MessageController {
         text = text.trim();
         if (!text.isEmpty()) {
             UUID targetId = UUID.fromString(contactId);
-            Conversation conv = chatapp.models.Conversation.getPrivateConversation(user.getId(), targetId);
+            Conversation conv = chatapp.dao.ConversationDAO.getPrivateConversation(user.getId(), targetId);
             if (conv == null) {
-                conv = chatapp.models.Conversation.createPrivateConversation(user.getId(), targetId);
+                conv = chatapp.dao.ConversationDAO.createPrivateConversation(user.getId(), targetId);
             }
             if (conv != null) {
-                chatapp.models.Message.send(conv.getId(), user.getId(), text);
+                chatapp.dao.MessageDAO.send(conv.getId(), user.getId(), text);
                 mv.sendMessage(text);
                 mv.getTextField().clear();
             }
@@ -97,7 +94,7 @@ public class MessageController {
     }
 
     private void loadChatView(User targetUser) {
-        Conversation conv = chatapp.models.Conversation.getPrivateConversation(user.getId(), targetUser.getId());
+        Conversation conv = chatapp.dao.ConversationDAO.getPrivateConversation(user.getId(), targetUser.getId());
         MessageView mv = views.computeIfAbsent(targetUser.getId().toString(), k -> {
             MessageView view = new MessageView();
             view.getTextField().setOnAction(e -> sendMessageFor(view, targetUser.getId().toString()));
@@ -107,7 +104,7 @@ public class MessageController {
 
         mv.clearMessages();
         if (conv != null) {
-            java.util.List<chatapp.models.Message> messages = chatapp.models.Message.getMessages(conv.getId());
+            java.util.List<chatapp.models.Message> messages = chatapp.dao.MessageDAO.getMessages(conv.getId());
             for (chatapp.models.Message m : messages) {
                 boolean isMine = m.getSenderId().equals(user.getId());
                 mv.addMessage(m.getContent(), isMine);
