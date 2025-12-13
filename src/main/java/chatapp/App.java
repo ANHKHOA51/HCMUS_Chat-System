@@ -113,21 +113,13 @@ public class App extends Application {
         });
 
         authCtl.setOnSignup((username, password, name, email) -> {
-            System.out.println("Signup requested: " + username);
-            boolean success = chatapp.dao.UserDAO.register(username, password, name, email);
-            if (success) {
-                System.out.println("Signup successful");
-                authCtl.showLogin();
-            } else {
-                System.out.println("Signup failed");
-                authCtl.showSignupError("Signup failed. User might already exist.");
-            }
+            // Logic handled in AuthController now
+            System.out.println("Signup delegated to AuthController for: " + username);
         });
 
         authCtl.setOnRequestReset(email -> {
-            System.out.println("Reset requested for: " + email);
-            // TODO: gọi backend gửi email; quay về login
-            authCtl.showLogin();
+            // Logic handled in AuthController now
+            System.out.println("Reset delegated to AuthController for: " + email);
         });
 
     }

@@ -11,6 +11,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
 import javafx.scene.control.Label;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.paint.Color;
 
 public class SignupView {
@@ -20,6 +23,11 @@ public class SignupView {
     private final TextField emailField = new TextField();
     private final PasswordField passwordField = new PasswordField();
     private final PasswordField confirmField = new PasswordField();
+    private final TextField addressField = new TextField();
+    private final DatePicker birthdayPicker = new DatePicker();
+    private final ToggleGroup genderGroup = new ToggleGroup();
+    private final RadioButton maleRadio = new RadioButton("Male");
+    private final RadioButton femaleRadio = new RadioButton("Female");
     private final Button signupButton = new Button("Sign up");
     private final Button backButton = new Button("Back");
     private final Label errorLabel = new Label();
@@ -36,9 +44,21 @@ public class SignupView {
 
         Text title = new Text("Sign up");
 
+        addressField.setPromptText("Address");
+        birthdayPicker.setPromptText("Birthday");
+
+        maleRadio.setToggleGroup(genderGroup);
+        femaleRadio.setToggleGroup(genderGroup);
+        maleRadio.setSelected(true);
+
+        HBox genderBox = new HBox(10, new Label("Gender:"), maleRadio, femaleRadio);
+        genderBox.setAlignment(Pos.CENTER_LEFT);
+
         HBox buttonBox = new HBox(10, signupButton, backButton);
         buttonBox.setAlignment(Pos.CENTER);
-        VBox box = new VBox(8, title, nameField, usernameField, emailField, passwordField, confirmField, errorLabel,
+        VBox box = new VBox(8, title, nameField, usernameField, emailField,
+                addressField, birthdayPicker, genderBox,
+                passwordField, confirmField, errorLabel,
                 buttonBox);
         box.setAlignment(Pos.CENTER);
         box.setMaxWidth(420);
@@ -87,5 +107,17 @@ public class SignupView {
     public void clearError() {
         errorLabel.setVisible(false);
         errorLabel.setText("");
+    }
+
+    public TextField getAddressField() {
+        return addressField;
+    }
+
+    public DatePicker getBirthdayPicker() {
+        return birthdayPicker;
+    }
+
+    public ToggleGroup getGenderGroup() {
+        return genderGroup;
     }
 }

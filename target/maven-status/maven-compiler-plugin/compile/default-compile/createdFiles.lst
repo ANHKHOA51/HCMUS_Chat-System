@@ -55,7 +55,7 @@ chatapp/dao/UserDAO.class
 chatapp/views/CreateGroupView.class
 chatapp/models/Message.class
 chatapp/views/MessageView.class
-chatapp/views/ContactListView$2.class
+chatapp/utils/EmailService.class
 chatapp/dto/LoginHistoryDTO.class
 chatapp/views/MessageView$1.class
 chatapp/views/cells/FriendReqCell.class
@@ -64,4 +64,5 @@ chatapp/views/CreateGroupView$1.class
 chatapp/views/GroupInfoView.class
 chatapp/controllers/dashboard/ReportController.class
 chatapp/dao/ConversationDAO.class
+chatapp/utils/EmailService$1.class
 chatapp/test/MockData.class

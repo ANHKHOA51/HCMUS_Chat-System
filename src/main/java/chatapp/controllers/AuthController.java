@@ -115,6 +115,18 @@ public class AuthController {
         String conf = signupView.getConfirmField().getText() == null ? "" : signupView.getConfirmField().getText();
         String name = signupView.getNameField().getText() == null ? "" : signupView.getNameField().getText().trim();
         String email = signupView.getEmailField().getText() == null ? "" : signupView.getEmailField().getText().trim();
+        String address = signupView.getAddressField().getText() == null ? ""
+                : signupView.getAddressField().getText().trim();
+        String birthday = "";
+        if (signupView.getBirthdayPicker().getValue() != null) {
+            birthday = signupView.getBirthdayPicker().getValue().toString();
+        }
+        boolean gender = true; // Default Male
+        if (signupView.getGenderGroup().getSelectedToggle() != null) {
+            javafx.scene.control.RadioButton selectedInfo = (javafx.scene.control.RadioButton) signupView
+                    .getGenderGroup().getSelectedToggle();
+            gender = selectedInfo.getText().equals("Male");
+        }
 
         if (u.isEmpty() || p.isEmpty()) {
             signupView.showError("Username and password are required");
@@ -126,13 +138,42 @@ public class AuthController {
         }
         if (onSignup != null)
             onSignup.handle(u, p, name, email);
+
+        boolean success = chatapp.dao.UserDAO.register(u, p, name, email, address, birthday, gender);
+        if (success) {
+            showLogin();
+            loginView.showError("Registration successful. Please login.");
+        } else {
+            signupView.showError("Registration failed. Username might be taken.");
+        }
     }
 
     private void submitForgot() {
         String v = forgotView.getEmailField().getText() == null ? "" : forgotView.getEmailField().getText().trim();
-        if (v.isEmpty())
+        if (v.isEmpty()) {
+            // forgotView.showError("Please enter email"); // View doesn't have showError
+            // yet?
             return;
-        if (onRequestReset != null)
-            onRequestReset.accept(v);
+        }
+
+        if (!chatapp.dao.UserDAO.isEmailExists(v)) {
+            // We can choose to be silent for security, but for now let's say "Email not
+            // found"
+            // forgotView.showError("Email not found");
+            System.out.println("Email not found: " + v);
+            return;
+        }
+
+        // Generate random password
+        String newPass = java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        boolean updated = chatapp.dao.UserDAO.updatePassword(v, newPass);
+        if (updated) {
+            chatapp.utils.EmailService.sendPasswordReset(v, newPass);
+            showLogin();
+            loginView.showError("Password reset. Check your email.");
+        } else {
+            // forgotView.showError("Failed to reset password.");
+        }
     }
 }

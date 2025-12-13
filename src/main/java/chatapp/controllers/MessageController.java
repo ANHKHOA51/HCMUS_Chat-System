@@ -113,6 +113,40 @@ public class MessageController {
             });
         }
 
+        contact.setOnReportSpam(this::handleReportSpam);
+    }
+
+    private void handleReportSpam(User u) {
+        if (u == null)
+            return;
+        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog();
+        dialog.setTitle("Report Spam");
+        dialog.setHeaderText("Report " + (u.getDisplayName() != null ? u.getDisplayName() : u.getUsername()));
+        dialog.setContentText("Reason:");
+
+        dialog.showAndWait().ifPresent(reason -> {
+            if (reason.trim().isEmpty()) {
+                // optional: show alert for empty reason
+                return;
+            }
+            // Add report
+            boolean success = chatapp.models.Report.addReport(user.getId(), u.getId(), reason);
+            if (success) {
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                        javafx.scene.control.Alert.AlertType.INFORMATION);
+                alert.setTitle("Report Submitted");
+                alert.setHeaderText(null);
+                alert.setContentText("Thank you. The user has been reported.");
+                alert.showAndWait();
+            } else {
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                        javafx.scene.control.Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText(null);
+                alert.setContentText("Failed to submit report.");
+                alert.showAndWait();
+            }
+        });
     }
 
     public void setupSocket(chatapp.server.ChatClientWrapper socketClient) {

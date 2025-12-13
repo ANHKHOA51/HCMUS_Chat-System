@@ -34,7 +34,8 @@ public class UserDAO {
         }
     }
 
-    public static boolean register(String username, String password, String name, String email) {
+    public static boolean register(String username, String password, String name, String email, String address,
+            String birthday, boolean gender) {
         try {
             Connection conn = DBConnection.getConnection();
             // Check if username already exists
@@ -50,22 +51,95 @@ public class UserDAO {
 
             String sql = "INSERT INTO users (id, username, password, display_name, email,admin, is_online, address, birthday, gender, created_at) VALUES (?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                String now = LocalDateTime.now().toString();
-                ps.setString(1, java.util.UUID.randomUUID().toString());
+                ps.setObject(1, java.util.UUID.randomUUID());
                 ps.setString(2, username);
                 ps.setString(3, password);
                 ps.setString(4, name);
                 ps.setString(5, email);
                 ps.setBoolean(6, false); // Default not admin
                 ps.setBoolean(7, false); // Default offline
-                ps.setString(8, ""); // Default address
-                ps.setString(9, ""); // Default birthday
-                ps.setBoolean(10, true); // Default gender (true for male, just a default)
-                ps.setString(11, now);
+                ps.setString(8, address);
+
+                if (birthday == null || birthday.trim().isEmpty()) {
+                    ps.setNull(9, java.sql.Types.DATE);
+                } else {
+                    ps.setDate(9, java.sql.Date.valueOf(birthday));
+                }
+
+                ps.setBoolean(10, gender);
+                ps.setTimestamp(11, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
 
                 int rowsAffected = ps.executeUpdate();
                 return rowsAffected > 0;
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean isEmailExists(String email) {
+        Connection conn = DBConnection.getConnection();
+        String sql = "SELECT id FROM users WHERE email = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean updatePassword(String email, String newPassword) {
+        Connection conn = DBConnection.getConnection();
+        String sql = "UPDATE users SET password = ? WHERE email = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newPassword);
+            ps.setString(2, email);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean updateUser(User user) {
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                UPDATE users
+                SET display_name = ?, email = ?, address = ?, birthday = ?, gender = ?, updated_at = ?
+                WHERE id = ?
+                """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, user.getDisplayName());
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getAddress());
+
+            if (user.getBirthdayUnformat() == null) {
+                ps.setNull(4, java.sql.Types.DATE);
+            } else {
+                ps.setDate(4, java.sql.Date.valueOf(user.getBirthdayUnformat()));
+            }
+
+            ps.setBoolean(5, user.isGender());
+            ps.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setObject(7, user.getId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean changePassword(UUID userId, String newPassword) {
+        Connection conn = DBConnection.getConnection();
+        String sql = "UPDATE users SET password = ? WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newPassword);
+            ps.setObject(2, userId);
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

@@ -130,4 +130,21 @@ public class Report {
             return false;
         }
     }
+
+    public static boolean addReport(UUID reportedBy, UUID reportedUser, String content) {
+        Connection conn = DBConnection.getConnection();
+        String sql = "INSERT INTO reports (id, reported_by, reported_user_id, content, created_at) VALUES (?, ?, ?, ?, ?)";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, UUID.randomUUID());
+            ps.setObject(2, reportedBy);
+            ps.setObject(3, reportedUser);
+            ps.setString(4, content);
+            ps.setObject(5, LocalDateTime.now());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
