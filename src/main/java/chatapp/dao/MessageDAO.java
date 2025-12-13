@@ -154,4 +154,18 @@ public class MessageDAO {
         }
         return list;
     }
+
+    public static boolean deleteMessagesFromUser(UUID conversationId, UUID userId) {
+        Connection conn = chatapp.db.DBConnection.getConnection();
+        String sql = "UPDATE messages SET is_deleted = TRUE WHERE conversation_id = ? AND sender_id = ?";
+        try {
+            java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, conversationId);
+            ps.setObject(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

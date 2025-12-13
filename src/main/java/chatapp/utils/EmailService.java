@@ -8,12 +8,10 @@ import javax.mail.internet.*;
 public class EmailService {
     private static final Dotenv dotenv = Dotenv.load();
 
-    // Configure these properties based on your email provider and project setup
-    // Ideally use environment variables or a config file
     private static final String SMTP_HOST = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
-    private static final String USERNAME = dotenv.get("GMAIL"); // PLACEHOLDER
-    private static final String PASSWORD = dotenv.get("APP_PASS"); // PLACEHOLDER
+    private static final String USERNAME = dotenv.get("GMAIL"); 
+    private static final String PASSWORD = dotenv.get("APP_PASS");
 
     public static void sendPasswordReset(String toEmail, String newPassword) {
         Properties prop = new Properties();

@@ -154,47 +154,6 @@ public class MessageController {
         if (this.socketClient != null) {
             this.socketClient.setOnRefreshChat(senderId -> {
                 // If we are currently viewing chat with senderId, refresh
-                // Determine which view to refresh
-                // Strategy: Refresh ALL active views where the other party is senderId?
-                // Or just the currently visible one?
-                // Simpler: iterate views. If view key matches senderId (for private), refresh.
-                // For group, we need to know if senderId is a member? "REFRESH" from server
-                // only sends senderId.
-                // Protocol update required for Group Chat Refresh?
-                // Currently ChatServer protocol: REFRESH:senderId.
-                // If I receive message in GroupID from SenderID.
-                // The NOTIFY sent was: NOTIFY:targetId. (TargetID = GroupID or UserID).
-                // Server sends REFRESH:senderId TO targetId.
-                // Wait.
-                // If I send to Group A. I NOTIFY Group A ID.
-                // Server looks up Group A ID => connections? NO. Server only maps UserID <->
-                // Conn.
-                // Group Logic missing in Server.
-                // HYBRID MODEL:
-                // Client sends NOTIFY:TargetID.
-                // If TargetID is a Group (how does server know?). Server doesn't know DB.
-                // PROBLEM.
-
-                // ADJUSTMENT:
-                // Client must NOTIFY ALL RECIPIENTS manually? Or Server learns groups.
-                // Simpler: Client iterates Group Members. Sends NOTIFY:MemberID for each
-                // member.
-                // Back in sendMessageFor:
-                // If Group: Get Members -> Loop -> socket.notifyUser(memberID).
-                // If Private: socket.notifyUser(targetID).
-
-                // Handling REFRESH at recipient:
-                // Recipient receives REFRESH:senderId.
-                // Client checks if currently open chat involves senderId.
-                // 1. Private Chat with senderId -> Refresh.
-                // 2. Group Chat where senderId is a member -> Refresh?
-                // We don't easily know which group senderId is messaging in unless we check DB
-                // or payload has GroupID.
-
-                // For now, let's supporting Private Chat Realtime perfectly.
-                // For Group Chat, if I receive REFRESH:senderId, I should probably check recent
-                // messages or just refresh active view?
-                // Let's implement: If we are viewing a chat with senderId, refresh.
 
                 javafx.application.Platform.runLater(() -> {
                     reloadContactList(); // Sync contacts/groups
@@ -204,7 +163,7 @@ public class MessageController {
                         // It is a private chat with this user
                         User u = new User();
                         u.setId(senderId); // Dummy user for refresh
-                        refreshChat(u, mv);
+                        refreshChat(u, mv, true);
                     }
 
                     // Also refresh any group chat? Expensive to check all.
@@ -231,7 +190,7 @@ public class MessageController {
                                     break;
                                 }
                             }
-                            refreshChat(dummy, v);
+                            refreshChat(dummy, v, true);
                         } catch (Exception e) {
                         }
                     }
@@ -283,6 +242,15 @@ public class MessageController {
                 // Update temp message with real CID if we wanted to sync state, but purely for
                 // DB send:
                 chatapp.dao.MessageDAO.send(msgId, cid, user.getId(), content);
+
+                // Add to Cache
+                chatapp.models.Message cachedMsg = new chatapp.models.Message();
+                cachedMsg.setId(msgId);
+                cachedMsg.setConversationId(cid);
+                cachedMsg.setSenderId(user.getId());
+                cachedMsg.setContent(content);
+                cachedMsg.setCreatedAt(java.time.LocalDateTime.now());
+                chatapp.models.ChatCache.add(cid, cachedMsg);
 
                 // Notify
                 if (socketClient != null) {
@@ -344,7 +312,7 @@ public class MessageController {
             view.setOnDeleteMessage(msg -> {
                 boolean success = chatapp.dao.MessageDAO.deleteMessage(msg.getId());
                 if (success)
-                    refreshChat(targetUser, view);
+                    refreshChat(targetUser, view, true); // Force refresh
             });
 
             // Clear History Handler
@@ -359,16 +327,58 @@ public class MessageController {
                 }
 
                 if (cid != null) {
-                    boolean success = chatapp.dao.MessageDAO.deleteAllMessages(cid);
-                    if (success)
-                        refreshChat(targetUser, view);
+                    if (targetUser instanceof GroupUser) {
+                        // For Groups: Only delete OWN messages
+                        boolean success = chatapp.dao.MessageDAO.deleteMessagesFromUser(cid, user.getId());
+                        if (success) {
+                            chatapp.models.ChatCache.invalidate(cid);
+
+                            // Notify all members (real-time update for others, their view of my messages
+                            // changes)
+                            java.util.List<UUID> memberIds = chatapp.dao.ConversationDAO.getConversationMemberIds(cid);
+                            if (socketClient != null) {
+                                for (UUID mid : memberIds) {
+                                    if (!mid.equals(user.getId())) {
+                                        socketClient.notifyUser(mid);
+                                    }
+                                }
+                            }
+
+                            // Reload current view to reflect deleted messages (hidden/removed)
+                            refreshChat(targetUser, view, true);
+                        }
+                    } else {
+                        // For Private: Delete Entire Conversation
+                        // Fetch members to notify before deletion (since deletion removes members)
+                        java.util.List<UUID> memberIds = chatapp.dao.ConversationDAO.getConversationMemberIds(cid);
+
+                        boolean success = chatapp.dao.ConversationDAO.deleteConversation(cid);
+                        if (success) {
+                            chatapp.models.ChatCache.invalidate(cid);
+
+                            // Notify all members to sync
+                            if (socketClient != null) {
+                                for (UUID mid : memberIds) {
+                                    if (!mid.equals(user.getId())) {
+                                        socketClient.notifyUser(mid);
+                                    }
+                                }
+                            }
+
+                            // Close view
+                            split.setCenter(null);
+                            views.remove(targetUser.getId().toString());
+                            // Remove from contact list
+                            contact.getItems().remove(targetUser);
+                        }
+                    }
                 }
             });
 
             // Search Context Handler
             view.setOnSearch(query -> {
                 if (query == null || query.trim().isEmpty()) {
-                    // refreshChat(targetUser, view); // Reset
+                    // refreshChat(targetUser, view, false); // Reset
                     // Don't reset chat, just clear search results
                     view.showSearchResults(null);
                     return;
@@ -402,7 +412,7 @@ public class MessageController {
         // startPolling(targetUser, mv);
 
         // We still fetch initial messages
-        refreshChat(targetUser, mv);
+        refreshChat(targetUser, mv, false); // Use cache if available
         split.setCenter(mv);
     }
 
@@ -434,7 +444,7 @@ public class MessageController {
         }
     }
 
-    private void refreshChat(User targetUser, MessageView mv) {
+    private void refreshChat(User targetUser, MessageView mv, boolean forceRefresh) {
         UUID conversationId;
         if (targetUser instanceof GroupUser) {
             conversationId = targetUser.getId();
@@ -443,19 +453,47 @@ public class MessageController {
             conversationId = (conv != null) ? conv.getId() : null;
         }
 
-        // mv.clearMessages(); // REMOVED PREMATURE CLEAR TO FIX BLINK
         if (conversationId != null) {
+            if (forceRefresh) {
+                chatapp.models.ChatCache.invalidate(conversationId);
+            }
+
+            // Check cache first
+            java.util.List<chatapp.models.Message> cached = chatapp.models.ChatCache.get(conversationId);
+
+            if (cached != null) {
+                mv.clearMessages();
+                for (chatapp.models.Message m : cached) {
+                    boolean isMine = m.getSenderId().equals(user.getId());
+                    mv.addMessage(m, isMine, resolveSenderName(m.getSenderId(), targetUser));
+                }
+                // Even if cached, maybe we want to background fetch to ensure fresh?
+                // For now, strict caching as requested.
+                // We rely on socket refresh to invalidate.
+                return;
+            }
+
+            // Cache Miss
+            final UUID cid = conversationId;
             chatapp.utils.DbTask<java.util.List<chatapp.models.Message>> task = new chatapp.utils.DbTask<>(() -> {
-                return chatapp.dao.MessageDAO.getMessages(conversationId);
+                return chatapp.dao.MessageDAO.getMessages(cid);
             });
             task.setOnSucceeded(e -> {
-                mv.clearMessages(); // Clear again just in case
-                for (chatapp.models.Message m : task.getValue()) {
+                java.util.List<chatapp.models.Message> msgs = task.getValue();
+                // Update Cache
+                chatapp.models.ChatCache.put(cid, msgs);
+
+                mv.clearMessages();
+                for (chatapp.models.Message m : msgs) {
                     boolean isMine = m.getSenderId().equals(user.getId());
                     mv.addMessage(m, isMine, resolveSenderName(m.getSenderId(), targetUser));
                 }
             });
             new Thread(task).start();
+        } else {
+            // Conversation does not exist (e.g. deleted or never started)
+            // Clear messages to reflect empty state
+            mv.clearMessages();
         }
     }
 

@@ -149,17 +149,15 @@ public class AuthController {
     }
 
     private void submitForgot() {
+        forgotView.clearError();
         String v = forgotView.getEmailField().getText() == null ? "" : forgotView.getEmailField().getText().trim();
         if (v.isEmpty()) {
-            // forgotView.showError("Please enter email"); // View doesn't have showError
-            // yet?
+            forgotView.showError("Please enter email");
             return;
         }
 
         if (!chatapp.dao.UserDAO.isEmailExists(v)) {
-            // We can choose to be silent for security, but for now let's say "Email not
-            // found"
-            // forgotView.showError("Email not found");
+            forgotView.showError("Email not found");
             System.out.println("Email not found: " + v);
             return;
         }
@@ -173,7 +171,7 @@ public class AuthController {
             showLogin();
             loginView.showError("Password reset. Check your email.");
         } else {
-            // forgotView.showError("Failed to reset password.");
+            forgotView.showError("Failed to reset password.");
         }
     }
 }

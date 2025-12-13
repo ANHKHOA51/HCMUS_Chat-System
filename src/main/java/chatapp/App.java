@@ -84,6 +84,16 @@ public class App extends Application {
 
                     ProfileController pfCtl = new ProfileController(cur_user);
                     pfCtl.setOnSignOut(() -> {
+                        // Set Offline
+                        if (cur_user != null) {
+                            chatapp.dao.UserDAO.updateFieldUser("is_online", false, "id", cur_user.getId());
+                        }
+                        // Close Socket
+                        if (socketClient != null) {
+                            socketClient.close();
+                            socketClient = null;
+                        }
+
                         cur_user = null;
                         authCtl.showLogin();
                         stage.setScene(authCtl.getScene());
@@ -126,6 +136,9 @@ public class App extends Application {
 
     @Override
     public void stop() throws Exception {
+        if (cur_user != null) {
+            chatapp.dao.UserDAO.updateFieldUser("is_online", false, "id", cur_user.getId());
+        }
         if (socketClient != null) {
             socketClient.close();
         }

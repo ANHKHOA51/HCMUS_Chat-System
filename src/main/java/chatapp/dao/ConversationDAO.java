@@ -396,4 +396,43 @@ public class ConversationDAO {
         }
         return false;
     }
+
+    public static boolean deleteConversation(UUID conversationId) {
+        Connection conn = DBConnection.getConnection();
+        try {
+            conn.setAutoCommit(false);
+
+            // 1. Delete Messages (if not cascaded)
+            String sqlMsg = "DELETE FROM messages WHERE conversation_id = ?";
+            PreparedStatement psMsg = conn.prepareStatement(sqlMsg);
+            psMsg.setObject(1, conversationId);
+            psMsg.executeUpdate();
+
+            // 2. Delete Members (if not cascaded)
+            String sqlMem = "DELETE FROM conversation_members WHERE conversation_id = ?";
+            PreparedStatement psMem = conn.prepareStatement(sqlMem);
+            psMem.setObject(1, conversationId);
+            psMem.executeUpdate();
+
+            // 3. Delete Conversation
+            String sqlConv = "DELETE FROM conversations WHERE id = ?";
+            PreparedStatement psConv = conn.prepareStatement(sqlConv);
+            psConv.setObject(1, conversationId);
+            int rows = psConv.executeUpdate();
+
+            conn.commit();
+            conn.setAutoCommit(true);
+
+            return rows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                conn.rollback();
+                conn.setAutoCommit(true);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            return false;
+        }
+    }
 }
