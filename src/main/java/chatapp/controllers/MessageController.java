@@ -71,7 +71,15 @@ public class MessageController {
             }
         });
 
-        javafx.scene.layout.VBox leftPane = new javafx.scene.layout.VBox(globalSearch, contact);
+        // Create Group Button
+        javafx.scene.control.Button createGroupBtn = new javafx.scene.control.Button("+");
+        createGroupBtn.setTooltip(new javafx.scene.control.Tooltip("Create Group"));
+        createGroupBtn.setOnAction(e -> handleCreateGroup());
+
+        javafx.scene.layout.HBox topBar = new javafx.scene.layout.HBox(5, globalSearch, createGroupBtn);
+        javafx.scene.layout.HBox.setHgrow(globalSearch, javafx.scene.layout.Priority.ALWAYS);
+
+        javafx.scene.layout.VBox leftPane = new javafx.scene.layout.VBox(topBar, contact);
         javafx.scene.layout.VBox.setVgrow(contact, javafx.scene.layout.Priority.ALWAYS);
         split.setLeft(leftPane);
 
@@ -199,6 +207,7 @@ public class MessageController {
     }
 
     // send message for a specific MessageView / contact
+    // send message for a specific MessageView / contact
     private void sendMessageFor(MessageView mv, User contact) {
         if (mv == null)
             return;
@@ -206,45 +215,59 @@ public class MessageController {
         if (text == null)
             return;
         text = text.trim();
-        if (!text.isEmpty()) {
-            if (contact instanceof GroupUser) {
-                // It is a group, contact.getId() is the conversation ID
-                chatapp.models.Message sentMsg = chatapp.dao.MessageDAO.send(contact.getId(), user.getId(), text);
-                if (sentMsg != null) {
-                    mv.sendMessage(sentMsg);
-                    mv.getTextField().clear();
+        if (text.isEmpty())
+            return;
 
-                    // Notify Group Members
-                    if (socketClient != null) {
-                        java.util.List<UUID> memberIds = chatapp.dao.ConversationDAO
-                                .getConversationMemberIds(contact.getId());
+        // Optimistic UI Update
+        UUID msgId = UUID.randomUUID();
+        chatapp.models.Message tempMsg = new chatapp.models.Message();
+        tempMsg.setId(msgId);
+        tempMsg.setSenderId(user.getId());
+        tempMsg.setContent(text);
+        tempMsg.setCreatedAt(java.time.LocalDateTime.now());
+        // We set conversationId later or use dummy for UI
+        tempMsg.setConversationId(null);
+
+        mv.sendMessage(tempMsg);
+        mv.getTextField().clear();
+
+        // Async Database & Notify
+        final String content = text;
+        new Thread(() -> {
+            UUID cid = null;
+            if (contact instanceof GroupUser) {
+                cid = contact.getId();
+            } else {
+                Conversation conv = chatapp.dao.ConversationDAO.getPrivateConversation(user.getId(), contact.getId());
+                if (conv == null) {
+                    conv = chatapp.dao.ConversationDAO.createPrivateConversation(user.getId(), contact.getId());
+                }
+                cid = (conv != null) ? conv.getId() : null;
+            }
+
+            if (cid != null) {
+                // Update temp message with real CID if we wanted to sync state, but purely for
+                // DB send:
+                chatapp.dao.MessageDAO.send(msgId, cid, user.getId(), content);
+
+                // Notify
+                if (socketClient != null) {
+                    if (contact instanceof GroupUser) {
+                        java.util.List<UUID> memberIds = chatapp.dao.ConversationDAO.getConversationMemberIds(cid);
                         for (UUID memberId : memberIds) {
                             if (!memberId.equals(user.getId())) {
                                 socketClient.notifyUser(memberId);
                             }
                         }
+                    } else {
+                        socketClient.notifyUser(contact.getId());
                     }
                 }
             } else {
-                UUID targetId = contact.getId();
-                Conversation conv = chatapp.dao.ConversationDAO.getPrivateConversation(user.getId(), targetId);
-                if (conv == null) {
-                    conv = chatapp.dao.ConversationDAO.createPrivateConversation(user.getId(), targetId);
-                }
-                if (conv != null) {
-                    chatapp.models.Message sentMsg = chatapp.dao.MessageDAO.send(conv.getId(), user.getId(), text);
-                    if (sentMsg != null) {
-                        mv.sendMessage(sentMsg);
-                        mv.getTextField().clear();
-
-                        // Notify Receiver
-                        if (socketClient != null) {
-                            socketClient.notifyUser(targetId);
-                        }
-                    }
-                }
+                // Failed to resolve conversation ID
+                System.err.println("Failed to resolve conversation ID for message");
             }
-        }
+        }).start();
     }
 
     public void openChatWith(User targetUser) {
@@ -311,7 +334,9 @@ public class MessageController {
             // Search Context Handler
             view.setOnSearch(query -> {
                 if (query == null || query.trim().isEmpty()) {
-                    refreshChat(targetUser, view); // Reset
+                    // refreshChat(targetUser, view); // Reset
+                    // Don't reset chat, just clear search results
+                    view.showSearchResults(null);
                     return;
                 }
 
@@ -330,11 +355,7 @@ public class MessageController {
                                 return chatapp.dao.MessageDAO.searchMessages(cid, query);
                             });
                     task.setOnSucceeded(e -> {
-                        view.clearMessages();
-                        for (chatapp.models.Message m : task.getValue()) {
-                            boolean isMine = m.getSenderId().equals(user.getId());
-                            view.addMessage(m, isMine);
-                        }
+                        view.showSearchResults(task.getValue());
                     });
                     new Thread(task).start();
                 }
@@ -397,7 +418,7 @@ public class MessageController {
                 mv.clearMessages(); // Clear again just in case
                 for (chatapp.models.Message m : task.getValue()) {
                     boolean isMine = m.getSenderId().equals(user.getId());
-                    mv.addMessage(m, isMine);
+                    mv.addMessage(m, isMine, resolveSenderName(m.getSenderId(), targetUser));
                 }
             });
             new Thread(task).start();
@@ -411,6 +432,7 @@ public class MessageController {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Group Info");
+        stage.setResizable(false);
         stage.setScene(new Scene(view));
         stage.setWidth(500);
         stage.setHeight(600);
@@ -608,9 +630,9 @@ public class MessageController {
         User selected = contact.getSelectionModel().getSelectedItem();
 
         javafx.collections.ObservableList<User> items = contact.getItems();
-        items.clear();
-        items.addAll(friends);
-        items.addAll(groups);
+        java.util.List<User> newList = new java.util.ArrayList<>(friends);
+        newList.addAll(groups);
+        items.setAll(newList);
 
         if (selected != null) {
             for (User u : items) {
@@ -620,5 +642,88 @@ public class MessageController {
                 }
             }
         }
+        contact.refresh(); // Force refresh to ensure cells redraw
+    }
+
+    private void handleCreateGroup() {
+        if (user == null)
+            return;
+        chatapp.views.CreateGroupView view = new chatapp.views.CreateGroupView(); // Need valid imports or fully
+                                                                                  // qualified
+
+        // Set CellFactory for display
+        view.getFriendsListView().setCellFactory(param -> new javafx.scene.control.ListCell<>() {
+            @Override
+            protected void updateItem(User item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getDisplayName() != null ? item.getDisplayName() : item.getUsername());
+                }
+            }
+        });
+
+        // Load friends
+        java.util.List<User> friends = chatapp.dao.FriendShipDAO.getFriendsList(user.getId());
+        view.getFriendsListView().getItems().addAll(friends);
+
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle("Create Group");
+        stage.setResizable(false);
+        stage.setScene(new Scene(view));
+        stage.setWidth(500);
+        stage.setHeight(600);
+
+        view.getCancelButton().setOnAction(e -> stage.close());
+
+        view.getCreateButton().setOnAction(e -> {
+            String name = view.getGroupNameField().getText().trim();
+            javafx.collections.ObservableList<User> selected = view.getFriendsListView().getSelectionModel()
+                    .getSelectedItems();
+
+            if (name.isEmpty())
+                return;
+            if (selected.isEmpty())
+                return;
+
+            java.util.List<java.util.UUID> memberIds = new java.util.ArrayList<>();
+            for (User member : selected) {
+                memberIds.add(member.getId());
+            }
+
+            Conversation conv = ConversationDAO.createChatGroup(name, user.getId(), memberIds);
+            if (conv != null) {
+                stage.close();
+                // Notify members
+                if (socketClient != null) {
+                    for (java.util.UUID mid : memberIds) {
+                        if (!mid.equals(user.getId())) {
+                            socketClient.notifyUser(mid);
+                        }
+                    }
+                }
+                // Reload local contact list
+                reloadContactList();
+                // Open the new group chat
+                openChatWith(new GroupUser(conv));
+            }
+        });
+
+        stage.showAndWait();
+    }
+
+    private String resolveSenderName(UUID senderId, User targetUser) {
+        if (senderId.equals(user.getId()))
+            return "You";
+        // If private chat and sender is target
+        if (targetUser != null && !(targetUser instanceof GroupUser) && targetUser.getId().equals(senderId)) {
+            return targetUser.getDisplayName();
+        }
+        // Group chat or generic lookup
+        User u = chatapp.dao.UserDAO.getUser("id", senderId);
+        return (u != null && u.getDisplayName() != null && !u.getDisplayName().isEmpty()) ? u.getDisplayName()
+                : (u != null ? u.getUsername() : "Unknown");
     }
 }

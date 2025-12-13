@@ -38,9 +38,12 @@ public class MessageDAO {
     }
 
     public static Message send(UUID conversationId, UUID senderId, String content) {
+        return send(UUID.randomUUID(), conversationId, senderId, content);
+    }
+
+    public static Message send(UUID msgId, UUID conversationId, UUID senderId, String content) {
         Connection conn = chatapp.db.DBConnection.getConnection();
         String sql = "INSERT INTO messages (id, conversation_id, sender_id, content) VALUES (?, ?, ?, ?)";
-        UUID msgId = UUID.randomUUID();
 
         try {
             java.sql.PreparedStatement ps = conn.prepareStatement(sql);

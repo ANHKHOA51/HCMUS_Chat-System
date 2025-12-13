@@ -12,7 +12,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 
 public class MessageView extends BorderPane {
     private VBox msgList = new VBox();;
@@ -23,6 +22,8 @@ public class MessageView extends BorderPane {
     private Button infoChat = new Button("Info");
     private Label lbl = new Label();
     private Button clearBtn = new Button("Clear");
+    private javafx.scene.control.ListView<chatapp.models.Message> searchResultsList = new javafx.scene.control.ListView<>();
+    private VBox searchPanel;
 
     private java.util.function.Consumer<chatapp.models.Message> onDeleteMessage;
     private Runnable onClearHistory;
@@ -57,6 +58,7 @@ public class MessageView extends BorderPane {
         setTop(header);
         setBottom(inpLayout);
         setCenter(scroll);
+        initSearchList();
     }
 
     public MessageView(User u) {
@@ -87,9 +89,45 @@ public class MessageView extends BorderPane {
         setTop(header);
         setBottom(inpLayout);
         setCenter(scroll);
+        initSearchList();
     }
 
-    private HBox createBubble(chatapp.models.Message msg, boolean isMine) {
+    private void initSearchList() {
+        searchResultsList.setPrefWidth(200);
+
+        Button closeBtn = new Button("Close");
+        closeBtn.setMaxWidth(Double.MAX_VALUE);
+        closeBtn.setOnAction(e -> {
+            searchPanel.setVisible(false);
+            searchPanel.setManaged(false);
+        });
+
+        searchResultsList.setCellFactory(param -> new javafx.scene.control.ListCell<>() {
+            @Override
+            protected void updateItem(chatapp.models.Message item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getContent());
+                }
+            }
+        });
+        searchResultsList.setOnMouseClicked(e -> {
+            chatapp.models.Message selected = searchResultsList.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                scrollToMessage(selected.getId());
+            }
+        });
+
+        searchPanel = new VBox(closeBtn, searchResultsList);
+        VBox.setVgrow(searchResultsList, Priority.ALWAYS);
+        searchPanel.setVisible(false);
+        searchPanel.setManaged(false);
+        setRight(searchPanel);
+    }
+
+    private HBox createBubble(chatapp.models.Message msg, boolean isMine, String senderName) {
         if (msg.isDeleted()) {
             // Maybe show "Message Deleted"? Or don't show at all?
             Label deletedLbl = new Label("Message Unsent");
@@ -103,25 +141,35 @@ public class MessageView extends BorderPane {
         String content = msg.getContent();
         Label chat = new Label(content);
 
-        javafx.scene.control.ContextMenu contextMenu = new javafx.scene.control.ContextMenu();
-        javafx.scene.control.MenuItem deleteItem = new javafx.scene.control.MenuItem("Delete");
-        deleteItem.setOnAction(e -> {
-            if (onDeleteMessage != null)
-                onDeleteMessage.accept(msg);
-        });
-        contextMenu.getItems().add(deleteItem);
-        chat.setContextMenu(contextMenu);
+        if (isMine) {
+            javafx.scene.control.ContextMenu contextMenu = new javafx.scene.control.ContextMenu();
+            javafx.scene.control.MenuItem deleteItem = new javafx.scene.control.MenuItem("Delete");
+            deleteItem.setOnAction(e -> {
+                if (onDeleteMessage != null)
+                    onDeleteMessage.accept(msg);
+            });
+            contextMenu.getItems().add(deleteItem);
+            chat.setContextMenu(contextMenu);
+        }
 
         chat.setWrapText(true);
         HBox bubble;
         if (isMine) {
-            Text text = new Text("You");
+            Label text = new Label("You");
             text.setFont(Font.font(10));
+            text.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
             bubble = new HBox(6, chat, text);
+            bubble.setAlignment(Pos.CENTER_RIGHT); // Ensure alignment
         } else {
-            Text text = new Text("Friend");
+            Label text = new Label(senderName != null ? senderName : "Friend");
             text.setFont(Font.font(10));
+            text.setMaxWidth(80);
+            text.setTextOverrun(javafx.scene.control.OverrunStyle.ELLIPSIS);
+            text.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE); // Allow shrink but prefer content? No.
+            // setMinWidth(0) allows shrinking to ellipsis.
+            text.setMinWidth(0);
             bubble = new HBox(6, text, chat);
+            bubble.setAlignment(Pos.CENTER_LEFT);
         }
         chat.setMaxWidth(400);
         String bg = isMine ? "#9292ff" : "#E5E5EA";
@@ -133,12 +181,13 @@ public class MessageView extends BorderPane {
 
         bubble.setAlignment(isMine ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
         bubble.setStyle(" -fx-padding: 3;");
+        bubble.setUserData(msg.getId());
 
         return bubble;
     }
 
     public void sendMessage(chatapp.models.Message msg) {
-        HBox bb = createBubble(msg, true);
+        HBox bb = createBubble(msg, true, "You");
         msgList.getChildren().add(bb);
     }
 
@@ -154,10 +203,10 @@ public class MessageView extends BorderPane {
         msgList.getChildren().clear();
     }
 
-    public void addMessage(chatapp.models.Message message, boolean isMine) {
+    public void addMessage(chatapp.models.Message message, boolean isMine, String senderName) {
         if (message == null)
             return;
-        HBox bubble = createBubble(message, isMine);
+        HBox bubble = createBubble(message, isMine, senderName);
         msgList.getChildren().add(bubble);
     }
 
@@ -179,5 +228,52 @@ public class MessageView extends BorderPane {
 
     public BorderPane getView() {
         return this;
+    }
+
+    public void showSearchResults(java.util.List<chatapp.models.Message> results) {
+        if (results == null || results.isEmpty()) {
+            searchPanel.setVisible(false);
+            searchPanel.setManaged(false);
+        } else {
+            searchResultsList.getItems().setAll(results);
+            searchPanel.setVisible(true);
+            searchPanel.setManaged(true);
+        }
+    }
+
+    public void scrollToMessage(java.util.UUID msgId) {
+        for (javafx.scene.Node node : msgList.getChildren()) {
+            if (msgId.equals(node.getUserData())) {
+                // Highlight
+                String originalStyle = node.getStyle();
+                node.setStyle(originalStyle
+                        + "-fx-effect: dropshadow(three-pass-box, yellow, 10, 0, 0, 0); -fx-background-color: yellow;");
+
+                // Reset after delay
+                javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(
+                        javafx.util.Duration.seconds(2));
+                pause.setOnFinished(e -> node.setStyle(originalStyle));
+                pause.play();
+
+                // Scroll
+                // Need bounds relative to VBox.
+                double y = node.getBoundsInParent().getMinY();
+                double contentHeight = msgList.getHeight();
+                double viewportHeight = scroll.getViewportBounds().getHeight();
+
+                // If content is smaller than viewport, scrolling does nothing
+                if (contentHeight > viewportHeight) {
+                    double vValue = y / (contentHeight - viewportHeight);
+                    // Adjust to center the message if possible?
+                    // Simple logic: Scroll so message is at top?
+                    // vValue 0 = top, 1 = bottom.
+                    // y is distance from top.
+                    // max scrollable distance = contentHeight - viewportHeight.
+                    // So val = y / max_dist.
+                    scroll.setVvalue(vValue);
+                }
+                break;
+            }
+        }
     }
 }

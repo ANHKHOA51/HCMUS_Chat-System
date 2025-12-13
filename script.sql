@@ -1,3 +1,5 @@
+drop table if exists reports;
+
 drop table if exists messages;
 
 drop table if exists conversation_members;
@@ -22,6 +24,7 @@ CREATE TABLE users (
     address TEXT,
     birthday DATE,
     gender BOOLEAN,
+    lock boolean null default false,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
@@ -61,22 +64,27 @@ create table conversation_members (
 );
 
 -- MESSAGES
-create table messages (
-  id UUID primary key,
-  conversation_id UUID references conversations (id) not null,
-  sender_id UUID references users (id) not null,
-  -- optional monotonic seq per conversation for ordering
-  conversation_seq BIGINT, -- ensure unique per conversation
-  client_message_id TEXT, -- idempotency key from client
-  content TEXT,
-  created_at TIMESTAMPTZ default now(),
-  reply_to_message_id UUID references messages (id),
-  is_deleted BOOLEAN default false,
-  check (
-    conversation_seq is null
-    or conversation_seq >= 0
+create table public.messages (
+  id uuid not null,
+  conversation_id uuid not null,
+  sender_id uuid not null,
+  conversation_seq bigint null,
+  client_message_id text null,
+  content text null,
+  created_at timestamp with time zone null default now(),
+  reply_to_message_id uuid null,
+  is_deleted boolean null default false,
+  constraint messages_pkey primary key (id),
+  constraint messages_conversation_id_fkey foreign KEY (conversation_id) references conversations (id),
+  constraint messages_reply_to_message_id_fkey foreign KEY (reply_to_message_id) references messages (id) on delete set null,
+  constraint messages_sender_id_fkey foreign KEY (sender_id) references users (id) on delete CASCADE,
+  constraint messages_conversation_seq_check check (
+    (
+      (conversation_seq is null)
+      or (conversation_seq >= 0)
+    )
   )
-);
+) TABLESPACE pg_default;
 
 create table public.login_history (
   id uuid not null default gen_random_uuid (),
@@ -85,6 +93,17 @@ create table public.login_history (
   time timestamp with time zone null default now(),
   constraint login_history_pkey primary key (id),
   constraint login_history_user_id_fkey foreign KEY (user_id) references users (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create table public.reports (
+  id uuid not null default gen_random_uuid (),
+  created_at timestamp with time zone not null default (now() AT TIME ZONE 'utc'::text),
+  reported_by uuid null default gen_random_uuid (),
+  content text null,
+  reported_user_id uuid not null,
+  constraint reports_pkey primary key (id),
+  constraint reports_reported_by_fkey foreign KEY (reported_by) references users (id) on delete set null,
+  constraint reports_reported_user_id_fkey foreign KEY (reported_user_id) references users (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
 -- SAMPLE DATA FOR CHAT SCHEMA
@@ -116,7 +135,7 @@ values
     'Bob Tran',
     'bob@example.com',
     false,
-    'HASHED_PW_BOB',
+    '123',
     '2025-10-21 09:10:00+07'
   ),
   (
@@ -134,7 +153,7 @@ values
     'Dave Pham',
     'dave@example.com',
     false,
-    'HASHED_PW_DAVE',
+    '123',
     '2025-10-01 14:20:00+07'
   ),
   (
@@ -143,7 +162,7 @@ values
     'Eve Hoang',
     'eve@example.com',
     false,
-    'HASHED_PW_EVE',
+    '123',
     '2025-10-05 16:45:00+07'
   ),
   (
@@ -152,7 +171,7 @@ values
     'Frank Vo',
     'frank@example.com',
     false,
-    'HASHED_PW_FRANK',
+    '123',
     '2025-09-25 10:00:00+07'
   ),
   (
@@ -161,7 +180,7 @@ values
     'Grace Nguyen',
     'grace@example.com',
     false,
-    'HASHED_PW_GRACE',
+    '123',
     '2025-09-26 12:00:00+07'
   ),
   (
@@ -170,7 +189,7 @@ values
     'Heidi Bui',
     'heidi@example.com',
     false,
-    'HASHED_PW_HEIDI',
+    '123',
     '2025-10-10 09:30:00+07'
   ),
   (
@@ -179,7 +198,7 @@ values
     'Ivan Do',
     'ivan@example.com',
     false,
-    'HASHED_PW_IVAN',
+    '123',
     '2025-10-11 08:00:00+07'
   ),
   (
@@ -188,7 +207,7 @@ values
     'Judy Kim',
     'judy@example.com',
     false,
-    'HASHED_PW_JUDY',
+    '123',
     '2025-08-20 07:45:00+07'
   ),
   (
@@ -197,7 +216,7 @@ values
     'Khanh Nguyen',
     'khanh@example.com',
     false,
-    'HASHED_PW_KHANH',
+    '123',
     '2025-07-30 13:00:00+07'
   ),
   (
@@ -206,7 +225,7 @@ values
     'Leo Tran',
     'leo@example.com',
     false,
-    'HASHED_PW_LEO',
+    '123',
     '2025-09-01 18:20:00+07'
   );
 
@@ -1002,7 +1021,7 @@ values
     '2025-09-02 09:03:00+07'
   );
 
-  drop function get_user_conversations (uuid);
+drop function get_user_conversations (uuid);
 
 CREATE OR REPLACE FUNCTION get_user_conversations(p_user_id UUID)
 RETURNS TABLE (

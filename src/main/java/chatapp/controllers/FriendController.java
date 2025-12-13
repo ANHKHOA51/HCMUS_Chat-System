@@ -383,8 +383,7 @@ public class FriendController {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Create Group");
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setTitle("Create Group");
+        stage.setResizable(false);
         stage.setScene(new Scene(view));
         stage.setWidth(500);
         stage.setHeight(600);
