@@ -1,17 +1,19 @@
 package chatapp.utils;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import java.util.Properties;
 import javax.mail.*;
 import javax.mail.internet.*;
 
 public class EmailService {
+    private static final Dotenv dotenv = Dotenv.load();
 
     // Configure these properties based on your email provider and project setup
     // Ideally use environment variables or a config file
     private static final String SMTP_HOST = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
-    private static final String USERNAME = "your_email@gmail.com"; // PLACEHOLDER
-    private static final String PASSWORD = "your_app_password"; // PLACEHOLDER
+    private static final String USERNAME = dotenv.get("GMAIL"); // PLACEHOLDER
+    private static final String PASSWORD = dotenv.get("APP_PASS"); // PLACEHOLDER
 
     public static void sendPasswordReset(String toEmail, String newPassword) {
         Properties prop = new Properties();
@@ -38,12 +40,8 @@ public class EmailService {
                     + "New Password: " + newPassword + "\n\n"
                     + "Please login and change your password immediately.");
 
-            // Uncomment to actually send when credentials are valid
-            // Transport.send(message);
+            Transport.send(message);
             System.out.println("LOG: Email prepared for " + toEmail + " with password: " + newPassword);
-            System.out
-                    .println("NOTE: Email sending is commented out. Check EmailService.java to configure credentials.");
-
         } catch (MessagingException e) {
             e.printStackTrace();
         }
