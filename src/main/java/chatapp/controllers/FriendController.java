@@ -73,7 +73,14 @@ public class FriendController {
 
             userList.getUserListView().setCellFactory(param -> {
                 UserFriendListCell cell = new UserFriendListCell();
+                cell.getSendRequestButton().setText("Chat");
+                cell.setOnSendRequest(u -> handleChat(u));
+
+                cell.setOnCreateGroup(u -> handleCreateGroup(u));
+
+                cell.getDeleteButton().setText("Unfriend");
                 cell.setOnDelete(u -> handleUnfriend(u));
+
                 cell.setOnBlock(u -> handleBlock(u));
                 return cell;
             });
@@ -209,17 +216,21 @@ public class FriendController {
                                 getDeleteButton().setVisible(false);
                                 getBlockButton().setVisible(false);
                                 getSendRequestButton().setVisible(false);
+                                getCreateGroupButton().setVisible(false);
 
                                 if ("friends".equals(rel)) {
                                     getSendRequestButton().setText("Chat");
                                     getSendRequestButton().setVisible(true);
                                     getSendRequestButton().setOnAction(e -> handleChat(user));
 
+                                    getCreateGroupButton().setVisible(true);
+                                    getCreateGroupButton().setOnAction(e -> handleCreateGroup(user));
+
                                     getBlockButton().setVisible(true);
+
                                     getDeleteButton().setVisible(true);
-                                    getDeleteButton().setText("Group");
-                                    getDeleteButton().setStyle("-fx-background-color: orange; -fx-text-fill: white;");
-                                    getDeleteButton().setOnAction(e -> handleCreateGroup(user));
+                                    getDeleteButton().setText("Unfriend");
+                                    getDeleteButton().setOnAction(e -> handleUnfriend(user));
 
                                 } else if ("pending_sent".equals(rel)) {
                                     getSendRequestButton().setText("Sent");
@@ -383,7 +394,7 @@ public class FriendController {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Create Group");
-        stage.setResizable(false);
+
         stage.setScene(new Scene(view));
         stage.setWidth(500);
         stage.setHeight(600);

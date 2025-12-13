@@ -23,6 +23,7 @@ public class UserFriendListCell extends ListCell<User> {
     private final Label statusLabel = new Label();
 
     private final Button sendReqBtn = new Button("Send request");
+    private final Button createGroupBtn = new Button("Create Group");
     private final Button blockBtn = new Button("Block");
     private final Button delBtn = new Button("Del");
 
@@ -30,6 +31,7 @@ public class UserFriendListCell extends ListCell<User> {
 
     private Consumer<User> onDeleteConsumer;
     private Consumer<User> onSendRequestConsumer;
+    private Consumer<User> onCreateGroupConsumer;
     private Consumer<User> onBlockConsumer;
 
     public UserFriendListCell() {
@@ -48,8 +50,9 @@ public class UserFriendListCell extends ListCell<User> {
         buttonsBox.setAlignment(Pos.CENTER_RIGHT);
 
         String buttonStyle = " -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 4 8 4 8; -fx-font-size: 12px;";
-        String hoverDelBtn = "-fx-cursor: hand; -fx-opacity: 1; -fx-background-color: red;";
+
         delBtn.setFocusTraversable(false);
+        String hoverDelBtn = "-fx-cursor: hand; -fx-opacity: 1; -fx-background-color: red;";
         String defaultDelBtn = "-fx-background-color: red; -fx-opacity: 0.6;";
         delBtn.setStyle(defaultDelBtn + buttonStyle);
         delBtn.setOnMouseEntered(e -> delBtn.setStyle(hoverDelBtn + buttonStyle));
@@ -65,12 +68,18 @@ public class UserFriendListCell extends ListCell<User> {
         blockBtn.setFocusTraversable(false);
         String hoverBlockBtn = "-fx-cursor: hand; -fx-opacity: 1; -fx-background-color: orange;";
         String defaultBlockBtn = "-fx-background-color: orange; -fx-opacity: 0.6;";
-
         blockBtn.setStyle(defaultBlockBtn + buttonStyle);
         blockBtn.setOnMouseEntered(e -> blockBtn.setStyle(hoverBlockBtn + buttonStyle));
         blockBtn.setOnMouseExited(e -> blockBtn.setStyle(defaultBlockBtn + buttonStyle));
 
-        buttonsBox.getChildren().addAll(sendReqBtn, blockBtn, delBtn);
+        createGroupBtn.setFocusTraversable(false);
+        String hoverGroupBtn = "-fx-cursor: hand; -fx-opacity: 1; -fx-background-color: lightgreen;";
+        String defaultGroupBtn = "-fx-background-color: lightgreen; -fx-opacity: 0.6;";
+        createGroupBtn.setStyle(defaultGroupBtn + buttonStyle);
+        createGroupBtn.setOnMouseEntered(e -> createGroupBtn.setStyle(hoverGroupBtn + buttonStyle));
+        createGroupBtn.setOnMouseExited(e -> createGroupBtn.setStyle(defaultGroupBtn + buttonStyle));
+
+        buttonsBox.getChildren().addAll(sendReqBtn, createGroupBtn, blockBtn, delBtn);
 
         delBtn.setOnAction(e -> {
             User u = getItem();
@@ -81,6 +90,11 @@ public class UserFriendListCell extends ListCell<User> {
             User u = getItem();
             if (u != null && onSendRequestConsumer != null)
                 onSendRequestConsumer.accept(u);
+        });
+        createGroupBtn.setOnAction(e -> {
+            User u = getItem();
+            if (u != null && onCreateGroupConsumer != null)
+                onCreateGroupConsumer.accept(u);
         });
         blockBtn.setOnAction(e -> {
             User u = getItem();
@@ -93,6 +107,8 @@ public class UserFriendListCell extends ListCell<User> {
         root.getChildren().addAll(leftBox, buttonsBox);
 
         HBox.setHgrow(leftBox, Priority.ALWAYS);
+
+        selectedProperty().addListener((obs, oldVal, newVal) -> updateStyle(newVal));
     }
 
     @Override
@@ -104,10 +120,8 @@ public class UserFriendListCell extends ListCell<User> {
             setGraphic(null);
         } else {
             setText(null);
-            // adjust name text -- replace with actual getter if available
             String display = user.getDisplayName() != null && !user.getDisplayName().isEmpty() ? user.getDisplayName()
                     : user.getUsername();
-            // if your User has getUsername(), use: user.getUsername()
             nameLabel.setText(display);
 
             String statusText = user.isOnline() ? " -fx-text-fill: green;" : " -fx-text-fill: gray;";
@@ -115,16 +129,28 @@ public class UserFriendListCell extends ListCell<User> {
 
             statusLabel.setText(user.isOnline() ? "Online" : "Offline");
 
-            // bind cell width to listview width once so cell uses full container width
             if (!boundWidth && getListView() != null) {
                 boundWidth = true;
-                // subtract a small value for padding/scrollbar if needed
                 getListView().widthProperty().addListener((obs, oldW, newW) -> root.setPrefWidth(newW.doubleValue()));
-                // initial set
                 root.setPrefWidth(getListView().getWidth());
             }
 
             setGraphic(root);
+            updateStyle(isSelected());
+        }
+    }
+
+    private void updateStyle(boolean selected) {
+        if (selected) {
+            nameLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: white;");
+            statusLabel.setStyle("-fx-font-size: 11px; -fx-opacity: 1.0; -fx-text-fill: white;");
+        } else {
+            nameLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: black;");
+            User u = getItem();
+            if (u != null) {
+                String statusText = u.isOnline() ? " -fx-text-fill: green;" : " -fx-text-fill: gray;";
+                statusLabel.setStyle("-fx-font-size: 11px; -fx-opacity: 0.6;" + statusText);
+            }
         }
     }
 
@@ -140,7 +166,10 @@ public class UserFriendListCell extends ListCell<User> {
         return blockBtn;
     }
 
-    // Consumer-based setters: caller gets the User directly
+    public Button getCreateGroupButton() {
+        return createGroupBtn;
+    }
+
     public void setOnDelete(Consumer<User> c) {
         this.onDeleteConsumer = c;
     }
@@ -149,11 +178,14 @@ public class UserFriendListCell extends ListCell<User> {
         this.onSendRequestConsumer = c;
     }
 
+    public void setOnCreateGroup(Consumer<User> c) {
+        this.onCreateGroupConsumer = c;
+    }
+
     public void setOnBlock(Consumer<User> c) {
         this.onBlockConsumer = c;
     }
 
-    // EventHandler-based setters (if caller prefers raw ActionEvent)
     public void setOnDeleteEvent(EventHandler<ActionEvent> h) {
         delBtn.setOnAction(h);
     }
