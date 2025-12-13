@@ -22,6 +22,7 @@ public class UserFriendListCell extends ListCell<User> {
     private final Label nameLabel = new Label();
     private final Label statusLabel = new Label();
 
+    private final Button chatBtn = new Button("Chat");
     private final Button sendReqBtn = new Button("Send request");
     private final Button createGroupBtn = new Button("Create Group");
     private final Button blockBtn = new Button("Block");
@@ -30,6 +31,7 @@ public class UserFriendListCell extends ListCell<User> {
     private boolean boundWidth = false;
 
     private Consumer<User> onDeleteConsumer;
+    private Consumer<User> onChatConsumer;
     private Consumer<User> onSendRequestConsumer;
     private Consumer<User> onCreateGroupConsumer;
     private Consumer<User> onBlockConsumer;
@@ -58,6 +60,13 @@ public class UserFriendListCell extends ListCell<User> {
         delBtn.setOnMouseEntered(e -> delBtn.setStyle(hoverDelBtn + buttonStyle));
         delBtn.setOnMouseExited(e -> delBtn.setStyle(defaultDelBtn + buttonStyle));
 
+        chatBtn.setFocusTraversable(false);
+        String hoverChatBtn = "-fx-cursor: hand; -fx-opacity: 1; -fx-background-color: #2196F3;"; // Blue
+        String defaultChatBtn = "-fx-background-color: #2196F3; -fx-opacity: 0.8;";
+        chatBtn.setStyle(defaultChatBtn + buttonStyle);
+        chatBtn.setOnMouseEntered(e -> chatBtn.setStyle(hoverChatBtn + buttonStyle));
+        chatBtn.setOnMouseExited(e -> chatBtn.setStyle(defaultChatBtn + buttonStyle));
+
         sendReqBtn.setFocusTraversable(false);
         String hoverSendReqBtn = "-fx-cursor: hand; -fx-opacity: 1; -fx-background-color: lightblue;";
         String defaultSendReqBtn = "-fx-background-color: lightblue; -fx-opacity: 0.6;";
@@ -79,12 +88,22 @@ public class UserFriendListCell extends ListCell<User> {
         createGroupBtn.setOnMouseEntered(e -> createGroupBtn.setStyle(hoverGroupBtn + buttonStyle));
         createGroupBtn.setOnMouseExited(e -> createGroupBtn.setStyle(defaultGroupBtn + buttonStyle));
 
-        buttonsBox.getChildren().addAll(sendReqBtn, createGroupBtn, blockBtn, delBtn);
+        buttonsBox.getChildren().addAll(chatBtn, sendReqBtn, createGroupBtn, blockBtn, delBtn);
 
         delBtn.setOnAction(e -> {
             User u = getItem();
             if (u != null && onDeleteConsumer != null)
                 onDeleteConsumer.accept(u);
+        });
+        delBtn.setOnAction(e -> {
+            User u = getItem();
+            if (u != null && onDeleteConsumer != null)
+                onDeleteConsumer.accept(u);
+        });
+        chatBtn.setOnAction(e -> {
+            User u = getItem();
+            if (u != null && onChatConsumer != null)
+                onChatConsumer.accept(u);
         });
         sendReqBtn.setOnAction(e -> {
             User u = getItem();
@@ -107,6 +126,13 @@ public class UserFriendListCell extends ListCell<User> {
         root.getChildren().addAll(leftBox, buttonsBox);
 
         HBox.setHgrow(leftBox, Priority.ALWAYS);
+
+        // Bind managed to visible so hidden buttons don't take up space
+        chatBtn.managedProperty().bind(chatBtn.visibleProperty());
+        sendReqBtn.managedProperty().bind(sendReqBtn.visibleProperty());
+        createGroupBtn.managedProperty().bind(createGroupBtn.visibleProperty());
+        blockBtn.managedProperty().bind(blockBtn.visibleProperty());
+        delBtn.managedProperty().bind(delBtn.visibleProperty());
 
         selectedProperty().addListener((obs, oldVal, newVal) -> updateStyle(newVal));
     }
@@ -158,6 +184,10 @@ public class UserFriendListCell extends ListCell<User> {
         return delBtn;
     }
 
+    public Button getChatButton() {
+        return chatBtn;
+    }
+
     public Button getSendRequestButton() {
         return sendReqBtn;
     }
@@ -172,6 +202,10 @@ public class UserFriendListCell extends ListCell<User> {
 
     public void setOnDelete(Consumer<User> c) {
         this.onDeleteConsumer = c;
+    }
+
+    public void setOnChat(Consumer<User> c) {
+        this.onChatConsumer = c;
     }
 
     public void setOnSendRequest(Consumer<User> c) {

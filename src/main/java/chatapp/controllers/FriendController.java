@@ -73,8 +73,9 @@ public class FriendController {
 
             userList.getUserListView().setCellFactory(param -> {
                 UserFriendListCell cell = new UserFriendListCell();
-                cell.getSendRequestButton().setText("Chat");
-                cell.setOnSendRequest(u -> handleChat(u));
+                cell.getSendRequestButton().setVisible(false); // Default hide request button in Friends list
+                cell.getChatButton().setVisible(true);
+                cell.setOnChat(u -> handleChat(u));
 
                 cell.setOnCreateGroup(u -> handleCreateGroup(u));
 
@@ -163,7 +164,9 @@ public class FriendController {
                 // The cell doesn't handle logic, controller does.
                 cell.getDeleteButton().setVisible(false); // Can't delete/block easily without knowing relation state
                 cell.getBlockButton().setVisible(false);
-                // We should probably check relation first. But for now enable 'Send Request'
+                cell.getChatButton().setVisible(false); // Hide chat/group here initially or maybe enable?
+                // For global search entry point (pre-type):
+                // keep it simple until search is done.
                 cell.setOnSendRequest(u -> handleSendRequest(u));
                 // Only show Send Request if not friend?
                 // That logic is complex for a simple cell factory without checking data for
@@ -217,11 +220,11 @@ public class FriendController {
                                 getBlockButton().setVisible(false);
                                 getSendRequestButton().setVisible(false);
                                 getCreateGroupButton().setVisible(false);
+                                getChatButton().setVisible(false);
 
                                 if ("friends".equals(rel)) {
-                                    getSendRequestButton().setText("Chat");
-                                    getSendRequestButton().setVisible(true);
-                                    getSendRequestButton().setOnAction(e -> handleChat(user));
+                                    getChatButton().setVisible(true);
+                                    getChatButton().setOnAction(e -> handleChat(user));
 
                                     getCreateGroupButton().setVisible(true);
                                     getCreateGroupButton().setOnAction(e -> handleCreateGroup(user));
@@ -243,10 +246,18 @@ public class FriendController {
                                     getSendRequestButton().setOnAction(e -> handleAccept(user));
                                     getBlockButton().setVisible(true);
                                 } else if ("none".equals(rel)) {
+                                    // Chat and Group are now allowed for non-friends too
+                                    getChatButton().setVisible(true);
+                                    getChatButton().setOnAction(e -> handleChat(user));
+
+                                    getCreateGroupButton().setVisible(true);
+                                    getCreateGroupButton().setOnAction(e -> handleCreateGroup(user));
+
                                     getSendRequestButton().setText("Add");
                                     getSendRequestButton().setVisible(true);
                                     getSendRequestButton().setDisable(false);
                                     getSendRequestButton().setOnAction(e -> handleSendRequest(user));
+
                                     getBlockButton().setVisible(true);
                                 }
                             }
