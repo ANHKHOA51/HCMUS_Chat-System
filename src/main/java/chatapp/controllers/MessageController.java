@@ -161,8 +161,23 @@ public class MessageController {
                     MessageView mv = views.get(senderId.toString());
                     if (mv != null) {
                         // It is a private chat with this user
-                        User u = new User();
-                        u.setId(senderId); // Dummy user for refresh
+                        // Find the real user object from contacts if possible
+                        User u = null;
+                        for (User c : contact.getItems()) {
+                            if (c.getId().equals(senderId)) {
+                                u = c;
+                                break;
+                            }
+                        }
+                        if (u == null) {
+                            // Fetch from DB if not in contact list?
+                            u = chatapp.dao.UserDAO.getUser("id", senderId);
+                        }
+
+                        if (u == null) {
+                            u = new User();
+                            u.setId(senderId); // Fallback
+                        }
                         refreshChat(u, mv, true);
                     }
 
@@ -320,8 +335,31 @@ public class MessageController {
             // Delete Message Handler
             view.setOnDeleteMessage(msg -> {
                 boolean success = chatapp.dao.MessageDAO.deleteMessage(msg.getId());
-                if (success)
-                    refreshChat(targetUser, view, true); // Force refresh
+                if (success) {
+                    refreshChat(targetUser, view, true); // Force refresh local
+
+                    // Notify others
+                    UUID cid = msg.getConversationId();
+                    if (cid == null) {
+                        // Try to resolve if missing in msg
+                        if (targetUser instanceof GroupUser)
+                            cid = targetUser.getId();
+                        else {
+                            Conversation c = chatapp.dao.ConversationDAO.getPrivateConversation(user.getId(),
+                                    targetUser.getId());
+                            cid = (c != null) ? c.getId() : null;
+                        }
+                    }
+
+                    if (cid != null && socketClient != null) {
+                        java.util.List<UUID> memberIds = chatapp.dao.ConversationDAO.getConversationMemberIds(cid);
+                        for (UUID mid : memberIds) {
+                            if (!mid.equals(user.getId())) {
+                                socketClient.notifyUser(mid);
+                            }
+                        }
+                    }
+                }
             });
 
             // Clear History Handler
@@ -829,11 +867,18 @@ public class MessageController {
     private String resolveSenderName(UUID senderId, User targetUser) {
         if (senderId.equals(user.getId()))
             return "You";
+
         // If private chat and sender is target
         if (targetUser != null && !(targetUser instanceof GroupUser) && targetUser.getId().equals(senderId)) {
-            return targetUser.getDisplayName();
+            String name = (targetUser.getDisplayName() != null && !targetUser.getDisplayName().isEmpty())
+                    ? targetUser.getDisplayName()
+                    : targetUser.getUsername();
+            // Only return if valid name found. If null (dummy user), fall through to DAO.
+            if (name != null)
+                return name;
         }
-        // Group chat or generic lookup
+
+        // Group chat or invalid targetUser -> generic lookup
         User u = chatapp.dao.UserDAO.getUser("id", senderId);
         return (u != null && u.getDisplayName() != null && !u.getDisplayName().isEmpty()) ? u.getDisplayName()
                 : (u != null ? u.getUsername() : "Unknown");
