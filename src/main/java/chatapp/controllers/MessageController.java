@@ -302,6 +302,11 @@ public class MessageController {
             view.getTextField().setOnAction(e -> sendMessageFor(view, targetUser));
             view.getButton().setOnAction(e -> sendMessageFor(view, targetUser));
 
+            // Suggestion Handler
+            view.getSuggestButton().setOnAction(ev -> {
+                handleSuggestion(view, targetUser);
+            });
+
             boolean isGroup = targetUser instanceof GroupUser;
             view.getInfoButton().setVisible(isGroup); // Only show for groups for now
             if (isGroup) {
@@ -797,5 +802,72 @@ public class MessageController {
         User u = chatapp.dao.UserDAO.getUser("id", senderId);
         return (u != null && u.getDisplayName() != null && !u.getDisplayName().isEmpty()) ? u.getDisplayName()
                 : (u != null ? u.getUsername() : "Unknown");
+    }
+
+    private void handleSuggestion(MessageView view, User targetUser) {
+        // Disable button to prevent spam
+        view.getSuggestButton().setDisable(true);
+        view.getSuggestButton().setText("...");
+
+        // Gather context
+        // We can get the last N messages from ChatCache or View.
+        UUID conversationId;
+        if (targetUser instanceof GroupUser) {
+            conversationId = targetUser.getId();
+        } else {
+            Conversation conv = chatapp.dao.ConversationDAO.getPrivateConversation(user.getId(), targetUser.getId());
+            conversationId = (conv != null) ? conv.getId() : null;
+        }
+
+        if (conversationId == null) {
+            view.getSuggestButton().setDisable(false);
+            view.getSuggestButton().setText("Suggest");
+            return;
+        }
+
+        java.util.List<chatapp.models.Message> msgs = chatapp.models.ChatCache.get(conversationId);
+        if (msgs == null || msgs.isEmpty()) {
+            // maybe fresh fetch? or just say no context
+            view.getSuggestButton().setDisable(false);
+            view.getSuggestButton().setText("Suggest");
+            return;
+        }
+
+        // Take last 10 messages
+        int start = Math.max(0, msgs.size() - 10);
+        StringBuilder context = new StringBuilder();
+        for (int i = start; i < msgs.size(); i++) {
+            chatapp.models.Message m = msgs.get(i);
+            String sender = m.getSenderId().equals(user.getId()) ? "Me"
+                    : resolveSenderName(m.getSenderId(), targetUser);
+            context.append(sender).append(": ").append(m.getContent()).append("\n");
+        }
+
+        chatapp.utils.OpenRouterService service = new chatapp.utils.OpenRouterService();
+        service.getSuggestion(context.toString())
+                .thenAccept(suggestion -> {
+                    javafx.application.Platform.runLater(() -> {
+                        view.getTextField().setText(suggestion);
+                        view.getTextField().requestFocus();
+                        view.getTextField().positionCaret(suggestion.length());
+
+                        view.getSuggestButton().setDisable(false);
+                        view.getSuggestButton().setText("Suggest");
+                    });
+                })
+                .exceptionally(ex -> {
+                    javafx.application.Platform.runLater(() -> {
+                        System.err.println("Suggestion failed: " + ex.getMessage());
+                        // Optional: Show alert or tooltip?
+                        view.getSuggestButton().setDisable(false);
+                        view.getSuggestButton().setText("Error");
+
+                        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(
+                                javafx.util.Duration.seconds(2));
+                        pause.setOnFinished(e -> view.getSuggestButton().setText("Suggest"));
+                        pause.play();
+                    });
+                    return null;
+                });
     }
 }

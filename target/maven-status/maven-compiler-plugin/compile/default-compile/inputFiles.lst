@@ -3,6 +3,7 @@
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/models/User.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/models/ChatGroup.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/controllers/AuthController.java
+/home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/utils/OpenRouterService.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/dao/UserDAO.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/views/cells/FriendReqCell.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/dto/ReportDTO.java

@@ -18,6 +18,7 @@ public class MessageView extends BorderPane {
     private ScrollPane scroll = new ScrollPane(msgList);
     private TextField input = new TextField();
     private Button sendBtn = new Button("Send");;
+    private Button suggestBtn = new Button("Suggest");
     private TextField searchMessage = new TextField();
     private Button infoChat = new Button("Info");
     private Label lbl = new Label();
@@ -38,7 +39,7 @@ public class MessageView extends BorderPane {
         input = new TextField();
         HBox.setHgrow(input, Priority.ALWAYS);
 
-        HBox inpLayout = new HBox(input, sendBtn);
+        HBox inpLayout = new HBox(input, suggestBtn, sendBtn);
         inpLayout.setStyle("-fx-padding: 10");
         inpLayout.setAlignment(Pos.CENTER);
         inpLayout.setSpacing(6);
@@ -68,7 +69,7 @@ public class MessageView extends BorderPane {
         scroll.setFitToWidth(true);
         msgList.heightProperty().addListener((obs, oldVal, newVal) -> scroll.setVvalue(1.0));
         HBox.setHgrow(input, Priority.ALWAYS);
-        HBox inpLayout = new HBox(input, sendBtn);
+        HBox inpLayout = new HBox(input, suggestBtn, sendBtn);
         inpLayout.setStyle("-fx-padding: 10");
         inpLayout.setAlignment(Pos.CENTER);
         inpLayout.setSpacing(6);
@@ -197,6 +198,10 @@ public class MessageView extends BorderPane {
 
     public Button getButton() {
         return sendBtn;
+    }
+
+    public Button getSuggestButton() {
+        return suggestBtn;
     }
 
     public void clearMessages() {

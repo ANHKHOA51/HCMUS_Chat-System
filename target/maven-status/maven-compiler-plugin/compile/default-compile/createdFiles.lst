@@ -43,6 +43,7 @@ chatapp/controllers/FriendController$Mode.class
 chatapp/controllers/dashboard/FriendController.class
 chatapp/models/LoginHistory.class
 module-info.class
+chatapp/utils/OpenRouterService.class
 chatapp/views/ContactListView.class
 chatapp/controllers/MessageController$3.class
 chatapp/utils/DbTask.class

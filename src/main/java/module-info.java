@@ -6,6 +6,8 @@ module chatapp {
     requires io.github.cdimascio.dotenv.java;
     requires org.java_websocket;
     requires java.mail;
+    requires java.net.http;
+    requires org.json;
 
     opens chatapp to javafx.fxml;
     opens chatapp.controllers.dashboard to javafx.fxml;
