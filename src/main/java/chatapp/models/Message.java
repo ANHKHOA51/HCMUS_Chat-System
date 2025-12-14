@@ -107,6 +107,10 @@ public class Message {
         this.createdAt = createdAt;
     }
 
+    public LocalDateTime getTimestamp() {
+        return createdAt;
+    }
+
     @Override
     public String toString() {
         return "Message{" +

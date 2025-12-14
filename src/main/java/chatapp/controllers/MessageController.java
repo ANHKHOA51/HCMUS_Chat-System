@@ -182,10 +182,10 @@ public class MessageController {
                             dummy.setId(UUID.fromString(key));
                             // Determine if group?
                             // We can check if key is in groups list
-                            boolean isGroup = false;
+                            // boolean isGroup = false;
                             for (User c : contact.getItems()) {
                                 if (c.getId().toString().equals(key) && c instanceof GroupUser) {
-                                    isGroup = true;
+                                    // isGroup = true;
                                     dummy = c; // Use real object
                                     break;
                                 }
@@ -225,7 +225,9 @@ public class MessageController {
         mv.getTextField().clear();
 
         // Async Database & Notify
-        final String content = text;
+
+        // Let's do encryption inside the thread to get correct CID
+        final String originalText = text;
         new Thread(() -> {
             UUID cid = null;
             if (contact instanceof GroupUser) {
@@ -239,16 +241,18 @@ public class MessageController {
             }
 
             if (cid != null) {
+                String contentToStore = chatapp.utils.CryptoUtils.encrypt(originalText, cid);
+
                 // Update temp message with real CID if we wanted to sync state, but purely for
                 // DB send:
-                chatapp.dao.MessageDAO.send(msgId, cid, user.getId(), content);
+                chatapp.dao.MessageDAO.send(msgId, cid, user.getId(), contentToStore);
 
                 // Add to Cache
                 chatapp.models.Message cachedMsg = new chatapp.models.Message();
                 cachedMsg.setId(msgId);
                 cachedMsg.setConversationId(cid);
                 cachedMsg.setSenderId(user.getId());
-                cachedMsg.setContent(content);
+                cachedMsg.setContent(contentToStore);
                 cachedMsg.setCreatedAt(java.time.LocalDateTime.now());
                 chatapp.models.ChatCache.add(cid, cachedMsg);
 
@@ -470,7 +474,28 @@ public class MessageController {
                 mv.clearMessages();
                 for (chatapp.models.Message m : cached) {
                     boolean isMine = m.getSenderId().equals(user.getId());
-                    mv.addMessage(m, isMine, resolveSenderName(m.getSenderId(), targetUser));
+                    String decrypted = chatapp.utils.CryptoUtils.decrypt(m.getContent(), conversationId);
+                    m.setContent(decrypted); // Update Object for View? Careful, this modifies cache reference if we are
+                                             // not careful.
+                    // Better to create copy or just pass decrypted string.
+                    // MessageView.addMessage takes Message object.
+                    // Let's clone or set content locally?
+                    // Safe hack: just setContent. If we refresh again, it might try to decrypt
+                    // decrypted text.
+                    // CryptoUtils.decrypt handles non-ENC prefix gracefully.
+                    // But if "Hello" matches prefix...
+
+                    // Better: Create a UI-only message object
+                    chatapp.models.Message uiMsg = new chatapp.models.Message();
+                    if (m.isDeleted())
+                        continue;
+
+                    uiMsg.setId(m.getId());
+                    uiMsg.setSenderId(m.getSenderId());
+                    uiMsg.setContent(decrypted);
+                    uiMsg.setCreatedAt(m.getTimestamp());
+
+                    mv.addMessage(uiMsg, isMine, resolveSenderName(m.getSenderId(), targetUser));
                 }
                 // Even if cached, maybe we want to background fetch to ensure fresh?
                 // For now, strict caching as requested.
@@ -490,8 +515,18 @@ public class MessageController {
 
                 mv.clearMessages();
                 for (chatapp.models.Message m : msgs) {
+                    if (m.isDeleted())
+                        continue;
+
                     boolean isMine = m.getSenderId().equals(user.getId());
-                    mv.addMessage(m, isMine, resolveSenderName(m.getSenderId(), targetUser));
+                    String decrypted = chatapp.utils.CryptoUtils.decrypt(m.getContent(), cid);
+                    chatapp.models.Message uiMsg = new chatapp.models.Message();
+                    uiMsg.setId(m.getId());
+                    uiMsg.setSenderId(m.getSenderId());
+                    uiMsg.setContent(decrypted);
+                    uiMsg.setCreatedAt(m.getTimestamp());
+
+                    mv.addMessage(uiMsg, isMine, resolveSenderName(m.getSenderId(), targetUser));
                 }
             });
             new Thread(task).start();
@@ -838,9 +873,13 @@ public class MessageController {
         StringBuilder context = new StringBuilder();
         for (int i = start; i < msgs.size(); i++) {
             chatapp.models.Message m = msgs.get(i);
+            if (m.isDeleted())
+                continue;
+
+            String decryptedContent = chatapp.utils.CryptoUtils.decrypt(m.getContent(), conversationId);
             String sender = m.getSenderId().equals(user.getId()) ? "Me"
                     : resolveSenderName(m.getSenderId(), targetUser);
-            context.append(sender).append(": ").append(m.getContent()).append("\n");
+            context.append(sender).append(": ").append(decryptedContent).append("\n");
         }
 
         chatapp.utils.OpenRouterService service = new chatapp.utils.OpenRouterService();
