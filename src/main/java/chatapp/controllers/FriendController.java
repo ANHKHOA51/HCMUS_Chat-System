@@ -224,41 +224,61 @@ public class FriendController {
 
                                 if ("friends".equals(rel)) {
                                     getChatButton().setVisible(true);
-                                    getChatButton().setOnAction(e -> handleChat(user));
+                                    getChatButton().setOnAction(event -> handleChat(user));
 
                                     getCreateGroupButton().setVisible(true);
-                                    getCreateGroupButton().setOnAction(e -> handleCreateGroup(user));
+                                    getCreateGroupButton().setOnAction(event -> handleCreateGroup(user));
 
                                     getBlockButton().setVisible(true);
+                                    getBlockButton().setText("Block");
+                                    getBlockButton().setOnAction(event -> handleBlock(user));
 
                                     getDeleteButton().setVisible(true);
                                     getDeleteButton().setText("Unfriend");
-                                    getDeleteButton().setOnAction(e -> handleUnfriend(user));
+                                    getDeleteButton().setOnAction(event -> handleUnfriend(user));
+
+                                } else if ("blocked".equals(rel)) {
+                                    // Check if I am the one who blocked?
+                                    // status is 'blocked' only for the pair.
+                                    // requester_id is the one who took action (blocked).
+                                    // We need to fetch relationship details if we want to be sure, but
+                                    // getRelationship returns string.
+                                    // Assumption: searchUsers hides users who blocked ME. So this must be someone I
+                                    // blocked.
+                                    getBlockButton().setVisible(true);
+                                    getBlockButton().setText("Unblock");
+                                    getBlockButton().setOnAction(event -> handleUnblock(user));
 
                                 } else if ("pending_sent".equals(rel)) {
                                     getSendRequestButton().setText("Sent");
                                     getSendRequestButton().setDisable(true);
                                     getSendRequestButton().setVisible(true);
                                     getBlockButton().setVisible(true);
+                                    getBlockButton().setText("Block");
+                                    getBlockButton().setOnAction(event -> handleBlock(user));
                                 } else if ("pending_received".equals(rel)) {
                                     getSendRequestButton().setText("Accept");
                                     getSendRequestButton().setVisible(true);
-                                    getSendRequestButton().setOnAction(e -> handleAccept(user));
+                                    getSendRequestButton().setOnAction(event -> handleAccept(user));
                                     getBlockButton().setVisible(true);
+                                    getBlockButton().setText("Block");
+                                    getBlockButton().setOnAction(event -> handleBlock(user));
                                 } else if ("none".equals(rel)) {
                                     // Chat and Group are now allowed for non-friends too
                                     getChatButton().setVisible(true);
-                                    getChatButton().setOnAction(e -> handleChat(user));
+                                    getChatButton().setOnAction(event -> handleChat(user));
 
                                     getCreateGroupButton().setVisible(true);
-                                    getCreateGroupButton().setOnAction(e -> handleCreateGroup(user));
+                                    getCreateGroupButton().setOnAction(event -> handleCreateGroup(user));
 
                                     getSendRequestButton().setText("Add");
                                     getSendRequestButton().setVisible(true);
                                     getSendRequestButton().setDisable(false);
-                                    getSendRequestButton().setOnAction(e -> handleSendRequest(user));
+                                    getSendRequestButton().setOnAction(event -> handleSendRequest(user));
 
                                     getBlockButton().setVisible(true);
+                                    getBlockButton().setText("Block");
+                                    getBlockButton().setOnAction(event -> handleBlock(user));
                                 }
                             }
                         };
@@ -315,6 +335,18 @@ public class FriendController {
             });
 
             new Thread(task).start();
+        }
+    }
+
+    // Action Handlers
+    private void handleUnblock(User u) {
+        boolean success = FriendShipDAO.unblockUser(currentUser.getId(), u.getId());
+        if (success) {
+            refreshFriendsList();
+            if (currentMode == Mode.SEARCH)
+                performSearch(); // Refresh search to update status
+        } else {
+            System.out.println("Failed to unblock " + u.getUsername());
         }
     }
 

@@ -191,6 +191,22 @@ public class FriendShipDAO {
         }
     }
 
+    public static boolean unblockUser(UUID userId, UUID blockedId) {
+        Connection conn = DBConnection.getConnection();
+        String sql = """
+                    DELETE FROM friendships
+                    WHERE user_id = ? AND friend_id = ? AND status = 'blocked'
+                """;
+        try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, userId);
+            ps.setObject(2, blockedId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public static List<User> searchUsers(String keyword, UUID currentUserId) {
         List<User> list = new ArrayList<>();
         Connection conn = DBConnection.getConnection();
