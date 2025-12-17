@@ -59,7 +59,8 @@ public class MessageController {
                 if (empty || item == null) {
                     setText(null);
                 } else {
-                    setText(item.getContent() + " (" + item.getCreatedAt() + ")");
+                    String decrypted = chatapp.utils.CryptoUtils.decrypt(item.getContent(), item.getConversationId());
+                    setText(decrypted + " (" + item.getCreatedAt() + ")");
                 }
             }
         });
@@ -93,7 +94,17 @@ public class MessageController {
                 }
 
                 chatapp.utils.DbTask<java.util.List<chatapp.models.Message>> task = new chatapp.utils.DbTask<>(() -> {
-                    return chatapp.dao.MessageDAO.searchAllMessages(u.getId(), newVal.trim());
+                    java.util.List<chatapp.models.Message> all = chatapp.dao.MessageDAO
+                            .getAllReadableMessages(u.getId());
+                    java.util.List<chatapp.models.Message> filtered = new java.util.ArrayList<>();
+                    String query = newVal.trim().toLowerCase();
+                    for (chatapp.models.Message m : all) {
+                        String decrypted = chatapp.utils.CryptoUtils.decrypt(m.getContent(), m.getConversationId());
+                        if (decrypted.toLowerCase().contains(query)) {
+                            filtered.add(m);
+                        }
+                    }
+                    return filtered;
                 });
                 task.setOnSucceeded(ev -> {
                     searchResults.setItems(FXCollections.observableArrayList(task.getValue()));
@@ -443,7 +454,21 @@ public class MessageController {
                 if (cid != null) {
                     chatapp.utils.DbTask<java.util.List<chatapp.models.Message>> task = new chatapp.utils.DbTask<>(
                             () -> {
-                                return chatapp.dao.MessageDAO.searchMessages(cid, query);
+                                java.util.List<chatapp.models.Message> all = chatapp.dao.MessageDAO.getMessages(cid);
+                                java.util.List<chatapp.models.Message> filtered = new java.util.ArrayList<>();
+                                String q = query.toLowerCase();
+                                for (chatapp.models.Message m : all) {
+                                    if (m.isDeleted())
+                                        continue;
+                                    String decrypted = chatapp.utils.CryptoUtils.decrypt(m.getContent(), cid);
+                                    if (decrypted.toLowerCase().contains(q)) {
+                                        // Create a copy or modify? Modifying local object is generic since DAO returns
+                                        // new instances.
+                                        m.setContent(decrypted);
+                                        filtered.add(m);
+                                    }
+                                }
+                                return filtered;
                             });
                     task.setOnSucceeded(e -> {
                         view.showSearchResults(task.getValue());

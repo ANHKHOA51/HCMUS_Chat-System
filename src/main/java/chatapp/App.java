@@ -76,8 +76,31 @@ public class App extends Application {
                                 cur_user.getId());
                         socketClient.connect();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        System.out.println("Chat Server is offline or unreachable. Continuing in offline mode.");
+                        // e.printStackTrace();
+                        // Keep socketClient null or handle reconnection later if needed?
+                        // For now, just continue.
                     }
+
+                    // Auto-reconnect thread
+                    Thread reconnectThread = new Thread(() -> {
+                        while (cur_user != null && socketClient != null) {
+                            try {
+                                Thread.sleep(5000); // Check every 5s
+                                if (socketClient != null
+                                        && socketClient.getReadyState() == org.java_websocket.enums.ReadyState.CLOSED) {
+                                    System.out.println("Reconnecting to Chat Server...");
+                                    socketClient.reconnect();
+                                }
+                            } catch (InterruptedException ie) {
+                                break;
+                            } catch (Exception e) {
+                                System.out.println("Reconnection attempt failed: " + e.getMessage());
+                            }
+                        }
+                    });
+                    reconnectThread.setDaemon(true);
+                    reconnectThread.start();
 
                     // Add callbacks AFTER socketClient is created
                     msgCtl.setupSocket(socketClient);

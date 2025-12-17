@@ -155,6 +155,39 @@ public class MessageDAO {
         return list;
     }
 
+    public static List<Message> getAllReadableMessages(UUID userId) {
+        List<Message> list = new ArrayList<>();
+        Connection conn = chatapp.db.DBConnection.getConnection();
+        // Join with conversation_members to ensure user is part of conversation
+        String sql = """
+                    SELECT m.*
+                    FROM messages m
+                    JOIN conversation_members cm ON m.conversation_id = cm.conversation_id
+                    WHERE cm.user_id = ?
+                    AND m.is_deleted = FALSE
+                    ORDER BY m.created_at DESC
+                """;
+        try {
+            java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, userId);
+            java.sql.ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Message m = new Message();
+                m.setId(UUID.fromString(rs.getString("id")));
+                m.setConversationId(UUID.fromString(rs.getString("conversation_id")));
+                m.setSenderId(UUID.fromString(rs.getString("sender_id")));
+                m.setContent(rs.getString("content"));
+                m.setDeleted(rs.getBoolean("is_deleted"));
+                m.setCreatedAt(
+                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+                list.add(m);
+            }
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     public static boolean deleteMessagesFromUser(UUID conversationId, UUID userId) {
         Connection conn = chatapp.db.DBConnection.getConnection();
         String sql = "UPDATE messages SET is_deleted = TRUE WHERE conversation_id = ? AND sender_id = ?";
