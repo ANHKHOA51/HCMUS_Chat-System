@@ -1,8 +1,6 @@
 package chatapp;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
@@ -17,8 +15,6 @@ import chatapp.db.DBConnection;
 import chatapp.models.LoginHistory;
 // import chatapp.db.DBConnection;
 import chatapp.models.User;
-
-import chatapp.utils.FXMLPaths;
 
 public class App extends Application {
     private static App instance;
@@ -46,99 +42,75 @@ public class App extends Application {
                     return;
                 }
 
-                if (cur_user.isAdmin()) {
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource(FXMLPaths.Dashboard.USER));
-                        Parent root = loader.load();
+                // User App always loads Chat UI regardless of role (Admin can also chat)
+                TabPane pane = new TabPane();
+                MessageController msgCtl = new MessageController(cur_user);
 
-                        // Setup logout handler for Dashboard
-                        chatapp.controllers.dashboard.DashboardController.onLogout = () -> {
-                            authCtl.showLogin();
-                            stage.setScene(authCtl.getScene());
-                            stage.centerOnScreen();
-                        };
-
-                        Scene adminScene = new Scene(root);
-                        stage.setScene(adminScene);
-                        stage.centerOnScreen();
-                        stage.setTitle("Admin Dashboard");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        System.out.println("Failed to load Admin Dashboard");
-                    }
-                } else {
-                    TabPane pane = new TabPane();
-                    MessageController msgCtl = new MessageController(cur_user);
-
-                    // Start Socket Client
-                    try {
-                        socketClient = new chatapp.server.ChatClientWrapper(new java.net.URI("ws://localhost:8887"),
-                                cur_user.getId());
-                        socketClient.connect();
-                    } catch (Exception e) {
-                        System.out.println("Chat Server is offline or unreachable. Continuing in offline mode.");
-                        // e.printStackTrace();
-                        // Keep socketClient null or handle reconnection later if needed?
-                        // For now, just continue.
-                    }
-
-                    // Auto-reconnect thread
-                    Thread reconnectThread = new Thread(() -> {
-                        while (cur_user != null && socketClient != null) {
-                            try {
-                                Thread.sleep(5000); // Check every 5s
-                                if (socketClient != null
-                                        && socketClient.getReadyState() == org.java_websocket.enums.ReadyState.CLOSED) {
-                                    System.out.println("Reconnecting to Chat Server...");
-                                    socketClient.reconnect();
-                                }
-                            } catch (InterruptedException ie) {
-                                break;
-                            } catch (Exception e) {
-                                System.out.println("Reconnection attempt failed: " + e.getMessage());
-                            }
-                        }
-                    });
-                    reconnectThread.setDaemon(true);
-                    reconnectThread.start();
-
-                    // Add callbacks AFTER socketClient is created
-                    msgCtl.setupSocket(socketClient);
-
-                    ProfileController pfCtl = new ProfileController(cur_user);
-                    pfCtl.setOnSignOut(() -> {
-                        // Set Offline
-                        if (cur_user != null) {
-                            chatapp.dao.UserDAO.updateFieldUser("is_online", false, "id", cur_user.getId());
-                        }
-                        // Close Socket
-                        if (socketClient != null) {
-                            socketClient.close();
-                            socketClient = null;
-                        }
-
-                        cur_user = null;
-                        authCtl.showLogin();
-                        stage.setScene(authCtl.getScene());
-                        stage.centerOnScreen();
-                    });
-                    FriendController frCtl = new FriendController(cur_user);
-                    frCtl.setupSocket(socketClient);
-
-                    frCtl.setOnOpenChat(targetUser -> {
-                        pane.getSelectionModel().select(0); // Assuming MessageController is at index 0
-                        msgCtl.openChatWith(targetUser);
-                    });
-
-                    pane.getTabs().add(msgCtl.getTab());
-                    pane.getTabs().add(frCtl.getTab());
-                    pane.getTabs().add(pfCtl.getProfileView());
-                    Scene main = new Scene(pane, 1200, 800);
-
-                    stage.setScene(main);
-                    stage.centerOnScreen();
-                    stage.setTitle("HCMUS Chat App");
+                // Start Socket Client
+                try {
+                    socketClient = new chatapp.server.ChatClientWrapper(new java.net.URI("ws://localhost:8887"),
+                            cur_user.getId());
+                    socketClient.connect();
+                } catch (Exception e) {
+                    System.out.println("Chat Server is offline or unreachable. Continuing in offline mode.");
                 }
+
+                // Auto-reconnect thread
+                Thread reconnectThread = new Thread(() -> {
+                    while (cur_user != null && socketClient != null) {
+                        try {
+                            Thread.sleep(5000); // Check every 5s
+                            if (socketClient != null
+                                    && socketClient.getReadyState() == org.java_websocket.enums.ReadyState.CLOSED) {
+                                System.out.println("Reconnecting to Chat Server...");
+                                socketClient.reconnect();
+                            }
+                        } catch (InterruptedException ie) {
+                            break;
+                        } catch (Exception e) {
+                            System.out.println("Reconnection attempt failed: " + e.getMessage());
+                        }
+                    }
+                });
+                reconnectThread.setDaemon(true);
+                reconnectThread.start();
+
+                // Add callbacks AFTER socketClient is created
+                msgCtl.setupSocket(socketClient);
+
+                ProfileController pfCtl = new ProfileController(cur_user);
+                pfCtl.setOnSignOut(() -> {
+                    // Set Offline
+                    if (cur_user != null) {
+                        chatapp.dao.UserDAO.updateFieldUser("is_online", false, "id", cur_user.getId());
+                    }
+                    // Close Socket
+                    if (socketClient != null) {
+                        socketClient.close();
+                        socketClient = null;
+                    }
+
+                    cur_user = null;
+                    authCtl.showLogin();
+                    stage.setScene(authCtl.getScene());
+                    stage.centerOnScreen();
+                });
+                FriendController frCtl = new FriendController(cur_user);
+                frCtl.setupSocket(socketClient);
+
+                frCtl.setOnOpenChat(targetUser -> {
+                    pane.getSelectionModel().select(0); // Assuming MessageController is at index 0
+                    msgCtl.openChatWith(targetUser);
+                });
+
+                pane.getTabs().add(msgCtl.getTab());
+                pane.getTabs().add(frCtl.getTab());
+                pane.getTabs().add(pfCtl.getProfileView());
+                Scene main = new Scene(pane, 1200, 800);
+
+                stage.setScene(main);
+                stage.centerOnScreen();
+                stage.setTitle("HCMUS Chat App");
             } else {
                 System.out.println("Login failed for user=" + username);
                 authCtl.showLoginError("Invalid username or password");

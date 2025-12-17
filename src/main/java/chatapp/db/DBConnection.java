@@ -11,7 +11,16 @@ public class DBConnection {
     public static Connection getConnection() {
         if (connection == null) {
             try {
-                Dotenv dotenv = Dotenv.load();
+                Dotenv dotenv;
+                try {
+                    // Try loading from filesystem first (Dev environment)
+                    dotenv = Dotenv.load();
+                } catch (Exception e) {
+                    // Fallback to loading from classpath (Prod/Jar environment)
+                    System.out.println("Could not load .env from filesystem, trying classpath...");
+                    dotenv = Dotenv.configure().directory("/").load();
+                }
+
                 String url = dotenv.get("SUPABASE_JDBC_URL");
                 String user = dotenv.get("SUPABASE_DB_USER");
                 String password = dotenv.get("SUPABASE_DB_PASS");
