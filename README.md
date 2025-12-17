@@ -42,3 +42,8 @@ Ensure you have the following installed:
 
 
 mvn exec:java@server
+mvn compile
+
+mvn exec
+
+mvn package
