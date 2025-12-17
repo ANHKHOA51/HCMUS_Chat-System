@@ -76,7 +76,7 @@ public class RegistrationController extends DashboardController {
         registrationTable.setItems(ListRegistation);
 
         ListYearCombox = FXCollections.observableArrayList();
-        for (int year = 2000; year <= 2025; year++) {
+        for (int year = 2020; year <= 2025; year++) {
             ListYearCombox.add(year);
         }
 

@@ -6,6 +6,7 @@
 <?import javafx.scene.chart.StackedBarChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -93,25 +94,44 @@
                      <children>
                         <VBox prefHeight="500.0" prefWidth="510.0">
                            <children>
+                              <HBox alignment="CENTER" prefHeight="40.0" prefWidth="200.0">
+                                 <children>
+                                    <Label text="From">
+                                       <HBox.margin>
+                                          <Insets right="8.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <DatePicker fx:id="fromDate">
+                                       <HBox.margin>
+                                          <Insets right="16.0" />
+                                       </HBox.margin>
+                                    </DatePicker>
+                                    <Label text="To">
+                                       <HBox.margin>
+                                          <Insets right="8.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <DatePicker fx:id="toDate" />
+                                 </children>
+                                 <padding>
+                                    <Insets left="8.0" right="8.0" />
+                                 </padding>
+                              </HBox>
                               <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="510.0">
                                  <children>
                                     <Label text="Number of activity">
                                        <HBox.margin>
                                           <Insets left="16.0" />
                                        </HBox.margin></Label>
-                                    <TextField>
+                                    <TextField fx:id="numActivityField">
                                        <HBox.margin>
                                           <Insets left="8.0" />
                                        </HBox.margin>
                                     </TextField>
-                                    <ComboBox prefWidth="150.0">
+                                    <ComboBox fx:id="typeCombox" prefWidth="150.0">
                                        <HBox.margin>
                                           <Insets left="8.0" />
                                        </HBox.margin></ComboBox>
-                                    <Button mnemonicParsing="false" text="Filter">
-                                       <HBox.margin>
-                                          <Insets left="8.0" />
-                                       </HBox.margin></Button>
                                  </children>
                               </HBox>
                               <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="200.0">
@@ -121,24 +141,24 @@
                                           <Insets left="16.0" />
                                        </HBox.margin>
                                     </Label>
-                                    <TextField>
+                                    <TextField fx:id="usernameField">
                                        <HBox.margin>
                                           <Insets left="8.0" />
                                        </HBox.margin>
                                     </TextField>
-                                    <Button mnemonicParsing="false" text="Filter">
+                                    <Button mnemonicParsing="false" onAction="#onFilterTable" text="Filter">
                                        <HBox.margin>
                                           <Insets left="8.0" />
                                        </HBox.margin>
                                     </Button>
                                  </children>
                               </HBox>
-                              <TableView prefHeight="500.0" prefWidth="510.0">
+                              <TableView fx:id="activityTable" prefHeight="500.0" prefWidth="510.0">
                                 <columns>
-                                  <TableColumn fx:id="userNameCol" prefWidth="95.99996948242188" text="User name" />
-                                  <TableColumn fx:id="name" prefWidth="107.20004272460938" text="Name" />
-                                    <TableColumn fx:id="timeCol" prefWidth="112.00003051757812" text="Time" />
-                                    <TableColumn fx:id="activityCol" prefWidth="160.0" text="Activity" />
+                                  <TableColumn fx:id="userNameCol" prefWidth="160.0" text="User name" />
+                                    <TableColumn fx:id="numLoginCol" prefWidth="90.0" text="Logins" />
+                                    <TableColumn fx:id="messageCol" prefWidth="90.0" text="Messages" />
+                                    <TableColumn fx:id="activityCol" minWidth="9.5999755859375" prefWidth="90.0" text="Total" />
                                 </columns>
                               </TableView>
                            </children>
@@ -146,32 +166,32 @@
                               <Insets bottom="16.0" left="8.0" right="8.0" top="16.0" />
                            </padding>
                         </VBox>
-                        <VBox alignment="CENTER" prefHeight="655.0" prefWidth="510.0">
+                        <VBox alignment="TOP_CENTER" prefHeight="655.0" prefWidth="510.0">
                            <children>
-                              <StackedBarChart>
-                                <xAxis>
-                                  <CategoryAxis side="BOTTOM" />
-                                </xAxis>
-                                <yAxis>
-                                  <NumberAxis side="LEFT" />
-                                </yAxis>
-                              </StackedBarChart>
                               <HBox alignment="CENTER_LEFT" prefHeight="52.0" prefWidth="200.0">
                                  <children>
                                     <Label text="Year">
                                        <HBox.margin>
                                           <Insets right="16.0" />
                                        </HBox.margin></Label>
-                                    <ComboBox prefWidth="150.0">
+                                    <ComboBox fx:id="yearCombox" prefWidth="150.0">
                                        <HBox.margin>
                                           <Insets right="16.0" />
                                        </HBox.margin></ComboBox>
-                                    <Button mnemonicParsing="false" text="Filter" />
+                                    <Button mnemonicParsing="false" onAction="#onFilterChart" text="Filter" />
                                  </children>
                                  <padding>
                                     <Insets left="16.0" />
                                  </padding>
                               </HBox>
+                              <StackedBarChart fx:id="loginChart">
+                                <xAxis>
+                                  <CategoryAxis label="Months" side="BOTTOM" fx:id="xAxis" />
+                                </xAxis>
+                                <yAxis>
+                                  <NumberAxis fx:id="yAxis" label="User logins" side="LEFT" />
+                                </yAxis>
+                              </StackedBarChart>
                            </children>
                            <padding>
                               <Insets bottom="16.0" left="8.0" right="8.0" top="16.0" />
