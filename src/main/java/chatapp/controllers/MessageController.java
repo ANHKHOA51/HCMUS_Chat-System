@@ -25,6 +25,7 @@ public class MessageController {
     private ContactListView contact;
     private BorderPane split = new BorderPane();
     private final Map<String, MessageView> views = new HashMap<>();
+    private final Map<UUID, UUID> pendingScrollRequest = new HashMap<>();
     private chatapp.server.ChatClientWrapper socketClient;
 
     public MessageController() {
@@ -84,13 +85,21 @@ public class MessageController {
         javafx.scene.layout.VBox.setVgrow(contact, javafx.scene.layout.Priority.ALWAYS);
         split.setLeft(leftPane);
 
+        // Search Results Panel
+        javafx.scene.control.Button closeSearchBtn = new javafx.scene.control.Button("Close Search");
+        closeSearchBtn.setMaxWidth(Double.MAX_VALUE);
+        closeSearchBtn.setOnAction(e -> globalSearch.clear());
+
+        javafx.scene.layout.VBox searchPanel = new javafx.scene.layout.VBox(closeSearchBtn, searchResults);
+        javafx.scene.layout.VBox.setVgrow(searchResults, javafx.scene.layout.Priority.ALWAYS);
+
         globalSearch.textProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == null || newVal.trim().isEmpty()) {
                 leftPane.getChildren().set(1, contact);
             } else {
-                if (!leftPane.getChildren().contains(searchResults)) {
-                    leftPane.getChildren().set(1, searchResults);
-                    javafx.scene.layout.VBox.setVgrow(searchResults, javafx.scene.layout.Priority.ALWAYS);
+                if (!leftPane.getChildren().contains(searchPanel)) {
+                    leftPane.getChildren().set(1, searchPanel);
+                    javafx.scene.layout.VBox.setVgrow(searchPanel, javafx.scene.layout.Priority.ALWAYS);
                 }
 
                 chatapp.utils.DbTask<java.util.List<chatapp.models.Message>> task = new chatapp.utils.DbTask<>(() -> {
@@ -512,8 +521,15 @@ public class MessageController {
         }
 
         if (target != null) {
-            openChatWith(target);
+            openChatWith(target, msg.getId());
         }
+    }
+
+    public void openChatWith(User target, UUID msgId) {
+        if (msgId != null) {
+            pendingScrollRequest.put(target.getId(), msgId);
+        }
+        openChatWith(target);
     }
 
     private void refreshChat(User targetUser, MessageView mv, boolean forceRefresh) {
@@ -559,6 +575,12 @@ public class MessageController {
                     uiMsg.setCreatedAt(m.getTimestamp());
 
                     mv.addMessage(uiMsg, isMine, resolveSenderName(m.getSenderId(), targetUser));
+
+                }
+
+                if (pendingScrollRequest.containsKey(targetUser.getId())) {
+                    UUID msgId = pendingScrollRequest.remove(targetUser.getId());
+                    javafx.application.Platform.runLater(() -> mv.scrollToMessage(msgId));
                 }
                 // Even if cached, maybe we want to background fetch to ensure fresh?
                 // For now, strict caching as requested.
@@ -590,6 +612,11 @@ public class MessageController {
                     uiMsg.setCreatedAt(m.getTimestamp());
 
                     mv.addMessage(uiMsg, isMine, resolveSenderName(m.getSenderId(), targetUser));
+                }
+
+                if (pendingScrollRequest.containsKey(targetUser.getId())) {
+                    UUID msgId = pendingScrollRequest.remove(targetUser.getId());
+                    javafx.application.Platform.runLater(() -> mv.scrollToMessage(msgId));
                 }
             });
             new Thread(task).start();
