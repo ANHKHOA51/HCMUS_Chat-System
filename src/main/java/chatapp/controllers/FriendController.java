@@ -42,6 +42,7 @@ public class FriendController {
 
         // Initial Load
         loadFriends();
+        fov.setActive(fov.getFriendBtn());
 
         // Wire buttons
         wireOptions();
@@ -143,10 +144,20 @@ public class FriendController {
     }
 
     private void wireOptions() {
-        fov.getFriendBtn().setOnAction(e -> loadFriends());
-        fov.getFriendReqBtn().setOnAction(e -> loadRequests());
-        fov.getOnlineBtn().setOnAction(e -> loadOnline());
+        fov.getFriendBtn().setOnAction(e -> {
+            loadFriends();
+            fov.setActive(fov.getFriendBtn());
+        });
+        fov.getFriendReqBtn().setOnAction(e -> {
+            loadRequests();
+            fov.setActive(fov.getFriendReqBtn());
+        });
+        fov.getOnlineBtn().setOnAction(e -> {
+            loadOnline();
+            fov.setActive(fov.getOnlineBtn());
+        });
         fov.getSearchBtn().setOnAction(e -> {
+            fov.setActive(fov.getSearchBtn());
             currentMode = Mode.SEARCH;
             userList.getUserListView().setItems(FXCollections.observableArrayList()); // Clear list
             userList.getFilterField().clear();

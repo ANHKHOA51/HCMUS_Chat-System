@@ -15,7 +15,7 @@ import javafx.collections.ObservableList;
 public class UserListView extends BorderPane {
     TextField filterField;
     ListView<User> userListView;
-    
+
     public TextField getFilterField() {
         return filterField;
     }
@@ -44,6 +44,8 @@ public class UserListView extends BorderPane {
         topBox.setPadding(new Insets(10));
         this.setTop(topBox);
         this.setCenter(userListView);
+
+        userListView.setPlaceholder(new javafx.scene.control.Label("No results found"));
     }
 
     public UserListView(ObservableList<User> users) {
@@ -57,8 +59,9 @@ public class UserListView extends BorderPane {
         topBox.setPadding(new Insets(10)); // optional spacing
         this.setTop(topBox);
         this.setCenter(userListView);
-    }
 
+        userListView.setPlaceholder(new javafx.scene.control.Label("No results found"));
+    }
 
     public void setFriendListCellFactory() {
         userListView.setCellFactory(param -> new UserFriendListCell());
