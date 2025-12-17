@@ -48,7 +48,11 @@ public class AdminApp extends Application {
 
                 try {
                     // Initialize Admin Socket
-                    socketClient = new chatapp.server.AdminSocketClient(new java.net.URI("ws://localhost:8887"));
+                    String host = chatapp.db.DBConnection.get("CHAT_SERVER_HOST", "localhost");
+                    String port = chatapp.db.DBConnection.get("CHAT_SERVER_PORT", "8887");
+                    String wsUrl = "ws://" + host + ":" + port;
+                    System.out.println("Admin connecting to Chat Server at: " + wsUrl);
+                    socketClient = new chatapp.server.AdminSocketClient(new java.net.URI(wsUrl));
                     socketClient.connect();
                 } catch (Exception e) {
                     System.out.println("Could not connect to Chat Server as Admin: " + e.getMessage());

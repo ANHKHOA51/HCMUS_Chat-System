@@ -48,7 +48,11 @@ public class App extends Application {
 
                 // Start Socket Client
                 try {
-                    socketClient = new chatapp.server.ChatClientWrapper(new java.net.URI("ws://localhost:8887"),
+                    String host = chatapp.db.DBConnection.get("CHAT_SERVER_HOST", "localhost");
+                    String port = chatapp.db.DBConnection.get("CHAT_SERVER_PORT", "8887");
+                    String wsUrl = "ws://" + host + ":" + port;
+                    System.out.println("Connecting to Chat Server at: " + wsUrl);
+                    socketClient = new chatapp.server.ChatClientWrapper(new java.net.URI(wsUrl),
                             cur_user.getId());
                     socketClient.connect();
                 } catch (Exception e) {

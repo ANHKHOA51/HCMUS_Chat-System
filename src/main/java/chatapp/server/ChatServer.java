@@ -27,8 +27,8 @@ public class ChatServer extends WebSocketServer {
     }
 
     public static void main(String[] args) {
-        String host = "0.0.0.0";
-        int port = 8887;
+        String host = chatapp.db.DBConnection.get("CHAT_SERVER_HOST", "0.0.0.0");
+        int port = Integer.parseInt(chatapp.db.DBConnection.get("CHAT_SERVER_PORT", "8887"));
         ChatServer server = new ChatServer(new InetSocketAddress(host, port));
         server.start();
         System.out.println("ChatServer started on port: " + port);
