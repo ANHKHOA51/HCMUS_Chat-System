@@ -7,7 +7,9 @@ import org.java_websocket.handshake.ClientHandshake;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class ChatServer extends WebSocketServer {
@@ -16,6 +18,9 @@ public class ChatServer extends WebSocketServer {
     private final Map<UUID, WebSocket> clientConnections = Collections.synchronizedMap(new HashMap<>());
     // Map to store reverse lookup: WebSocket -> UserID
     private final Map<WebSocket, UUID> connectionToUser = Collections.synchronizedMap(new HashMap<>());
+
+    // Set to store Admin Monitor connections
+    private final Set<WebSocket> adminConnections = Collections.synchronizedSet(new HashSet<>());
 
     public ChatServer(InetSocketAddress address) {
         super(address);
@@ -41,7 +46,9 @@ public class ChatServer extends WebSocketServer {
         if (userId != null) {
             clientConnections.remove(userId);
             broadcast("OFFLINE:" + userId.toString());
+            broadcastActiveUsersToAdmins(); // Update admins
         }
+        adminConnections.remove(conn);
     }
 
     @Override
@@ -51,6 +58,7 @@ public class ChatServer extends WebSocketServer {
             // Protocol:
             // LOGIN:<userId>
             // NOTIFY:<targetId> (User A notifications User B)
+            // ADMIN_MONITOR (Admin registers to receive updates)
 
             if (message.startsWith("LOGIN:")) {
                 String userIdStr = message.substring(6);
@@ -76,6 +84,14 @@ public class ChatServer extends WebSocketServer {
 
                 // Broadcast this user is ONLINE
                 broadcast("ONLINE:" + userId.toString());
+                broadcastActiveUsersToAdmins(); // Update admins
+
+            } else if (message.equals("ADMIN_MONITOR")) {
+                adminConnections.add(conn);
+                System.out.println("Admin Monitor registered: " + conn.getRemoteSocketAddress());
+                // Send current list immediately
+                sendActiveUsersTo(conn);
+
             } else if (message.startsWith("NOTIFY:")) {
                 String targetIdStr = message.substring(7);
                 UUID senderId = connectionToUser.get(conn);
@@ -93,6 +109,37 @@ public class ChatServer extends WebSocketServer {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void broadcastActiveUsersToAdmins() {
+        if (adminConnections.isEmpty())
+            return;
+
+        StringBuilder userList = new StringBuilder("ACTIVE_USERS:");
+        synchronized (clientConnections) {
+            for (UUID id : clientConnections.keySet()) {
+                userList.append(id).append(",");
+            }
+        }
+        String msg = userList.toString();
+
+        synchronized (adminConnections) {
+            for (WebSocket admin : adminConnections) {
+                if (admin.isOpen()) {
+                    admin.send(msg);
+                }
+            }
+        }
+    }
+
+    private void sendActiveUsersTo(WebSocket conn) {
+        StringBuilder userList = new StringBuilder("ACTIVE_USERS:");
+        synchronized (clientConnections) {
+            for (UUID id : clientConnections.keySet()) {
+                userList.append(id).append(",");
+            }
+        }
+        conn.send(userList.toString());
     }
 
     @Override

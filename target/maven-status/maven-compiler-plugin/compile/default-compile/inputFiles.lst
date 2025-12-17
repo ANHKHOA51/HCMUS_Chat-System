@@ -39,6 +39,7 @@
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/App.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/dao/ConversationDAO.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/db/DBConnection.java
+/home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/server/AdminSocketClient.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/dto/LoginHistoryDTO.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/models/LoginHistory.java
 /home/akhoa/Documents/Code/Project/HCMUS_Chat-app/src/main/java/chatapp/controllers/dashboard/LoginHistoryController.java

@@ -16,6 +16,7 @@ import chatapp.utils.FXMLPaths;
 
 public class AdminApp extends Application {
     private User cur_user;
+    public static chatapp.server.AdminSocketClient socketClient;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -46,11 +47,23 @@ public class AdminApp extends Application {
                 }
 
                 try {
+                    // Initialize Admin Socket
+                    socketClient = new chatapp.server.AdminSocketClient(new java.net.URI("ws://localhost:8887"));
+                    socketClient.connect();
+                } catch (Exception e) {
+                    System.out.println("Could not connect to Chat Server as Admin: " + e.getMessage());
+                }
+
+                try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource(FXMLPaths.Dashboard.USER));
                     Parent root = loader.load();
 
                     // Setup logout handler for Dashboard
                     chatapp.controllers.dashboard.DashboardController.onLogout = () -> {
+                        if (socketClient != null) {
+                            socketClient.close();
+                            socketClient = null;
+                        }
                         authCtl.showLogin();
                         stage.setScene(authCtl.getScene());
                         stage.centerOnScreen();

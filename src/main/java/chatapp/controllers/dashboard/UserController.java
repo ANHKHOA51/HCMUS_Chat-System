@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
 import chatapp.dto.LoginHistoryDTO;
 import chatapp.models.User;
 import chatapp.utils.FXMLPaths;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -136,6 +137,18 @@ public class UserController extends DashboardController {
                 unlockUser.setDisable(!isLock);
             }
         });
+
+        // Register for real-time updates
+        if (chatapp.AdminApp.socketClient != null) {
+            chatapp.AdminApp.socketClient.setOnActiveUsersUpdate(activeUserIds -> {
+                Platform.runLater(() -> {
+                    for (User user : userList) {
+                        user.setOnline(activeUserIds.contains(user.getId()));
+                    }
+                    tableView.refresh();
+                });
+            });
+        }
     }
 
     @FXML
