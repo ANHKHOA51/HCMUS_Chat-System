@@ -140,6 +140,76 @@
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>cross-platform</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-controls</artifactId>
+          <version>21</version>
+          <classifier>win</classifier>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-controls</artifactId>
+          <version>21</version>
+          <classifier>mac</classifier>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-controls</artifactId>
+          <version>21</version>
+          <classifier>linux</classifier>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-fxml</artifactId>
+          <version>21</version>
+          <classifier>win</classifier>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-fxml</artifactId>
+          <version>21</version>
+          <classifier>mac</classifier>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-fxml</artifactId>
+          <version>21</version>
+          <classifier>linux</classifier>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-graphics</artifactId>
+          <version>21</version>
+          <classifier>win</classifier>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-graphics</artifactId>
+          <version>21</version>
+          <classifier>mac</classifier>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-graphics</artifactId>
+          <version>21</version>
+          <classifier>linux</classifier>
+          <scope>compile</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
     <maven.compiler.target>21</maven.compiler.target>
