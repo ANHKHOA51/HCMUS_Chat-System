@@ -276,6 +276,26 @@ public class MessageController {
             }
 
             if (cid != null) {
+                // Check membership for groups
+                if (contact instanceof GroupUser && !chatapp.dao.ConversationDAO.isMember(cid, user.getId())) {
+                    javafx.application.Platform.runLater(() -> {
+                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                                javafx.scene.control.Alert.AlertType.ERROR);
+                        alert.setTitle("Error");
+                        alert.setHeaderText("Access Denied");
+                        alert.setContentText("You are no longer a member of this group.");
+                        alert.show();
+
+                        // Remove from contact list & close view
+                        this.contact.getItems().remove(contact);
+                        this.views.remove(contact.getId().toString());
+                        if (split.getCenter() == mv) {
+                            split.setCenter(null);
+                        }
+                    });
+                    return;
+                }
+
                 String contentToStore = chatapp.utils.CryptoUtils.encrypt(originalText, cid);
 
                 // Update temp message with real CID if we wanted to sync state, but purely for

@@ -397,6 +397,21 @@ public class ConversationDAO {
         return false;
     }
 
+    public static boolean isMember(UUID conversationId, UUID userId) {
+        Connection conn = DBConnection.getConnection();
+        String sql = "SELECT 1 FROM conversation_members WHERE conversation_id = ? AND user_id = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, conversationId);
+            ps.setObject(2, userId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public static boolean deleteConversation(UUID conversationId) {
         Connection conn = DBConnection.getConnection();
         try {
