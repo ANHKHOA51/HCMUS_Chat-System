@@ -83,6 +83,12 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>admin</id>
+                        <configuration>
+                            <mainClass>chatapp.AdminApp</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <!-- Configuration for manual attach debugging -->
                         <!-- Usage: mvn clean javafx:run@debug -->
                         <id>debug</id>
