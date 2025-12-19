@@ -1,0 +1,32 @@
+package chatapp.utils;
+
+public class FXMLPaths {
+
+    public static class Dashboard {
+        private static final String DASHBOARD_BASE = "/chatapp/views/dashboard/";
+
+        public static final String USER = DASHBOARD_BASE + "user.fxml";
+        public static final String CHAT_GROUP = DASHBOARD_BASE + "chatGroup.fxml";
+        public static final String LOGIN_HISTORY = DASHBOARD_BASE + "loginHistory.fxml";
+        public static final String REGISTRATION = DASHBOARD_BASE + "registration.fxml";
+        public static final String REPORT = DASHBOARD_BASE + "report.fxml";
+        public static final String ACTIVITY = DASHBOARD_BASE + "activity.fxml";
+        public static final String FRIEND = DASHBOARD_BASE + "friend.fxml";
+        public static final String ADD_USER = DASHBOARD_BASE + "addUserForm.fxml";
+        public static final String UPDATE_USER = DASHBOARD_BASE + "updateAccount.fxml";
+
+    }
+
+    public static class User {
+
+        private static final String USER_BASE = "/chatapp/views/user/";
+
+        public static final String CHAT = USER_BASE + "chat.fxml";
+        public static final String FRIENDS_LIST = USER_BASE + "friendsList.fxml";
+        public static final String GROUPS_LIST = USER_BASE + "groupsList.fxml";
+        public static final String GROUP_MANAGEMENT = USER_BASE + "groupManagement.fxml";
+    }
+
+    private FXMLPaths() {
+    }
+}

@@ -1,25 +1,49 @@
-## 🚀 Getting Started
+# HCMUS Chat App
 
-This project is a **Chat System** developed for the *Java Application Programming* course at **Ho Chi Minh City University of Science (HCMUS)**.
+A JavaFX desktop application for real-time messaging, built with Java 21 and PostgreSQL.
 
-The application allows users to chat through a local network, built using **JavaFX** for the user interface and standard **Java sockets** for communication.
+## Tech Stack
 
-Currently, the project supports both **Windows** and **Linux** operating systems.
+*   **Language**: Java 21
+*   **GUI Framework**: JavaFX 21
+*   **Database**: PostgreSQL
+*   **Build Tool**: Maven
 
-### 🧩 Requirements
-- JDK 21  
-- JavaFX SDK version 21.0.9 (make sure the `lib` folder is properly configured)  
-- Maven
+## Prerequisites
 
-## ⚙️ How to run
-Firstly, you must install Maven for easy run and compile
+Ensure you have the following installed:
 
-### 🐧 Linux
-```bash
-sudo apt install maven
-```
+*   [Java Development Kit (JDK) 21](https://www.oracle.com/java/technologies/downloads/#java21)
+*   [Maven](https://maven.apache.org/)
 
-### 🛠️ Compile and run
-```bash
-mvn clean javafx:run
-```
+## Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/ANHKHOA51/HCMUS_Chat-System.git
+    cd HCMUS_Chat-app
+    ```
+
+## Usage
+
+1.  **Build and Run:**
+    Use Maven to run the application:
+    ```bash
+    mvn clean javafx:run
+    ```
+
+2.  **Default Credentials (no need password, just type _'admin'_ or _'user'_ in username to get in what you want):**
+
+    *   **Standard User:**
+        *   Username: `user`
+
+    *   **Administrator:**
+        *   Username: `admin`
+
+
+mvn exec:java@server
+mvn compile
+
+mvn exec
+
+mvn package
