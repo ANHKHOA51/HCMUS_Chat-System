@@ -81,7 +81,6 @@ public class UpdateUserController extends DashboardController {
             return;
         }
 
-        // check email
         if (emailField.getText().equals(updateUser.getEmail()) == false) {
             User userCheckk = User.getUser("email", emailField.getText());
             if (userCheckk != null) {
@@ -91,7 +90,6 @@ public class UpdateUserController extends DashboardController {
             }
         }
 
-        // check username
         if (usernameField.getText().equals(updateUser.getUsername()) == false) {
             User userCheckk = User.getUser("username", usernameField.getText());
             if (userCheckk != null) {
@@ -101,7 +99,6 @@ public class UpdateUserController extends DashboardController {
             }
         }
 
-        // check combox
         if (roleCombox.getValue() == null) {
             errorLable.setText("Please chose role");
             errorLable.setVisible(true);

@@ -26,14 +26,12 @@ public class AuthController {
     private Consumer<String> onRequestReset;
 
     public AuthController() {
-        // initial
         root.getChildren().add(loginView.getRoot());
         wireLogin();
         wireSignup();
         wireForgot();
     }
 
-    // scene getter used by App
     public Scene getScene() {
         return scene;
     }

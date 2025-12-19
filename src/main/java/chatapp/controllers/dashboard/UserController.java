@@ -138,7 +138,6 @@ public class UserController extends DashboardController {
             }
         });
 
-        // Register for real-time updates
         if (chatapp.AdminApp.socketClient != null) {
             chatapp.AdminApp.socketClient.setOnActiveUsersUpdate(activeUserIds -> {
                 Platform.runLater(() -> {

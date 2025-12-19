@@ -67,7 +67,6 @@ public class AddUserController extends DashboardController {
             return;
         }
 
-        // check email
         User userCheckk = User.getUser("email", emailField.getText());
         if (userCheckk != null) {
             errorLable.setText("email already exist");
@@ -75,7 +74,6 @@ public class AddUserController extends DashboardController {
             return;
         }
 
-        // check username
         userCheckk = User.getUser("username", usernameField.getText());
         if (userCheckk != null) {
             errorLable.setText("username already exist");
@@ -83,14 +81,12 @@ public class AddUserController extends DashboardController {
             return;
         }
 
-        // check password
         if (passwordField.getText().equals(confirmPasswordField.getText()) == false) {
             errorLable.setText("Confirm password is wrong");
             errorLable.setVisible(true);
             return;
         }
 
-        // check combox
         if (roleCombox.getValue() == null) {
             errorLable.setText("Please chose role");
             errorLable.setVisible(true);
