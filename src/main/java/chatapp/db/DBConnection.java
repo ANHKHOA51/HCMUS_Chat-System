@@ -15,7 +15,6 @@ public class DBConnection {
     }
 
     private static void loadConfig() {
-        // 1. Always load Internal (Embedded) config first
         try {
             internalConfig = Dotenv.configure().directory("/").ignoreIfMissing().load();
             System.out.println("Loaded embedded configuration.");
@@ -23,12 +22,8 @@ public class DBConnection {
             System.err.println("Warning: Could not load embedded .env");
         }
 
-        // 2. Try loading External config
         try {
             externalConfig = Dotenv.configure().ignoreIfMissing().load();
-            // Verify if it found a file (check for a known key or if entries exist)
-            // Dotenv-java might return an empty object if no file found with
-            // ignoreIfMissing
             if (externalConfig.entries().isEmpty()) {
                 externalConfig = null;
             } else {
@@ -42,12 +37,10 @@ public class DBConnection {
     public static String get(String key) {
         String value = null;
 
-        // Priority 1: External Config
         if (externalConfig != null) {
             value = externalConfig.get(key);
         }
 
-        // Priority 2: Internal Config (Fallback)
         if (value == null && internalConfig != null) {
             value = internalConfig.get(key);
         }
@@ -55,7 +48,6 @@ public class DBConnection {
         return value;
     }
 
-    // Helper for optional config with default value
     public static String get(String key, String defaultValue) {
         String val = get(key);
         return (val == null) ? defaultValue : val;

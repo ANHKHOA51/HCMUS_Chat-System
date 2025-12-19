@@ -130,7 +130,6 @@ public class MessageView extends BorderPane {
 
     private HBox createBubble(chatapp.models.Message msg, boolean isMine, String senderName) {
         if (msg.isDeleted()) {
-            // Maybe show "Message Deleted"? Or don't show at all?
             Label deletedLbl = new Label("Message Unsent");
             deletedLbl.setStyle("-fx-font-style: italic; -fx-text-fill: grey;");
             HBox bubble = new HBox(deletedLbl);
@@ -160,14 +159,13 @@ public class MessageView extends BorderPane {
             text.setFont(Font.font(10));
             text.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
             bubble = new HBox(6, chat, text);
-            bubble.setAlignment(Pos.CENTER_RIGHT); // Ensure alignment
+            bubble.setAlignment(Pos.CENTER_RIGHT);
         } else {
             Label text = new Label(senderName != null ? senderName : "Friend");
             text.setFont(Font.font(10));
             text.setMaxWidth(80);
             text.setTextOverrun(javafx.scene.control.OverrunStyle.ELLIPSIS);
-            text.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE); // Allow shrink but prefer content? No.
-            // setMinWidth(0) allows shrinking to ellipsis.
+            text.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE); 
             text.setMinWidth(0);
             bubble = new HBox(6, text, chat);
             bubble.setAlignment(Pos.CENTER_LEFT);
@@ -249,32 +247,21 @@ public class MessageView extends BorderPane {
     public void scrollToMessage(java.util.UUID msgId) {
         for (javafx.scene.Node node : msgList.getChildren()) {
             if (msgId.equals(node.getUserData())) {
-                // Highlight
                 String originalStyle = node.getStyle();
                 node.setStyle(originalStyle
                         + "-fx-effect: dropshadow(three-pass-box, yellow, 10, 0, 0, 0); -fx-background-color: yellow;");
 
-                // Reset after delay
                 javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(
                         javafx.util.Duration.seconds(2));
                 pause.setOnFinished(e -> node.setStyle(originalStyle));
                 pause.play();
 
-                // Scroll
-                // Need bounds relative to VBox.
                 double y = node.getBoundsInParent().getMinY();
                 double contentHeight = msgList.getHeight();
                 double viewportHeight = scroll.getViewportBounds().getHeight();
 
-                // If content is smaller than viewport, scrolling does nothing
                 if (contentHeight > viewportHeight) {
                     double vValue = y / (contentHeight - viewportHeight);
-                    // Adjust to center the message if possible?
-                    // Simple logic: Scroll so message is at top?
-                    // vValue 0 = top, 1 = bottom.
-                    // y is distance from top.
-                    // max scrollable distance = contentHeight - viewportHeight.
-                    // So val = y / max_dist.
                     scroll.setVvalue(vValue);
                 }
                 break;

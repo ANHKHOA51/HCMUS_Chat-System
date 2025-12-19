@@ -19,7 +19,7 @@ public class CryptoUtils {
             byte[] key = seed.getBytes(StandardCharsets.UTF_8);
             MessageDigest sha = MessageDigest.getInstance("SHA-256");
             key = sha.digest(key);
-            key = Arrays.copyOf(key, 16); // Use first 128 bit
+            key = Arrays.copyOf(key, 16); 
             return new SecretKeySpec(key, "AES");
         } catch (Exception e) {
             e.printStackTrace();
@@ -31,7 +31,7 @@ public class CryptoUtils {
         if (strToEncrypt == null)
             return null;
         if (conversationId == null)
-            return strToEncrypt; // Fallback
+            return strToEncrypt; 
 
         try {
             SecretKeySpec secretKey = getKey(conversationId);
@@ -51,7 +51,7 @@ public class CryptoUtils {
         if (conversationId == null)
             return strToDecrypt;
         if (!strToDecrypt.startsWith(PREFIX))
-            return strToDecrypt; // Not encrypted
+            return strToDecrypt; 
 
         try {
             String cipherText = strToDecrypt.substring(PREFIX.length());
@@ -62,6 +62,6 @@ public class CryptoUtils {
         } catch (Exception e) {
             System.err.println("Error while decrypting: " + e.toString());
         }
-        return strToDecrypt; // Fallback to original text if fail
+        return strToDecrypt;
     }
 }

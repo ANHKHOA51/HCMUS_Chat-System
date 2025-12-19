@@ -129,7 +129,6 @@ public class FriendShip {
                 '}';
     }
 
-    // query
     @Deprecated
     public static List<UserFriendsDTO> getListUserFriends() {
         List<UserFriendsDTO> list = new ArrayList<>();
@@ -192,9 +191,6 @@ public class FriendShip {
     public static List<User> getFriendsList(UUID userId) {
         List<User> list = new ArrayList<>();
         Connection conn = DBConnection.getConnection();
-        // Get friends where status is accepted. Consider both (user_id, friend_id)
-        // directions if your design treats (A, B) same as (B, A).
-        // Based on script.sql: check (user_id <> friend_id).
         String sql = """
                     SELECT u.*
                     FROM users u
@@ -222,12 +218,6 @@ public class FriendShip {
     public static List<User> getPendingRequests(UUID userId) {
         List<User> list = new ArrayList<>();
         Connection conn = DBConnection.getConnection();
-        // Incoming requests: user is friend_id, requester is user_id (usually).
-        // requester_id column explicitly tracks who sent it.
-        // So we want friendships where friend_id = userId AND status = 'pending'.
-        // The user who sent it is 'requester_id' (which should match user_id if logic
-        // follows).
-        // Let's join with Users to get the details of the requester.
         String sql = """
                     SELECT u.*
                     FROM users u
@@ -268,8 +258,6 @@ public class FriendShip {
     @Deprecated
     public static boolean acceptFriendRequest(UUID userId, UUID requesterId) {
         Connection conn = DBConnection.getConnection();
-        // userId is the one accepting (so they are the friend_id in the row, or we just
-        // find the row by both IDs)
         String sql = """
                     UPDATE friendships
                     SET status = 'accepted', accepted_at = NOW(), updated_at = NOW()
@@ -307,9 +295,7 @@ public class FriendShip {
     @Deprecated
     public static boolean blockUser(UUID userId, UUID blockedId) {
         Connection conn = DBConnection.getConnection();
-        // 1. Remove existing friendship if any
         removeFriend(userId, blockedId);
-        // 2. Insert blocked record
         String sql = """
                     INSERT INTO friendships (user_id, friend_id, requester_id, status, created_at, updated_at)
                     VALUES (?, ?, ?, 'blocked', NOW(), NOW())
@@ -317,7 +303,7 @@ public class FriendShip {
         try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setObject(1, userId);
             ps.setObject(2, blockedId);
-            ps.setObject(3, userId); // The one who blocks is the "requester" of the block action
+            ps.setObject(3, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -329,10 +315,6 @@ public class FriendShip {
     public static List<User> searchUsers(String keyword, UUID currentUserId) {
         List<User> list = new ArrayList<>();
         Connection conn = DBConnection.getConnection();
-        // Exclude users who blocked me:
-        // "blocked" status: user_id blocked friend_id. requester_id is the blocker.
-        // If I am blocked by X: friendship(user_id=me/X, friend_id=X/me,
-        // status='blocked', requester_id=X)
         String sql = """
                     SELECT u.*
                     FROM users u
@@ -369,8 +351,6 @@ public class FriendShip {
         return list;
     }
 
-    // Check relationship: "friends", "pending_sent", "pending_received", "blocked",
-    // "none"
     @Deprecated
     public static String getRelationship(UUID userId, UUID targetId) {
         Connection conn = DBConnection.getConnection();
@@ -389,7 +369,7 @@ public class FriendShip {
                 if ("accepted".equals(status))
                     return "friends";
                 if ("blocked".equals(status))
-                    return "blocked"; // Either I blocked them or they blocked me (though search hides blockers)
+                    return "blocked"; 
                 if ("pending".equals(status)) {
                     if (requesterV.equals(userId))
                         return "pending_sent";
@@ -412,7 +392,6 @@ public class FriendShip {
         user.setEmail(rs.getString("email"));
         user.setOnline(rs.getBoolean("is_online"));
         user.setAdmin(rs.getBoolean("admin"));
-        // ... map other fields if necessary
         return user;
     }
 }

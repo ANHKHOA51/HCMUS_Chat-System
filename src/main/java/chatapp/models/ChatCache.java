@@ -8,7 +8,6 @@ import java.util.UUID;
 import java.util.ArrayList;
 
 public class ChatCache {
-    // Thread-safe map
     private static final Map<UUID, List<Message>> cache = Collections.synchronizedMap(new HashMap<>());
 
     public static List<Message> get(UUID conversationId) {
@@ -20,9 +19,7 @@ public class ChatCache {
     public static void put(UUID conversationId, List<Message> messages) {
         if (conversationId == null)
             return;
-        // Store a copy to prevent external modification issues if needed, but for
-        // performance we might store direct ref
-        // Let's store a defensive copy usually, but here simplicity wins.
+
         cache.put(conversationId, new ArrayList<>(messages));
     }
 
@@ -33,8 +30,6 @@ public class ChatCache {
             list.add(message);
             return list;
         });
-        // If not present, we don't add because we might have a partial state.
-        // Better to fetch all if missing. So computeIfPresent is correct.
     }
 
     public static void invalidate(UUID conversationId) {

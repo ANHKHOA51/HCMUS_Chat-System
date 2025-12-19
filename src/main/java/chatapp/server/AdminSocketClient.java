@@ -32,7 +32,7 @@ public class AdminSocketClient extends WebSocketClient {
         System.out.println("Admin Monitor received: " + message);
         try {
             if (message.startsWith("ACTIVE_USERS:")) {
-                String listStr = message.substring(13); // Length of "ACTIVE_USERS:"
+                String listStr = message.substring(13); 
                 String[] ids = listStr.split(",");
                 Set<UUID> activeUsers = new HashSet<>();
                 for (String id : ids) {
@@ -40,7 +40,6 @@ public class AdminSocketClient extends WebSocketClient {
                         try {
                             activeUsers.add(UUID.fromString(id.trim()));
                         } catch (IllegalArgumentException e) {
-                            // Ignore invalid UUIDs
                         }
                     }
                 }

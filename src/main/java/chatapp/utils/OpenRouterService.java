@@ -12,8 +12,7 @@ import org.json.JSONObject;
 
 public class OpenRouterService {
     private static final String API_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private static final String MODEL = "openai/gpt-3.5-turbo"; // or a free model like
-                                                                // "mistralai/mistral-7b-instruct:free"
+    private static final String MODEL = "openai/gpt-3.5-turbo"; 
 
     private String apiKey;
 

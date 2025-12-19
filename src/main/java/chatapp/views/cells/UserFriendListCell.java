@@ -127,7 +127,6 @@ public class UserFriendListCell extends ListCell<User> {
 
         HBox.setHgrow(leftBox, Priority.ALWAYS);
 
-        // Bind managed to visible so hidden buttons don't take up space
         chatBtn.managedProperty().bind(chatBtn.visibleProperty());
         sendReqBtn.managedProperty().bind(sendReqBtn.visibleProperty());
         createGroupBtn.managedProperty().bind(createGroupBtn.visibleProperty());

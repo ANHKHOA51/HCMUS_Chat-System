@@ -79,7 +79,6 @@ public class ChatClientWrapper extends WebSocketClient {
     @Override
     public void onError(Exception ex) {
         System.out.println("Chat Server Error (or Offline): " + ex.getMessage());
-        // ex.printStackTrace();
     }
 
     public void notifyUser(UUID targetId) {

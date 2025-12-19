@@ -117,26 +117,22 @@ public class ConversationDAO {
         try {
             conn.setAutoCommit(false);
 
-            // 1. Create Conversation
             UUID convId = UUID.randomUUID();
             String sqlConv = "INSERT INTO conversations (id, isGroup, created_by) VALUES (?, ?, ?)";
             PreparedStatement psConv = conn.prepareStatement(sqlConv);
             psConv.setObject(1, convId);
             psConv.setBoolean(2, false);
-            psConv.setObject(3, user1); // Initiator
+            psConv.setObject(3, user1);
             psConv.executeUpdate();
 
-            // 2. Add Members
             String sqlMem = "INSERT INTO conversation_members (conversation_id, user_id, role) VALUES (?, ?, ?)";
             PreparedStatement psMem = conn.prepareStatement(sqlMem);
 
-            // Member 1
             psMem.setObject(1, convId);
             psMem.setObject(2, user1);
             psMem.setString(3, "member");
             psMem.executeUpdate();
 
-            // Member 2
             psMem.setObject(1, convId);
             psMem.setObject(2, user2);
             psMem.setString(3, "member");
@@ -169,7 +165,6 @@ public class ConversationDAO {
         try {
             conn.setAutoCommit(false);
 
-            // 1. Create Conversation
             UUID convId = UUID.randomUUID();
             String sqlConv = "INSERT INTO conversations (id, title, isGroup, created_by, created_at) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement psConv = conn.prepareStatement(sqlConv);
@@ -180,7 +175,6 @@ public class ConversationDAO {
             psConv.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
             psConv.executeUpdate();
 
-            // 2. Add Creator as Admin
             String sqlMem = "INSERT INTO conversation_members (conversation_id, user_id, role) VALUES (?, ?, ?)";
             PreparedStatement psMem = conn.prepareStatement(sqlMem);
 
@@ -189,7 +183,6 @@ public class ConversationDAO {
             psMem.setString(3, "admin");
             psMem.addBatch();
 
-            // 3. Add Members
             for (UUID memberId : memberIds) {
                 psMem.setObject(1, convId);
                 psMem.setObject(2, memberId);
@@ -279,7 +272,6 @@ public class ConversationDAO {
                 c.setId(UUID.fromString(rs.getString("id")));
                 c.setTitle(rs.getString("title"));
                 c.setGroup(true);
-                // c.setCreatedBy(...) // Optional
 
                 chatapp.models.GroupUser gu = new chatapp.models.GroupUser(c);
                 list.add(gu);
@@ -299,7 +291,7 @@ public class ConversationDAO {
                 JOIN users u ON u.id = cm.user_id
                 WHERE cm.conversation_id = ?
                 ORDER BY cm.role ASC, u.username ASC
-                """; // Role ASC usually puts 'admin' before 'member' alphabetically
+                """;
 
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -310,7 +302,6 @@ public class ConversationDAO {
                 u.setId(UUID.fromString(rs.getString("id")));
                 u.setUsername(rs.getString("username"));
                 u.setDisplayName(rs.getString("display_name"));
-                // u.setGender(rs.getBoolean("gender")); // Assume not critical for list
                 u.setOnline(rs.getBoolean("is_online"));
 
                 GroupMember gm = new GroupMember(u, rs.getString("role"));
@@ -338,7 +329,6 @@ public class ConversationDAO {
 
     public static boolean addMember(UUID conversationId, UUID userId) {
         Connection conn = DBConnection.getConnection();
-        // Check if already member?
         String sql = "INSERT INTO conversation_members (conversation_id, user_id, role) VALUES (?, ?, 'member') ON CONFLICT DO NOTHING";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -417,19 +407,16 @@ public class ConversationDAO {
         try {
             conn.setAutoCommit(false);
 
-            // 1. Delete Messages (if not cascaded)
             String sqlMsg = "DELETE FROM messages WHERE conversation_id = ?";
             PreparedStatement psMsg = conn.prepareStatement(sqlMsg);
             psMsg.setObject(1, conversationId);
             psMsg.executeUpdate();
 
-            // 2. Delete Members (if not cascaded)
             String sqlMem = "DELETE FROM conversation_members WHERE conversation_id = ?";
             PreparedStatement psMem = conn.prepareStatement(sqlMem);
             psMem.setObject(1, conversationId);
             psMem.executeUpdate();
 
-            // 3. Delete Conversation
             String sqlConv = "DELETE FROM conversations WHERE id = ?";
             PreparedStatement psConv = conn.prepareStatement(sqlConv);
             psConv.setObject(1, conversationId);

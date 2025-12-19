@@ -37,7 +37,6 @@ public class MessageController {
 
     public MessageController(User u) {
         this.user = u;
-        // Load friends instead of mock data
         java.util.List<User> friends = chatapp.dao.FriendShipDAO.getFriendsList(u.getId());
         java.util.List<chatapp.models.GroupUser> groups = ConversationDAO.getGroupsForUser(u.getId());
         javafx.collections.ObservableList<User> allContacts = FXCollections.observableArrayList();
@@ -49,7 +48,6 @@ public class MessageController {
         split.setLeft(contact);
         split.setCenter(null);
 
-        // Global Search UI
         javafx.scene.control.TextField globalSearch = new javafx.scene.control.TextField();
         globalSearch.setPromptText("Search all chats...");
         javafx.scene.control.ListView<chatapp.models.Message> searchResults = new javafx.scene.control.ListView<>();
@@ -73,7 +71,6 @@ public class MessageController {
             }
         });
 
-        // Create Group Button
         javafx.scene.control.Button createGroupBtn = new javafx.scene.control.Button("+");
         createGroupBtn.setTooltip(new javafx.scene.control.Tooltip("Create Group"));
         createGroupBtn.setOnAction(e -> handleCreateGroup());
@@ -85,7 +82,6 @@ public class MessageController {
         javafx.scene.layout.VBox.setVgrow(contact, javafx.scene.layout.Priority.ALWAYS);
         split.setLeft(leftPane);
 
-        // Search Results Panel
         javafx.scene.control.Button closeSearchBtn = new javafx.scene.control.Button("Close Search");
         closeSearchBtn.setMaxWidth(Double.MAX_VALUE);
         closeSearchBtn.setOnAction(e -> globalSearch.clear());
@@ -126,8 +122,6 @@ public class MessageController {
         if (sel != null) {
             sel.selectedItemProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal != null) {
-                    // Load chat for the selected user
-                    // reuse per-contact view so state is preserved or updated
                     openChatWith(newVal);
                 }
             });
@@ -146,10 +140,8 @@ public class MessageController {
 
         dialog.showAndWait().ifPresent(reason -> {
             if (reason.trim().isEmpty()) {
-                // optional: show alert for empty reason
                 return;
             }
-            // Add report
             boolean success = chatapp.models.Report.addReport(user.getId(), u.getId(), reason);
             if (success) {
                 javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
@@ -173,15 +165,11 @@ public class MessageController {
         this.socketClient = socketClient;
         if (this.socketClient != null) {
             this.socketClient.setOnRefreshChat(senderId -> {
-                // If we are currently viewing chat with senderId, refresh
-
                 javafx.application.Platform.runLater(() -> {
-                    reloadContactList(); // Sync contacts/groups
+                    reloadContactList();
 
                     MessageView mv = views.get(senderId.toString());
                     if (mv != null) {
-                        // It is a private chat with this user
-                        // Find the real user object from contacts if possible
                         User u = null;
                         for (User c : contact.getItems()) {
                             if (c.getId().equals(senderId)) {
@@ -190,38 +178,25 @@ public class MessageController {
                             }
                         }
                         if (u == null) {
-                            // Fetch from DB if not in contact list?
                             u = chatapp.dao.UserDAO.getUser("id", senderId);
                         }
 
                         if (u == null) {
                             u = new User();
-                            u.setId(senderId); // Fallback
+                            u.setId(senderId);
                         }
                         refreshChat(u, mv, true);
                     }
 
-                    // Also refresh any group chat? Expensive to check all.
-                    // Hack: Just refresh the currently focused chat if possible?
-                    // Let's iterate all open views and refresh?
-                    // Safe approach for V1.
                     for (Map.Entry<String, MessageView> entry : views.entrySet()) {
                         String key = entry.getKey();
                         try {
-                            // If key is ID. Refresh it.
                             MessageView v = entry.getValue();
-                            // We need user object.
-                            // Hack: Just call refreshChat with dummy User with ID?
-                            // refreshChat uses ID.
                             User dummy = new User();
                             dummy.setId(UUID.fromString(key));
-                            // Determine if group?
-                            // We can check if key is in groups list
-                            // boolean isGroup = false;
                             for (User c : contact.getItems()) {
                                 if (c.getId().toString().equals(key) && c instanceof GroupUser) {
-                                    // isGroup = true;
-                                    dummy = c; // Use real object
+                                    dummy = c;
                                     break;
                                 }
                             }
@@ -234,8 +209,6 @@ public class MessageController {
         }
     }
 
-    // send message for a specific MessageView / contact
-    // send message for a specific MessageView / contact
     private void sendMessageFor(MessageView mv, User contact) {
         if (mv == null)
             return;
@@ -246,22 +219,17 @@ public class MessageController {
         if (text.isEmpty())
             return;
 
-        // Optimistic UI Update
         UUID msgId = UUID.randomUUID();
         chatapp.models.Message tempMsg = new chatapp.models.Message();
         tempMsg.setId(msgId);
         tempMsg.setSenderId(user.getId());
         tempMsg.setContent(text);
         tempMsg.setCreatedAt(java.time.LocalDateTime.now());
-        // We set conversationId later or use dummy for UI
         tempMsg.setConversationId(null);
 
         mv.sendMessage(tempMsg);
         mv.getTextField().clear();
 
-        // Async Database & Notify
-
-        // Let's do encryption inside the thread to get correct CID
         final String originalText = text;
         new Thread(() -> {
             UUID cid = null;
@@ -276,7 +244,6 @@ public class MessageController {
             }
 
             if (cid != null) {
-                // Check membership for groups
                 if (contact instanceof GroupUser && !chatapp.dao.ConversationDAO.isMember(cid, user.getId())) {
                     javafx.application.Platform.runLater(() -> {
                         javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
@@ -286,7 +253,6 @@ public class MessageController {
                         alert.setContentText("You are no longer a member of this group.");
                         alert.show();
 
-                        // Remove from contact list & close view
                         this.contact.getItems().remove(contact);
                         this.views.remove(contact.getId().toString());
                         if (split.getCenter() == mv) {
@@ -298,11 +264,8 @@ public class MessageController {
 
                 String contentToStore = chatapp.utils.CryptoUtils.encrypt(originalText, cid);
 
-                // Update temp message with real CID if we wanted to sync state, but purely for
-                // DB send:
                 chatapp.dao.MessageDAO.send(msgId, cid, user.getId(), contentToStore);
 
-                // Add to Cache
                 chatapp.models.Message cachedMsg = new chatapp.models.Message();
                 cachedMsg.setId(msgId);
                 cachedMsg.setConversationId(cid);
@@ -311,7 +274,6 @@ public class MessageController {
                 cachedMsg.setCreatedAt(java.time.LocalDateTime.now());
                 chatapp.models.ChatCache.add(cid, cachedMsg);
 
-                // Notify
                 if (socketClient != null) {
                     if (contact instanceof GroupUser) {
                         java.util.List<UUID> memberIds = chatapp.dao.ConversationDAO.getConversationMemberIds(cid);
@@ -325,32 +287,24 @@ public class MessageController {
                     }
                 }
             } else {
-                // Failed to resolve conversation ID
                 System.err.println("Failed to resolve conversation ID for message");
             }
         }).start();
     }
 
     public void openChatWith(User targetUser) {
-        // Ensure user is in the list
         if (!contact.getItems().contains(targetUser)) {
             contact.getItems().add(targetUser);
-            // Select the newly added user
             contact.getSelectionModel().select(targetUser);
-            // The listener will trigger openChatWith again, so we can return?
-            // Better to decouple: openChatWith ensures selection, and selection triggers
-            // loadChatView.
-            // But openChatWith is called by App.java.
             return;
         }
 
-        // If not selected, select it (this triggers listener)
+
         if (!targetUser.equals(contact.getSelectionModel().getSelectedItem())) {
             contact.getSelectionModel().select(targetUser);
             return;
         }
 
-        // Logic to load messages and set view (called by listener or effectively here)
         loadChatView(targetUser);
     }
 
@@ -361,27 +315,23 @@ public class MessageController {
             view.getTextField().setOnAction(e -> sendMessageFor(view, targetUser));
             view.getButton().setOnAction(e -> sendMessageFor(view, targetUser));
 
-            // Suggestion Handler
             view.getSuggestButton().setOnAction(ev -> {
                 handleSuggestion(view, targetUser);
             });
 
             boolean isGroup = targetUser instanceof GroupUser;
-            view.getInfoButton().setVisible(isGroup); // Only show for groups for now
+            view.getInfoButton().setVisible(isGroup); 
             if (isGroup) {
                 view.getInfoButton().setOnAction(e -> handleGroupInfo((GroupUser) targetUser));
             }
 
-            // Delete Message Handler
             view.setOnDeleteMessage(msg -> {
                 boolean success = chatapp.dao.MessageDAO.deleteMessage(msg.getId());
                 if (success) {
-                    refreshChat(targetUser, view, true); // Force refresh local
+                    refreshChat(targetUser, view, true);
 
-                    // Notify others
                     UUID cid = msg.getConversationId();
                     if (cid == null) {
-                        // Try to resolve if missing in msg
                         if (targetUser instanceof GroupUser)
                             cid = targetUser.getId();
                         else {
@@ -402,7 +352,6 @@ public class MessageController {
                 }
             });
 
-            // Clear History Handler
             view.setOnClearHistory(() -> {
                 UUID cid;
                 if (targetUser instanceof GroupUser)
@@ -415,13 +364,10 @@ public class MessageController {
 
                 if (cid != null) {
                     if (targetUser instanceof GroupUser) {
-                        // For Groups: Only delete OWN messages
                         boolean success = chatapp.dao.MessageDAO.deleteMessagesFromUser(cid, user.getId());
                         if (success) {
                             chatapp.models.ChatCache.invalidate(cid);
 
-                            // Notify all members (real-time update for others, their view of my messages
-                            // changes)
                             java.util.List<UUID> memberIds = chatapp.dao.ConversationDAO.getConversationMemberIds(cid);
                             if (socketClient != null) {
                                 for (UUID mid : memberIds) {
@@ -431,19 +377,15 @@ public class MessageController {
                                 }
                             }
 
-                            // Reload current view to reflect deleted messages (hidden/removed)
                             refreshChat(targetUser, view, true);
                         }
                     } else {
-                        // For Private: Delete Entire Conversation
-                        // Fetch members to notify before deletion (since deletion removes members)
                         java.util.List<UUID> memberIds = chatapp.dao.ConversationDAO.getConversationMemberIds(cid);
 
                         boolean success = chatapp.dao.ConversationDAO.deleteConversation(cid);
                         if (success) {
                             chatapp.models.ChatCache.invalidate(cid);
 
-                            // Notify all members to sync
                             if (socketClient != null) {
                                 for (UUID mid : memberIds) {
                                     if (!mid.equals(user.getId())) {
@@ -452,21 +394,16 @@ public class MessageController {
                                 }
                             }
 
-                            // Close view
                             split.setCenter(null);
                             views.remove(targetUser.getId().toString());
-                            // Remove from contact list
                             contact.getItems().remove(targetUser);
                         }
                     }
                 }
             });
 
-            // Search Context Handler
             view.setOnSearch(query -> {
                 if (query == null || query.trim().isEmpty()) {
-                    // refreshChat(targetUser, view, false); // Reset
-                    // Don't reset chat, just clear search results
                     view.showSearchResults(null);
                     return;
                 }
@@ -491,8 +428,6 @@ public class MessageController {
                                         continue;
                                     String decrypted = chatapp.utils.CryptoUtils.decrypt(m.getContent(), cid);
                                     if (decrypted.toLowerCase().contains(q)) {
-                                        // Create a copy or modify? Modifying local object is generic since DAO returns
-                                        // new instances.
                                         m.setContent(decrypted);
                                         filtered.add(m);
                                     }
@@ -509,11 +444,7 @@ public class MessageController {
             return view;
         });
 
-        // Start Polling - REMOVED for WebSocket
-        // startPolling(targetUser, mv);
-
-        // We still fetch initial messages
-        refreshChat(targetUser, mv, false); // Use cache if available
+        refreshChat(targetUser, mv, false); 
         split.setCenter(mv);
     }
 
@@ -566,7 +497,6 @@ public class MessageController {
                 chatapp.models.ChatCache.invalidate(conversationId);
             }
 
-            // Check cache first
             java.util.List<chatapp.models.Message> cached = chatapp.models.ChatCache.get(conversationId);
 
             if (cached != null) {
@@ -574,17 +504,8 @@ public class MessageController {
                 for (chatapp.models.Message m : cached) {
                     boolean isMine = m.getSenderId().equals(user.getId());
                     String decrypted = chatapp.utils.CryptoUtils.decrypt(m.getContent(), conversationId);
-                    m.setContent(decrypted); // Update Object for View? Careful, this modifies cache reference if we are
-                                             // not careful.
-                    // Better to create copy or just pass decrypted string.
-                    // MessageView.addMessage takes Message object.
-                    // Let's clone or set content locally?
-                    // Safe hack: just setContent. If we refresh again, it might try to decrypt
-                    // decrypted text.
-                    // CryptoUtils.decrypt handles non-ENC prefix gracefully.
-                    // But if "Hello" matches prefix...
+                    m.setContent(decrypted); 
 
-                    // Better: Create a UI-only message object
                     chatapp.models.Message uiMsg = new chatapp.models.Message();
                     if (m.isDeleted())
                         continue;
@@ -602,20 +523,16 @@ public class MessageController {
                     UUID msgId = pendingScrollRequest.remove(targetUser.getId());
                     javafx.application.Platform.runLater(() -> mv.scrollToMessage(msgId));
                 }
-                // Even if cached, maybe we want to background fetch to ensure fresh?
-                // For now, strict caching as requested.
-                // We rely on socket refresh to invalidate.
+
                 return;
             }
 
-            // Cache Miss
             final UUID cid = conversationId;
             chatapp.utils.DbTask<java.util.List<chatapp.models.Message>> task = new chatapp.utils.DbTask<>(() -> {
                 return chatapp.dao.MessageDAO.getMessages(cid);
             });
             task.setOnSucceeded(e -> {
                 java.util.List<chatapp.models.Message> msgs = task.getValue();
-                // Update Cache
                 chatapp.models.ChatCache.put(cid, msgs);
 
                 mv.clearMessages();
@@ -641,8 +558,6 @@ public class MessageController {
             });
             new Thread(task).start();
         } else {
-            // Conversation does not exist (e.g. deleted or never started)
-            // Clear messages to reflect empty state
             mv.clearMessages();
         }
     }
@@ -650,7 +565,6 @@ public class MessageController {
     private void handleGroupInfo(GroupUser group) {
         GroupInfoView view = new GroupInfoView();
 
-        // Setup Stage
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Group Info");
@@ -659,18 +573,16 @@ public class MessageController {
         stage.setWidth(500);
         stage.setHeight(600);
 
-        // Initial Load
         loadGroupData(group, view);
 
-        // Actions
         view.getRenameBtn().setOnAction(e -> {
             String newName = view.getGroupNameField().getText().trim();
             if (!newName.isEmpty()) {
                 boolean success = ConversationDAO.renameConversation(group.getId(), newName);
                 if (success) {
-                    group.setDisplayName(newName); // Update local object
-                    loadGroupData(group, view); // Refresh
-                    contact.refresh(); // Refresh contact list UI
+                    group.setDisplayName(newName);
+                    loadGroupData(group, view); 
+                    contact.refresh();
                 } else {
                     view.setError("Unsufficient permissions or error.");
                 }
@@ -678,8 +590,6 @@ public class MessageController {
         });
 
         view.getAddMemberBtn().setOnAction(e -> {
-            // Pick a friend to add
-            // Simple approach: ChoiceDialog with friends NOT in group
             java.util.List<User> friends = chatapp.dao.FriendShipDAO.getFriendsList(user.getId());
             java.util.List<GroupMember> currentMembers = ConversationDAO.getGroupMembers(group.getId());
 
@@ -744,7 +654,6 @@ public class MessageController {
         });
 
         view.getLeaveBtn().setOnAction(e -> {
-            // Confirm?
             boolean success = ConversationDAO.removeMember(group.getId(), user.getId());
             if (success) {
                 stage.close();
@@ -757,14 +666,11 @@ public class MessageController {
     }
 
     private void loadGroupData(GroupUser group, GroupInfoView view) {
-        // Name
         view.getGroupNameField().setText(group.getDisplayName());
 
-        // Members
         java.util.List<GroupMember> members = ConversationDAO.getGroupMembers(group.getId());
         view.getMembersListView().setItems(FXCollections.observableArrayList(members));
 
-        // Check if current user is admin
         boolean isAdmin = false;
         for (GroupMember m : members) {
             if (m.getId().equals(user.getId()) && "admin".equals(m.getRole())) {
@@ -775,17 +681,8 @@ public class MessageController {
 
         final boolean finalIsAdmin = isAdmin;
 
-        // Set permissions on view controls
         view.getRenameBtn().setDisable(!isAdmin);
-        // view.getAddMemberBtn().setDisable(!isAdmin); // Anyone can add? Let's say yes
-        // for now or restrict to admin.
-        // Requirement 12.c just says "Thêm thành viên". 12.e says "Xoá: chỉ admin".
-        // Let's assume Add is unrestricted or restricted.
-        // Usually safer to restrict to admin, but "Create group" allows anyone to add
-        // initial members.
-        // Let's allow anyone to add.
 
-        // Setup List Cell Factory for Actions (Kick/Promote)
         view.getMembersListView().setCellFactory(param -> new javafx.scene.control.ListCell<>() {
             @Override
             protected void updateItem(GroupMember item, boolean empty) {
@@ -840,12 +737,6 @@ public class MessageController {
     }
 
     private void reloadContactList() {
-        // Run on UI thread? The caller (setupSocket) runs inside Platform.runLater
-        // already.
-        // But if called from elsewhere... safest to assume we need to manage thread or
-        // caller does.
-        // Since setupSocket does runLater, we are okay.
-
         java.util.List<User> friends = chatapp.dao.FriendShipDAO.getFriendsList(user.getId());
         java.util.List<chatapp.models.GroupUser> groups = ConversationDAO.getGroupsForUser(user.getId());
 
@@ -864,16 +755,14 @@ public class MessageController {
                 }
             }
         }
-        contact.refresh(); // Force refresh to ensure cells redraw
+        contact.refresh(); 
     }
 
     private void handleCreateGroup() {
         if (user == null)
             return;
-        chatapp.views.CreateGroupView view = new chatapp.views.CreateGroupView(); // Need valid imports or fully
-                                                                                  // qualified
+        chatapp.views.CreateGroupView view = new chatapp.views.CreateGroupView();
 
-        // Set CellFactory for display
         view.getFriendsListView().setCellFactory(param -> new javafx.scene.control.ListCell<>() {
             @Override
             protected void updateItem(User item, boolean empty) {
@@ -886,7 +775,6 @@ public class MessageController {
             }
         });
 
-        // Load friends
         java.util.List<User> friends = chatapp.dao.FriendShipDAO.getFriendsList(user.getId());
         view.getFriendsListView().getItems().addAll(friends);
 
@@ -918,7 +806,6 @@ public class MessageController {
             Conversation conv = ConversationDAO.createChatGroup(name, user.getId(), memberIds);
             if (conv != null) {
                 stage.close();
-                // Notify members
                 if (socketClient != null) {
                     for (java.util.UUID mid : memberIds) {
                         if (!mid.equals(user.getId())) {
@@ -926,9 +813,7 @@ public class MessageController {
                         }
                     }
                 }
-                // Reload local contact list
                 reloadContactList();
-                // Open the new group chat
                 openChatWith(new GroupUser(conv));
             }
         });
@@ -940,29 +825,23 @@ public class MessageController {
         if (senderId.equals(user.getId()))
             return "You";
 
-        // If private chat and sender is target
         if (targetUser != null && !(targetUser instanceof GroupUser) && targetUser.getId().equals(senderId)) {
             String name = (targetUser.getDisplayName() != null && !targetUser.getDisplayName().isEmpty())
                     ? targetUser.getDisplayName()
                     : targetUser.getUsername();
-            // Only return if valid name found. If null (dummy user), fall through to DAO.
             if (name != null)
                 return name;
         }
 
-        // Group chat or invalid targetUser -> generic lookup
         User u = chatapp.dao.UserDAO.getUser("id", senderId);
         return (u != null && u.getDisplayName() != null && !u.getDisplayName().isEmpty()) ? u.getDisplayName()
                 : (u != null ? u.getUsername() : "Unknown");
     }
 
     private void handleSuggestion(MessageView view, User targetUser) {
-        // Disable button to prevent spam
         view.getSuggestButton().setDisable(true);
         view.getSuggestButton().setText("...");
 
-        // Gather context
-        // We can get the last N messages from ChatCache or View.
         UUID conversationId;
         if (targetUser instanceof GroupUser) {
             conversationId = targetUser.getId();
@@ -979,13 +858,11 @@ public class MessageController {
 
         java.util.List<chatapp.models.Message> msgs = chatapp.models.ChatCache.get(conversationId);
         if (msgs == null || msgs.isEmpty()) {
-            // maybe fresh fetch? or just say no context
             view.getSuggestButton().setDisable(false);
             view.getSuggestButton().setText("Suggest");
             return;
         }
 
-        // Take last 10 messages
         int start = Math.max(0, msgs.size() - 10);
         StringBuilder context = new StringBuilder();
         for (int i = start; i < msgs.size(); i++) {
@@ -1014,7 +891,6 @@ public class MessageController {
                 .exceptionally(ex -> {
                     javafx.application.Platform.runLater(() -> {
                         System.err.println("Suggestion failed: " + ex.getMessage());
-                        // Optional: Show alert or tooltip?
                         view.getSuggestButton().setDisable(false);
                         view.getSuggestButton().setText("Error");
 

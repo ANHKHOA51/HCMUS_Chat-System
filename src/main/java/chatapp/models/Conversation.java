@@ -87,7 +87,6 @@ public class Conversation {
                 '}';
     }
 
-    // Query
     @Deprecated
     public static List<ChatGroupDTO> getListChatGroup() {
         List<ChatGroupDTO> list = new ArrayList<>();
@@ -157,12 +156,6 @@ public class Conversation {
     @Deprecated
     public static Conversation getPrivateConversation(UUID user1, UUID user2) {
         Connection conn = DBConnection.getConnection();
-        // Determine private chat: conversation joined by BOTH user1 and user2 AND
-        // isGroup = false
-        // Query: find conversation_id in members where user_id = user1
-        // INTERSECT find conversation_id in members where user_id = user2
-        // JOIN conversations to check isGroup = false
-
         String sql = """
                     SELECT c.*
                     FROM conversations c
@@ -201,26 +194,22 @@ public class Conversation {
         try {
             conn.setAutoCommit(false);
 
-            // 1. Create Conversation
             UUID convId = UUID.randomUUID();
             String sqlConv = "INSERT INTO conversations (id, isGroup, created_by) VALUES (?, ?, ?)";
             PreparedStatement psConv = conn.prepareStatement(sqlConv);
             psConv.setObject(1, convId);
             psConv.setBoolean(2, false);
-            psConv.setObject(3, user1); // Initiator
+            psConv.setObject(3, user1);
             psConv.executeUpdate();
 
-            // 2. Add Members
             String sqlMem = "INSERT INTO conversation_members (conversation_id, user_id, role) VALUES (?, ?, ?)";
             PreparedStatement psMem = conn.prepareStatement(sqlMem);
 
-            // Member 1
             psMem.setObject(1, convId);
             psMem.setObject(2, user1);
             psMem.setString(3, "member");
             psMem.executeUpdate();
 
-            // Member 2
             psMem.setObject(1, convId);
             psMem.setObject(2, user2);
             psMem.setString(3, "member");

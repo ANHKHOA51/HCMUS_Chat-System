@@ -1,7 +1,7 @@
 package chatapp.models;
 
 public class GroupMember extends User {
-    private String role; // "admin" or "member"
+    private String role; 
 
     public GroupMember() {
         super();

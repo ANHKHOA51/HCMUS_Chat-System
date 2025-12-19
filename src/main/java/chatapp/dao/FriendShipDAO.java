@@ -172,9 +172,7 @@ public class FriendShipDAO {
     }
 
     public static boolean blockUser(UUID userId, UUID blockedId) {
-        // 1. Remove existing friendship if any
         removeFriend(userId, blockedId);
-        // 2. Insert blocked record
         Connection conn = DBConnection.getConnection();
         String sql = """
                     INSERT INTO friendships (user_id, friend_id, requester_id, status, created_at, updated_at)

@@ -51,12 +51,10 @@ public class AuthController {
     }
 
     private void wireLogin() {
-        // Enter or button triggers submit
         loginView.getUsernameField().setOnAction(e -> submitLogin());
         loginView.getPasswordField().setOnAction(e -> submitLogin());
         loginView.getLoginButton().setOnAction(e -> submitLogin());
 
-        // navigation
         loginView.getRegisterButton().setOnAction(e -> showSignup());
         loginView.getForgotButton().setOnAction(e -> showForgot());
     }
@@ -75,7 +73,6 @@ public class AuthController {
         forgotView.getEmailField().setOnAction(e -> submitForgot());
     }
 
-    // navigation helpers
     public void showLogin() {
         loginView.clearError();
         root.getChildren().setAll(loginView.getRoot());
@@ -98,7 +95,6 @@ public class AuthController {
         signupView.showError(message);
     }
 
-    // submit handlers call caller-provided callbacks
     private void submitLogin() {
         loginView.clearError();
         String u = loginView.getUsernameField().getText() == null ? "" : loginView.getUsernameField().getText().trim();
@@ -121,7 +117,7 @@ public class AuthController {
         if (signupView.getBirthdayPicker().getValue() != null) {
             birthday = signupView.getBirthdayPicker().getValue().toString();
         }
-        boolean gender = true; // Default Male
+        boolean gender = true;
         if (signupView.getGenderGroup().getSelectedToggle() != null) {
             javafx.scene.control.RadioButton selectedInfo = (javafx.scene.control.RadioButton) signupView
                     .getGenderGroup().getSelectedToggle();
@@ -162,7 +158,6 @@ public class AuthController {
             return;
         }
 
-        // Generate random password
         String newPass = java.util.UUID.randomUUID().toString().substring(0, 8);
 
         boolean updated = chatapp.dao.UserDAO.updatePassword(v, newPass);

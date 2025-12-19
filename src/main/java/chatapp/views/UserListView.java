@@ -56,7 +56,7 @@ public class UserListView extends BorderPane {
 
         HBox topBox = new HBox(filterField);
         topBox.setAlignment(Pos.CENTER_RIGHT);
-        topBox.setPadding(new Insets(10)); // optional spacing
+        topBox.setPadding(new Insets(10));
         this.setTop(topBox);
         this.setCenter(userListView);
 

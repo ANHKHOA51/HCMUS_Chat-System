@@ -32,7 +32,6 @@ public class AdminApp extends Application {
         authCtl.setOnLogin((username, password) -> {
             User user = chatapp.dao.UserDAO.login(username, password);
             if (user != null) {
-                // STRICT ADMIN CHECK
                 if (!user.isAdmin()) {
                     authCtl.showLoginError("Access Denied: You do not have Admin privileges.");
                     return;
@@ -47,7 +46,6 @@ public class AdminApp extends Application {
                 }
 
                 try {
-                    // Initialize Admin Socket
                     String host = chatapp.db.DBConnection.get("CHAT_SERVER_HOST", "localhost");
                     String port = chatapp.db.DBConnection.get("CHAT_SERVER_PORT", "8887");
                     String wsUrl = "ws://" + host + ":" + port;
@@ -62,7 +60,6 @@ public class AdminApp extends Application {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource(FXMLPaths.Dashboard.USER));
                     Parent root = loader.load();
 
-                    // Setup logout handler for Dashboard
                     chatapp.controllers.dashboard.DashboardController.onLogout = () -> {
                         if (socketClient != null) {
                             socketClient.close();

@@ -47,7 +47,7 @@ public class ProfileView extends Tab {
         tf_user_name = new TextField();
         tf_user_name.setText(u.getUsername());
         tf_user_name.setMaxWidth(300);
-        tf_user_name.setDisable(true); // Username immutable
+        tf_user_name.setDisable(true);
 
         Label lb_password = new Label("New password");
         tf_password = new TextField();
@@ -137,7 +137,6 @@ public class ProfileView extends Tab {
         setContent(vbox);
     }
 
-    // Default constructor for testing or initial view
     public ProfileView() {
         this(new User(java.util.UUID.randomUUID(), "", "", "", "", "", false, false, false, java.time.LocalDate.now(),
                 null, null));

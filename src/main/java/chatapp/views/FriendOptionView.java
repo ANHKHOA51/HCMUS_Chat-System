@@ -45,17 +45,13 @@ public class FriendOptionView extends VBox {
     public FriendOptionView() {
         super(30);
         setPadding(new Insets(20));
-        setStyle("-fx-background-color: #b9c0c7ff; -fx-padding: 10 0 0 0;"); // Màu nền tối cho sidebar
+        setStyle("-fx-background-color: #b9c0c7ff; -fx-padding: 10 0 0 0;"); 
         setPrefWidth(300);
 
-        // Tạo các nút menu
         friendBtn = createMenuButton("Danh sách bạn bè");
         friendReqBtn = createMenuButton("Yêu cầu kết bạn");
         onlineBtn = createMenuButton("Đang online");
         searchBtn = createMenuButton("Tìm kiếm bạn bè");
-
-        // --- Xử lý sự kiện khi bấm nút ---
-        // Logic: Khi bấm nút -> Gọi hàm setCenter để thay đổi nội dung bên phải
 
         getChildren().addAll(friendBtn, friendReqBtn, onlineBtn, searchBtn);
     }
@@ -63,10 +59,8 @@ public class FriendOptionView extends VBox {
     private void updateButtonStyle(Button btn, boolean isActive) {
         String baseStyle = "-fx-font-size: 14px; -fx-pref-width: 300px; -fx-alignment: CENTER_LEFT; -fx-padding: 10 20;";
         if (isActive) {
-            // Active style: Darker background, white text, bold?
             btn.setStyle(baseStyle + "-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold;");
         } else {
-            // Inactive style: Default background
             btn.setStyle(baseStyle + "-fx-background-color: rgba(165, 172, 182, 1); -fx-text-fill: black;");
         }
     }
@@ -83,11 +77,10 @@ public class FriendOptionView extends VBox {
 
     private Button createMenuButton(String text) {
         Button btn = new Button(text);
-        btn.setMaxWidth(Double.MAX_VALUE); // Nút giãn full chiều ngang sidebar
+        btn.setMaxWidth(Double.MAX_VALUE); 
         btn.setPrefHeight(60);
         btn.setPrefWidth(300);
 
-        // Initial style
         updateButtonStyle(btn, false);
 
         btn.setOnMouseEntered(e -> {

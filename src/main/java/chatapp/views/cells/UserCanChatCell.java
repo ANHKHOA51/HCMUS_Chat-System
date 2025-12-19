@@ -84,10 +84,8 @@ public class UserCanChatCell extends ListCell<User> {
             setGraphic(null);
         } else {
             setText(null);
-            // adjust name text -- replace with actual getter if available
             String display = user.getDisplayName() != null && !user.getDisplayName().isEmpty() ? user.getDisplayName()
                     : user.getUsername();
-            // if your User has getUsername(), use: user.getUsername()
             nameLabel.setText(display);
 
             String statusText = user.isOnline() ? " -fx-text-fill: green;" : " -fx-text-fill: gray;";
@@ -95,12 +93,9 @@ public class UserCanChatCell extends ListCell<User> {
 
             statusLabel.setText(user.isOnline() ? "Online" : "Offline");
 
-            // bind cell width to listview width once so cell uses full container width
             if (!boundWidth && getListView() != null) {
                 boundWidth = true;
-                // subtract a small value for padding/scrollbar if needed
                 getListView().widthProperty().addListener((obs, oldW, newW) -> root.setPrefWidth(newW.doubleValue()));
-                // initial set
                 root.setPrefWidth(getListView().getWidth());
             }
 
@@ -116,7 +111,6 @@ public class UserCanChatCell extends ListCell<User> {
         return chatBtn;
     }
 
-    // Consumer-based setters: caller gets the User directly
     public void setOnChat(Consumer<User> c) {
         this.onChatConsumer = c;
     }
@@ -125,7 +119,6 @@ public class UserCanChatCell extends ListCell<User> {
         this.onCreatGroupConsumer = c;
     }
 
-    // EventHandler-based setters (if caller prefers raw ActionEvent)
     public void setOnCreateGroupEvent(EventHandler<ActionEvent> h) {
         groupBtn.setOnAction(h);
     }

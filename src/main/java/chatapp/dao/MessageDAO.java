@@ -28,7 +28,6 @@ public class MessageDAO {
                 m.setDeleted(rs.getBoolean("is_deleted"));
                 m.setCreatedAt(
                         rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
-                // Other fields if needed
                 list.add(m);
             }
         } catch (java.sql.SQLException e) {
@@ -65,7 +64,7 @@ public class MessageDAO {
         } catch (java.sql.SQLException e) {
             e.printStackTrace();
         }
-        return null; // Failed
+        return null;
     }
 
     public static boolean deleteMessage(UUID messageId) {
@@ -123,7 +122,6 @@ public class MessageDAO {
     public static List<Message> searchAllMessages(UUID userId, String query) {
         List<Message> list = new ArrayList<>();
         Connection conn = chatapp.db.DBConnection.getConnection();
-        // Join with conversation_members to ensure user is part of conversation
         String sql = """
                     SELECT m.*
                     FROM messages m
@@ -158,7 +156,6 @@ public class MessageDAO {
     public static List<Message> getAllReadableMessages(UUID userId) {
         List<Message> list = new ArrayList<>();
         Connection conn = chatapp.db.DBConnection.getConnection();
-        // Join with conversation_members to ensure user is part of conversation
         String sql = """
                     SELECT m.*
                     FROM messages m

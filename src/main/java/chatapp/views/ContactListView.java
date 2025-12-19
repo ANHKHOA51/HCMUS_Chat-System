@@ -24,7 +24,7 @@ public class ContactListView extends ListView<User> {
 
     public void setOnReportSpam(java.util.function.Consumer<User> onReportSpam) {
         this.onReportSpam = onReportSpam;
-        refresh(); // Refresh to update cells
+        refresh(); 
     }
 
     public ListView<User> getContactList() {
@@ -45,7 +45,6 @@ public class ContactListView extends ListView<User> {
                             : u.getUsername();
                     setText(display);
 
-                    // Context Menu
                     if (!(u instanceof chatapp.models.GroupUser)) {
                         javafx.scene.control.ContextMenu cm = new javafx.scene.control.ContextMenu();
                         javafx.scene.control.MenuItem reportItem = new javafx.scene.control.MenuItem("Report Spam");

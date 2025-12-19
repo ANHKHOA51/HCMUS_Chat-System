@@ -81,7 +81,6 @@ public class LoginHistory {
                 '}';
     }
 
-    // Query
     public static boolean saveLoginHistory(UUID id) {
         Connection conn = DBConnection.getConnection();
         String sql = """

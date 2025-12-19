@@ -12,7 +12,7 @@ public class GroupInfoView extends VBox {
     private Button renameBtn;
     private ListView<GroupMember> membersListView;
     private Button addMemberBtn;
-    private Button leaveBtn; // Optional
+    private Button leaveBtn; 
     private Label errorLabel;
 
     public GroupInfoView() {
@@ -24,7 +24,6 @@ public class GroupInfoView extends VBox {
         Label title = new Label("Group Settings");
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-        // Group Name Section
         HBox nameBox = new HBox(10);
         nameBox.setAlignment(Pos.CENTER_LEFT);
         groupNameField = new TextField();
@@ -33,14 +32,12 @@ public class GroupInfoView extends VBox {
         renameBtn = new Button("Rename");
         nameBox.getChildren().addAll(groupNameField, renameBtn);
 
-        // Members Section
         Label membersLabel = new Label("Members");
         membersLabel.setStyle("-fx-font-weight: bold;");
 
         membersListView = new ListView<>();
         VBox.setVgrow(membersListView, Priority.ALWAYS);
 
-        // Buttons
         HBox actionBox = new HBox(10);
         actionBox.setAlignment(Pos.CENTER_RIGHT);
         addMemberBtn = new Button("Add Member");

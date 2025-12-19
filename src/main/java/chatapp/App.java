@@ -13,7 +13,6 @@ import chatapp.controllers.MessageController;
 import chatapp.controllers.ProfileController;
 import chatapp.db.DBConnection;
 import chatapp.models.LoginHistory;
-// import chatapp.db.DBConnection;
 import chatapp.models.User;
 
 public class App extends Application {
@@ -42,11 +41,9 @@ public class App extends Application {
                     return;
                 }
 
-                // User App always loads Chat UI regardless of role (Admin can also chat)
                 TabPane pane = new TabPane();
                 MessageController msgCtl = new MessageController(cur_user);
 
-                // Start Socket Client
                 try {
                     String host = chatapp.db.DBConnection.get("CHAT_SERVER_HOST", "localhost");
                     String port = chatapp.db.DBConnection.get("CHAT_SERVER_PORT", "8887");
@@ -59,11 +56,10 @@ public class App extends Application {
                     System.out.println("Chat Server is offline or unreachable. Continuing in offline mode.");
                 }
 
-                // Auto-reconnect thread
                 Thread reconnectThread = new Thread(() -> {
                     while (cur_user != null && socketClient != null) {
                         try {
-                            Thread.sleep(5000); // Check every 5s
+                            Thread.sleep(5000);
                             if (socketClient != null
                                     && socketClient.getReadyState() == org.java_websocket.enums.ReadyState.CLOSED) {
                                 System.out.println("Reconnecting to Chat Server...");
@@ -79,16 +75,13 @@ public class App extends Application {
                 reconnectThread.setDaemon(true);
                 reconnectThread.start();
 
-                // Add callbacks AFTER socketClient is created
                 msgCtl.setupSocket(socketClient);
 
                 ProfileController pfCtl = new ProfileController(cur_user);
                 pfCtl.setOnSignOut(() -> {
-                    // Set Offline
                     if (cur_user != null) {
                         chatapp.dao.UserDAO.updateFieldUser("is_online", false, "id", cur_user.getId());
                     }
-                    // Close Socket
                     if (socketClient != null) {
                         socketClient.close();
                         socketClient = null;
@@ -103,7 +96,7 @@ public class App extends Application {
                 frCtl.setupSocket(socketClient);
 
                 frCtl.setOnOpenChat(targetUser -> {
-                    pane.getSelectionModel().select(0); // Assuming MessageController is at index 0
+                    pane.getSelectionModel().select(0); 
                     msgCtl.openChatWith(targetUser);
                 });
 
@@ -122,12 +115,10 @@ public class App extends Application {
         });
 
         authCtl.setOnSignup((username, password, name, email) -> {
-            // Logic handled in AuthController now
             System.out.println("Signup delegated to AuthController for: " + username);
         });
 
         authCtl.setOnRequestReset(email -> {
-            // Logic handled in AuthController now
             System.out.println("Reset delegated to AuthController for: " + email);
         });
 

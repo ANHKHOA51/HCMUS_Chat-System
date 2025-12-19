@@ -125,5 +125,4 @@ public class Message {
                 ", createdAt=" + createdAt +
                 '}';
     }
-    // DB Methods removed and moved to MessageDAO
 }

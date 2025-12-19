@@ -38,13 +38,12 @@ public class UserDAO {
             String birthday, boolean gender) {
         try {
             Connection conn = DBConnection.getConnection();
-            // Check if username already exists
             String checkSql = "SELECT id FROM users WHERE username = ?";
             try (PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
                 checkPs.setString(1, username);
                 try (ResultSet rs = checkPs.executeQuery()) {
                     if (rs.next()) {
-                        return false; // Username already exists
+                        return false; 
                     }
                 }
             }
@@ -56,8 +55,8 @@ public class UserDAO {
                 ps.setString(3, password);
                 ps.setString(4, name);
                 ps.setString(5, email);
-                ps.setBoolean(6, false); // Default not admin
-                ps.setBoolean(7, false); // Default offline
+                ps.setBoolean(6, false);
+                ps.setBoolean(7, false);
                 ps.setString(8, address);
 
                 if (birthday == null || birthday.trim().isEmpty()) {
@@ -199,7 +198,6 @@ public class UserDAO {
         }
     }
 
-    // Methods moved from User.java that might be useful for general usage
     public static List<User> getAllUser() {
         List<User> list = new ArrayList<>();
         Connection conn = DBConnection.getConnection();

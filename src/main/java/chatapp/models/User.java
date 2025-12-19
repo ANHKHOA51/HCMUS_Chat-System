@@ -210,9 +210,6 @@ public class User {
                 "}, \n";
     }
 
-    // Querry
-
-    // Admin
     @Deprecated
     public static List<User> getAllUser() {
         List<User> list = new ArrayList<User>();
@@ -574,7 +571,6 @@ public class User {
         return list;
     }
 
-    // User
     @Deprecated
     public static User login(String user_name, String password) {
         try {
@@ -601,7 +597,6 @@ public class User {
                                 rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime()
                                         : null);
 
-                        // u.setUpdateAt(rs.getString("updated_at"));
                         return u;
                     } else {
                         return null;
@@ -619,13 +614,12 @@ public class User {
             String email) {
         try {
             Connection conn = DBConnection.getConnection();
-            // Check if username already exists
             String checkSql = "SELECT id FROM users WHERE username = ?";
             try (PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
                 checkPs.setString(1, username);
                 try (ResultSet rs = checkPs.executeQuery()) {
                     if (rs.next()) {
-                        return false; // Username already exists
+                        return false;
                     }
                 }
             }
@@ -638,11 +632,11 @@ public class User {
                 ps.setString(3, password);
                 ps.setString(4, name);
                 ps.setString(5, email);
-                ps.setBoolean(6, false); // Default not admin
-                ps.setBoolean(7, false); // Default offline
-                ps.setString(8, ""); // Default address
-                ps.setString(9, ""); // Default birthday
-                ps.setBoolean(10, true); // Default gender (true for male, just a default)
+                ps.setBoolean(6, false);
+                ps.setBoolean(7, false); 
+                ps.setString(8, "");
+                ps.setString(9, ""); 
+                ps.setBoolean(10, true); 
                 ps.setString(11, now);
 
                 int rowsAffected = ps.executeUpdate();

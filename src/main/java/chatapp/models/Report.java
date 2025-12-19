@@ -76,7 +76,6 @@ public class Report {
         this.createdAt = createdAt;
     }
 
-    // Query
     public static List<ReportDTO> getListReports() {
         List<ReportDTO> list = new ArrayList<>();
         Connection conn = DBConnection.getConnection();

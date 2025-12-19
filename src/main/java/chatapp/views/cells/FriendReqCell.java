@@ -78,18 +78,13 @@ public class FriendReqCell extends ListCell<User> {
             setGraphic(null);
         } else {
             setText(null);
-            // adjust name text -- replace with actual getter if available
             String display = user.getDisplayName() != null && !user.getDisplayName().isEmpty() ? user.getDisplayName()
                     : user.getUsername();
-            // if your User has getUsername(), use: user.getUsername()
             nameLabel.setText(display);
 
-            // bind cell width to listview width once so cell uses full container width
             if (!boundWidth && getListView() != null) {
                 boundWidth = true;
-                // subtract a small value for padding/scrollbar if needed
                 getListView().widthProperty().addListener((obs, oldW, newW) -> root.setPrefWidth(newW.doubleValue()));
-                // initial set
                 root.setPrefWidth(getListView().getWidth());
             }
 
@@ -105,7 +100,6 @@ public class FriendReqCell extends ListCell<User> {
         return acptBtn;
     }
 
-    // Consumer-based setters: caller gets the User directly
     public void setOnDecline(Consumer<User> c) {
         this.onDeclineConsumer = c;
     }
@@ -114,7 +108,6 @@ public class FriendReqCell extends ListCell<User> {
         this.onAcceptConsumer = c;
     }
 
-    // EventHandler-based setters (if caller prefers raw ActionEvent)
     public void setOnDeclineEvent(EventHandler<ActionEvent> h) {
         declineBtn.setOnAction(h);
     }
